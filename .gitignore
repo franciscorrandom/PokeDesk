@@ -1,0 +1,9 @@
+.build/
+dist/
+.DS_Store
+*.enc
+estado.json
+google-client.json
+*.p12
+*.mobileprovision
+.env*

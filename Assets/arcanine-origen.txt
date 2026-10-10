@@ -1,0 +1,9 @@
+Recurso: arcanine.png
+Referencia compartida por el usuario; PNG oficial de la Pokédex.
+Fuente: https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/059.png
+Guardado el 4 de octubre de 2026. 475 × 475 píxeles, canal alfa original conservado.
+
+La generación de un atlas mediante image_gen integrado fue rechazada por la herramienta.
+No se generó una ilustración alternativa. Se usa el PNG oficial sin modificar como textura
+de la mascota; Core Image anima zonas de cabeza, cola, patas, torso, mandíbula y ojos
+durante la ejecución. No se pintó un fondo ni se añadió una pantalla a la figura.

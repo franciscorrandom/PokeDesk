@@ -1,0 +1,30 @@
+Arcanine 3D — nguyenlouis32
+Modelo: https://sketchfab.com/3d-models/arcanine-82c02a3bc6294f94b4423ae454a7b2aa
+Autor: https://sketchfab.com/nguyenlouis32
+Licencia del modelo: Creative Commons Attribution 4.0
+https://creativecommons.org/licenses/by/4.0/
+Modificaciones: once clips de animación, ojos unidos a la cabeza para parpadeos,
+articulación y apoyos de patas para estiramiento, persecución de cola,
+reacción a caricias y sentarse con las patas delanteras apoyadas.
+Personaje Pokémon: sus respectivos titulares.
+
+Importador GLTFKit2 — Copyright (c) 2021 Warren Moore. MIT License.
+https://github.com/warrenm/GLTFKit2
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
