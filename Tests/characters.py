@@ -29,6 +29,27 @@ def validate(character, joint_count, author):
         assert all(math.isfinite(x) for row in values for x in row)
         return values
 
+    # Validate the rest pose independently of the animation generator.
+    def multiply(a,b):
+        return [[sum(a[r][k]*b[k][c] for k in range(4)) for c in range(4)] for r in range(4)]
+    parents = {child:i for i,n in enumerate(doc['nodes']) for child in n.get('children',[])}
+    world_cache = {}
+    def world(i):
+        if i in world_cache: return world_cache[i]
+        n=doc['nodes'][i]
+        if 'matrix' in n: m=[[n['matrix'][c*4+r] for c in range(4)] for r in range(4)]
+        else:
+            x,y,z,w=n.get('rotation',[0,0,0,1]); scale=n.get('scale',[1,1,1])
+            rotation=[[1-2*y*y-2*z*z,2*x*y-2*z*w,2*x*z+2*y*w],[2*x*y+2*z*w,1-2*x*x-2*z*z,2*y*z-2*x*w],[2*x*z-2*y*w,2*y*z+2*x*w,1-2*x*x-2*y*y]]
+            m=[[rotation[r][c]*scale[c] for c in range(3)]+[n.get('translation',[0,0,0])[r]] for r in range(3)]+[[0,0,0,1]]
+        world_cache[i]=multiply(world(parents[i]),m) if i in parents else m
+        return world_cache[i]
+    if character=='pikachu':
+        for shoulder,hand in [(45,48),(50,53)]:
+            a,b=world(shoulder),world(hand)
+            assert b[1][3] < a[1][3]-8, 'Hands must rest below the shoulders'
+            assert abs(b[2][3]-a[2][3]) < 4, 'Hands must not remain extended forward'
+
     expected = {'reposo', 'curiosidad', 'saludo', 'cola-alegre', 'estiramiento', 'aviso-reunion', 'celebracion', 'caricias', 'sentarse'}
     assert len(doc['animations']) == 9
     assert {a['name'] for a in doc['animations']} == expected
@@ -69,3 +90,10 @@ def validate(character, joint_count, author):
 
 for spec in [("mewtwo",77,"nguyenlouis32"),("pikachu",49,"jacobjksn42"),("charizard",87,"nguyenlouis32")]:
     validate(*spec)
+
+# Every chooser image is a dedicated, consistently sized 3D render.
+for character in ['arcanine','mewtwo','pikachu','charizard']:
+    raw=(root/f'Assets/preview-{character}.png').read_bytes()
+    assert raw[:8]==b'\x89PNG\r\n\x1a\n'
+    assert struct.unpack_from('>II',raw,16)==(320,320)
+print('Cuatro miniaturas 3D de 320 × 320 incluidas.')

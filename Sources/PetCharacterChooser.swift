@@ -11,7 +11,7 @@ struct PetCharacterChooser: View {
                 let chosen = character == selected
                 Button { onSelect(character) } label: {
                     VStack(spacing: 5) {
-                        if let art = NSImage(named: character.rawValue) {
+                        if let url = Bundle.main.url(forResource: character.thumbnailResource, withExtension: "png"), let art = NSImage(contentsOf: url) {
                             Image(nsImage: art).resizable().scaledToFit().frame(height: 64)
                         } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: 64) }
                         Text(character.name).font(.system(size: 13, weight: .bold, design: .rounded))

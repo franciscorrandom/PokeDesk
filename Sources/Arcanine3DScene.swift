@@ -102,14 +102,20 @@ final class Arcanine3DScene {
                 for material in node.geometry?.materials ?? [] where material.name?.hasPrefix("CharizardFlame") == true {
                     material.lightingModel = .constant
                     material.writesToDepthBuffer = false
+                    material.blendMode = .alpha
+                    material.transparencyMode = .singleLayer
+                    material.isDoubleSided = true
                     material.emission.contents = NSColor(srgbRed: 1, green: material.name == "CharizardFlame3" ? 0.25 : 0.65, blue: 0.025, alpha: 1)
                     material.emission.intensity = 0.6
                     var modifiers = material.shaderModifiers ?? [:]
                     modifiers[.fragment] = """
                     #pragma transparent
                     #pragma body
-                    float mask = max(_surface.diffuse.r, max(_surface.diffuse.g, _surface.diffuse.b));
-                    _output.color.a *= smoothstep(0.035, 0.20, mask);
+                    // The original RGB images are masks, not opaque black fire.
+                    float mask = _surface.diffuse.r;
+                    float alpha = smoothstep(0.04, 0.30, mask) * mask;
+                    float3 fire = mix(float3(1.0, 0.08, 0.005), float3(1.0, \(material.name == "CharizardFlame3" ? "0.45, 0.02" : "0.85, 0.12")), mask);
+                    _output.color = float4(fire * alpha, alpha);
                     """
                     material.shaderModifiers = modifiers
                 }
@@ -118,13 +124,16 @@ final class Arcanine3DScene {
         let box = modelRoot.boundingBox
         guard box.max.y > box.min.y else { fail("El modelo 3D no tiene una altura válida."); return }
         let footprint = hypot(box.max.x - box.min.x, box.max.z - box.min.z)
-        let scale = requested == .charizard ? min(2.2 / (box.max.y - box.min.y), 3.8 / max(0.01, footprint)) : 2.2 / (box.max.y - box.min.y)
+        let scale = requested == .charizard ? min(2.2 / (box.max.y - box.min.y), 4.6 / max(0.01, footprint)) : 2.2 / (box.max.y - box.min.y)
         let placement = SCNNode()
         placement.scale = SCNVector3(scale, scale, scale)
         placement.position = SCNVector3(-(box.max.x + box.min.x) * scale / 2, -box.min.y * scale, -(box.max.z + box.min.z) * scale / 2)
         placement.addChildNode(modelRoot)
         let install = { [weak self] in
             guard let self, generation == self.loadGeneration else { return }
+            // The renderer must never observe the new mesh before its release frame.
+            SCNTransaction.begin(); SCNTransaction.disableActions = true
+            self.appearance.isHidden = self.effectsEnabled
             self.install(placement, root: modelRoot, clips: clips,
                          joints: asset.skins.first?.joints.count ?? 0, character: requested)
             if self.effectsEnabled {
@@ -132,7 +141,9 @@ final class Arcanine3DScene {
                     guard let self, generation == self.loadGeneration else { return }
                     self.loadingCharacter = nil; self.onReady?()
                 }
-            } else { self.loadingCharacter = nil; self.onReady?() }
+            } else { self.loadingCharacter = nil }
+            SCNTransaction.commit()
+            if !self.effectsEnabled { self.onReady?() }
         }
         if ready && effectsEnabled {
             rest()
@@ -180,6 +191,8 @@ final class Arcanine3DScene {
     }
 
     private func startSummoning(_ phase: PetSummonPhase, completion: (() -> Void)? = nil) {
+        SCNTransaction.begin(); SCNTransaction.disableActions = true
+        defer { SCNTransaction.commit() }
         cancelSummoning()
         var seen = Set<ObjectIdentifier>()
         root?.enumerateChildNodes { node, _ in
@@ -220,8 +233,8 @@ final class Arcanine3DScene {
         appearance.isHidden = frame.petOpacity < 0.001
         for (material, contents, intensity) in emissions {
             if frame.whiten > 0.001 {
-                material.emission.contents = NSColor(white: frame.whiten*1.8, alpha: 1)
-                material.emission.intensity = 1
+                material.emission.contents = effect.energyColor
+                material.emission.intensity = CGFloat(frame.whiten*1.6)
             } else { material.emission.contents = contents; material.emission.intensity = intensity }
         }
         effect.update(frame, petCenter: center)
@@ -229,9 +242,14 @@ final class Arcanine3DScene {
     }
 
     private func completeSummoning() {
+        // Recall cleanup and the hidden incoming mesh become visible atomically.
+        SCNTransaction.begin(); SCNTransaction.disableActions = true
+        let phase = summon?.phase
         let completion = summonCompletion
         cancelSummoning()
-        completion?()
+        if phase == .recall { completion?() }
+        SCNTransaction.commit()
+        if phase != .recall { completion?() }
     }
     func cancelSummoning() {
         guard summon != nil else { return }
@@ -254,6 +272,8 @@ final class Arcanine3DScene {
         summonPreview = true
         applySummoning(PetSummonFrame(phase: phase, time: time))
     }
+
+    var incomingHidden: Bool { appearance.isHidden && appearance.opacity == 0 }
 
     var summonRestored: Bool {
         summon == nil && emissions.isEmpty && appearance.opacity == 1 && !appearance.isHidden &&

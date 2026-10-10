@@ -17,12 +17,13 @@ final class Pokeball3DEffect {
     private let beamAura = SCNNode()
     private let light = SCNNode()
     private var sparks: [SCNNode] = []
-    private let color: NSColor
+    let energyColor: NSColor
+    private var color: NSColor { energyColor }
     var ballPosition: SIMD3<Float> { phase == .release ? SIMD3(0.68, 0.34, 0.58) : SIMD3(-0.68, 0.34, 0.58) }
 
     init(phase: PetSummonPhase) {
         self.phase = phase
-        color = phase == .release ? NSColor(red: 0.52, green: 0.85, blue: 1, alpha: 1) : NSColor(red: 1, green: 0.40, blue: 0.58, alpha: 1)
+        energyColor = phase == .release ? NSColor(srgbRed: 0.02, green: 0.32, blue: 1, alpha: 1) : NSColor(srgbRed: 1, green: 0.045, blue: 0.12, alpha: 1)
         node.name = "PokeballTransition"
         node.addChildNode(ball)
         ball.name = "Pokeball3D"
@@ -59,8 +60,9 @@ final class Pokeball3DEffect {
         beam.geometry = SCNCylinder(radius: 0.012, height: 1)
         beam.geometry?.materials = [Self.luminous(.white)]; node.addChildNode(beam)
         beam.categoryBitMask = 2
-        beamAura.geometry = SCNCylinder(radius: 0.038, height: 1)
-        beamAura.geometry?.materials = [Self.luminous(color.withAlphaComponent(0.16))]; node.addChildNode(beamAura)
+        beamAura.geometry = SCNCylinder(radius: 0.065, height: 1)
+        beamAura.geometry?.materials = [Self.luminous(color.withAlphaComponent(0.75))]; node.addChildNode(beamAura)
+        beamAura.geometry?.firstMaterial?.blendMode = .alpha
         beamAura.categoryBitMask = 2
         light.light = SCNLight(); light.light?.type = .omni
         light.light?.color = color; light.light?.attenuationStartDistance = 0; light.light?.attenuationEndDistance = 3
@@ -86,10 +88,10 @@ final class Pokeball3DEffect {
         core.scale = SCNVector3(repeating: 0.8+frame.glow*0.5)
         ballHalo.simdPosition = position+SIMD3(0, 0.05, 0)
         ballHalo.scale = SCNVector3(repeating: 0.65+frame.glow*0.28)
-        ballHalo.opacity = CGFloat(frame.glow*0.82); ballHalo.isHidden = frame.glow < 0.001
+        ballHalo.opacity = CGFloat(frame.glow*0.95); ballHalo.isHidden = frame.glow < 0.001
         petHalo.simdPosition = petCenter
         petHalo.scale = SCNVector3(repeating: 0.40+frame.petAmount*1.32)
-        petHalo.opacity = CGFloat(frame.glow*0.43); petHalo.isHidden = frame.glow < 0.001
+        petHalo.opacity = CGFloat(frame.glow*0.82); petHalo.isHidden = frame.glow < 0.001
         Self.connect(beam, from: position, to: petCenter)
         Self.connect(beamAura, from: position, to: petCenter)
         beam.opacity = CGFloat(frame.beam); beam.isHidden = frame.beam < 0.001
@@ -151,14 +153,18 @@ final class Pokeball3DEffect {
     private static func halo(_ tint: NSColor) -> SCNGeometry {
         let geometry = SCNPlane(width: 2, height: 2)
         let material = luminous(tint)
-        material.blendMode = .add
+        // A saturated alpha corona remains visible over a white desktop.
+        // The white center and core retain the impression of brilliant light.
+        material.blendMode = .alpha
         material.shaderModifiers = [.fragment: """
         #pragma transparent
         #pragma body
         float radius = length(_surface.diffuseTexcoord - float2(0.5)) * 2.0;
-        float falloff = exp(-radius * radius * 6.5) * pow(max(0.0, 1.0 - radius), 0.8);
+        float falloff = exp(-radius * radius * 3.2) * pow(max(0.0, 1.0 - radius), 0.8);
         float alpha = _output.color.a * falloff;
-        _output.color = float4(_output.color.rgb * alpha, alpha);
+        float whiteCore = exp(-radius * radius * 90.0);
+        float3 glow = mix(_output.color.rgb, float3(1.0), whiteCore * 0.9);
+        _output.color = float4(glow * alpha, alpha);
         """]
         geometry.materials = [material]
         return geometry

@@ -103,8 +103,15 @@ def world_rotation(i, axis, angle, world, q=None):
 
 # Relax Pikachu's arms and compact Charizard's long tail, retaining rig weights.
 if pika:
-    for arm,elbow,hand,sign in arms:
-        nodes[arm]["rotation"] = world_rotation(arm,[0,0,1],-sign*.28,worlds())
+    for shoulder, hand, sign in [(45,48,1),(50,53,-1)]:
+        # Lower the entire forward-pointing chain at the shoulder, rather than
+        # rolling an extended arm. Hands settle beside the belly, slightly bent.
+        world = worlds()
+        direction = world[hand][:3,3] - world[shoulder][:3,3]
+        direction /= np.linalg.norm(direction)
+        target = np.array([sign*.50, -.84, .20]); target /= np.linalg.norm(target)
+        axis = np.cross(direction, target); axis /= np.linalg.norm(axis)
+        nodes[shoulder]['rotation'] = world_rotation(shoulder, axis, math.acos(np.dot(direction,target)), world)
 if not pika:
     for i,a in zip(tail,[.13,.22,.28,.30,.29,.24,.16]):
         nodes[i]['rotation'] = world_rotation(i,[0,1,0],a,worlds())
@@ -176,7 +183,7 @@ def pose(clip,t,duration):
         for i,tip,sign in ears: turn(i,[0,0,1],sign*e*.15)
     elif clip=='saludo':
         arm,elbow,hand,sign=arms[1]
-        turn(arm,[0,0,1],-e*.85);turn(elbow,[1,0,0],-e*.32)
+        turn(arm,[0,0,1],-e*(1.55 if pika else .85));turn(elbow,[1,0,0],-e*.32)
         turn(hand,[0,0,1],e*.22*math.sin(t*7))
         turn(head,[0,0,1],-e*.08)
         for i,tip,sign in ears:turn(tip,[0,0,1],sign*e*.1*math.sin(t*5))
@@ -186,7 +193,7 @@ def pose(clip,t,duration):
     elif clip=='estiramiento':
         turn(spine,[1,0,0],-e*.10);turn(head,[1,0,0],-e*.12)
         for arm,elbow,hand,sign in arms:
-            turn(arm,[0,0,1],sign*e*.80);turn(elbow,[1,0,0],-e*.18)
+            turn(arm,[0,0,1],sign*e*(1.30 if pika else .80));turn(elbow,[1,0,0],-e*.18)
         for wing,mid,tip,sign in wings:
             turn(wing,[0,1,0],sign*e*.16);turn(mid,[0,0,1],sign*e*.10)
     elif clip=='aviso-reunion':
@@ -195,7 +202,7 @@ def pose(clip,t,duration):
         for i,tip,sign in ears: turn(i,[0,0,1],sign*e*.12)
     elif clip=='celebracion':
         move(origin,[0,e*(1.7+1.3*math.sin(t*5)),0])
-        for arm,elbow,hand,sign in arms: turn(arm,[0,0,1],sign*e*1.1)
+        for arm,elbow,hand,sign in arms: turn(arm,[0,0,1],sign*e*(1.65 if pika else 1.1))
         for wing,mid,tip,sign in wings:turn(wing,[0,1,0],sign*e*.15*math.sin(t*5))
         turn(head,[0,0,1],e*.10*math.sin(t*5))
     elif clip=='caricias':
@@ -231,7 +238,7 @@ for clip,duration in catalog:
             anim['channels'].append({'sampler':si,'target':{'node':i,'path':path}})
     doc['animations'].append(anim);manifest.append({'id':clip,'duration':duration,'channels':len(anim['channels'])})
 extras=doc['asset'].setdefault('extras',{})
-extras.update(author='jacobjksn42' if pika else 'nguyenlouis32',license='CC-BY-4.0',source='https://sketchfab.com/3d-models/'+('pikachu-c22dab8fc3064c76a0c502d64555a74f' if pika else 'charizard-29bae357dcb74bad8f432704e2d9f531'),modifications='Original rig and textures retained; head-attached expression atlas and nine articulated clips; Charizard tail curved in rebuilt bind pose. Generated for PokéDesk.')
+extras.update(author='jacobjksn42' if pika else 'nguyenlouis32',license='CC-BY-4.0',source='https://sketchfab.com/3d-models/'+('pikachu-c22dab8fc3064c76a0c502d64555a74f' if pika else 'charizard-29bae357dcb74bad8f432704e2d9f531'),modifications='Original rig and textures retained; head-attached expression atlas and nine articulated clips; '+('Pikachu shoulders lowered into a relaxed rebuilt bind pose.' if pika else 'Charizard tail curved in rebuilt bind pose.')+' Generated for PokéDesk.')
 doc['buffers'][0]['byteLength']=len(binary)
 encoded=json.dumps(doc,separators=(',',':'),ensure_ascii=False).encode();encoded+=b' '*(-len(encoded)%4);binary.extend(b'\0'*(-len(binary)%4))
 result=struct.pack('<4sII',b'glTF',2,28+len(encoded)+len(binary))+struct.pack('<II',len(encoded),0x4E4F534A)+encoded+struct.pack('<II',len(binary),0x004E4942)+binary

@@ -19,10 +19,12 @@ final class BubblePanel: NSPanel {
 }
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private let thumbnailTest = CommandLine.arguments.contains("--thumbnail-test")
+    private var hiddenIncomingChecks = [Bool]()
     private let rosterTest = CommandLine.arguments.contains("--roster-smoke-test")
     private let characterTest = CommandLine.arguments.contains("--characters-smoke-test")
     private let pokeballTest = CommandLine.arguments.contains("--pokeball-smoke-test")
-    private let smokeTest = CommandLine.arguments.contains("--roster-smoke-test") || CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test") || CommandLine.arguments.contains("--pokeball-smoke-test")
+    private let smokeTest = CommandLine.arguments.contains("--thumbnail-test") || CommandLine.arguments.contains("--roster-smoke-test") || CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test") || CommandLine.arguments.contains("--pokeball-smoke-test")
     private var smokeStarted = false
     private var characterReady: (() -> Void)?
     private var pokeballReady: (() -> Void)?
@@ -30,7 +32,7 @@ final class BubblePanel: NSPanel {
     private var recordSummons = true
     private var cancelRecall = false
     private var cancelIncoming = false
-    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(rosterTest ? "pokedesk-roster-smoke/estado.json" : pokeballTest ? "arcanine-pokeball-smoke/estado.json" : characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
+    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(thumbnailTest ? "pokedesk-thumbnail-smoke/estado.json" : rosterTest ? "pokedesk-roster-smoke/estado.json" : pokeballTest ? "arcanine-pokeball-smoke/estado.json" : characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
     private var petPanel: PetPanel!
     private var petView: PetView!
     private var dashboard: BubblePanel?
@@ -51,7 +53,7 @@ final class BubblePanel: NSPanel {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        if characterTest || pokeballTest || rosterTest { model.settings.petCharacter = "arcanine" }
+        if thumbnailTest || characterTest || pokeballTest || rosterTest { model.settings.petCharacter = "arcanine" }
         if pokeballTest { model.settings.motionEnabled = true; model.settings.soundEnabled = false }
         guard let image = NSImage(named: "arcanine") else {
             let alert = NSAlert()
@@ -75,6 +77,18 @@ final class BubblePanel: NSPanel {
         petView = PetView(image: image, frame: NSRect(origin: .zero, size: size))
         petView.summoningEnabled = !smokeTest || pokeballTest
         if pokeballTest {
+            let prepare = petView.engine.prepareSummon
+            petView.engine.prepareSummon = { [weak self] node, begin in
+                guard let self else { return }
+                if self.petView.engine.summoningPhase == .release {
+                    self.hiddenIncomingChecks.append(self.petView.engine.incomingHidden)
+                    // Simulate a slow GPU preparation: the new mesh must stay hidden.
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.12) {
+                        self.hiddenIncomingChecks.append(self.petView.engine.incomingHidden)
+                        prepare?(node, begin)
+                    }
+                } else { prepare?(node, begin) }
+            }
             petView.engine.onSummonStarted = { [weak self] phase in
                 guard let self, self.recordSummons else { return }
                 self.summonPhases.append(phase.rawValue)
@@ -156,10 +170,11 @@ final class BubblePanel: NSPanel {
         petView.onReady = { [weak self] in
             guard let self, self.smokeTest else { return }
             if self.pokeballTest, let next = self.pokeballReady { next(); return }
-            if (self.characterTest || self.rosterTest), let next = self.characterReady { next(); return }
+            if (self.thumbnailTest || self.characterTest || self.rosterTest), let next = self.characterReady { next(); return }
             guard !self.smokeStarted else { return }
             self.smokeStarted = true
-            if self.pokeballTest { self.performPokeballTest() }
+            if self.thumbnailTest { self.performThumbnailTest() }
+            else if self.pokeballTest { self.performPokeballTest() }
             else if self.rosterTest { self.performRosterTest() }
             else if self.characterTest { self.performCharacterTest() } else { self.performSmokeTest() }
         }
@@ -478,6 +493,29 @@ final class BubblePanel: NSPanel {
         return true
     }
 
+    private func performThumbnailTest() {
+        renderTimer?.invalidate()
+        model.settings.soundEnabled = false
+        model.settings.petSize = 230
+        petView.focusTimer = nil
+        var remaining = Array(PetCharacter.allCases)
+        func next() {
+            guard !remaining.isEmpty else { self.characterReady = nil; NSApp.terminate(nil); return }
+            let character = remaining.removeFirst()
+            let capture = {
+                self.petView.setYaw(0)
+                self.petView.preview(.idle, at: 0)
+                DispatchQueue.main.asyncAfter(deadline: .now()+0.25) {
+                    self.capturePreview(self.petView, name: "thumbnail-source-"+character.rawValue)
+                    next()
+                }
+            }
+            if self.petView.engine.character == character { capture() }
+            else { self.characterReady = capture; _ = self.model.selectCharacter(character) }
+        }
+        next()
+    }
+
     private func performRosterTest() {
         renderTimer?.invalidate()
         model.settings.soundEnabled = false
@@ -508,8 +546,9 @@ final class BubblePanel: NSPanel {
                 DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
                     if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "pokedesk-quick-menu") }
                     if let view = self.quickDetail?.contentView { self.capturePreview(view, name: "pokedesk-companions") }
+                    report["four3DThumbnailsBundled"] = PetCharacter.allCases.allSatisfy { Bundle.main.url(forResource: $0.thumbnailResource, withExtension: "png") != nil }
                     report["quickSelectorVisible"] = self.quickState.selected == .companions && self.quickDetail?.isVisible == true
-                    report["versionVisible"] = self.menu.items.first?.title.contains("1.3.0") == true
+                    report["versionVisible"] = self.menu.items.first?.title.contains(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "missing") == true
                     let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("roster-smoke-test.json")
                     try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted,.sortedKeys]).write(to: url)
                     NSApp.terminate(nil)
@@ -610,6 +649,7 @@ final class BubblePanel: NSPanel {
 
     private func capturePokeballTest(_ initial: [String: Any]) {
         var report = initial
+        report["incomingHiddenDuringPreparation"] = hiddenIncomingChecks.count >= 4 && hiddenIncomingChecks.allSatisfy { $0 }
         petView.focusTimer = nil; petView.setYaw(0)
         let framesPerSecond = 20.0
         var incoming = [CGImage]()
@@ -633,24 +673,37 @@ final class BubblePanel: NSPanel {
             petView.setYaw(0); petView.engine.cancelSummoning()
             return true
         }
-        func frame(_ phase: PetSummonPhase, _ time: Double) -> CGImage? {
+        func frame(_ phase: PetSummonPhase, _ time: Double, white: Bool = false) -> CGImage? {
             petView.previewSummoning(phase, at: time)
             let rendered = petView.snapshot()
             let composed = NSImage(size: rendered.size)
             composed.lockFocus()
-            NSGradient(starting: NSColor(red: 0.09, green: 0.13, blue: 0.23, alpha: 1), ending: NSColor(red: 0.025, green: 0.04, blue: 0.085, alpha: 1))?.draw(in: NSRect(origin: .zero, size: rendered.size), angle: 90)
+            if white { NSColor.white.setFill(); NSRect(origin: .zero, size: rendered.size).fill() }
+            else { NSGradient(starting: NSColor(red: 0.09, green: 0.13, blue: 0.23, alpha: 1), ending: NSColor(red: 0.025, green: 0.04, blue: 0.085, alpha: 1))?.draw(in: NSRect(origin: .zero, size: rendered.size), angle: 90) }
             rendered.draw(in: NSRect(origin: .zero, size: rendered.size))
             composed.unlockFocus()
             guard let data = composed.tiffRepresentation else { return nil }
             let cg = NSBitmapImageRep(data: data)?.cgImage
             let peak = phase == .release ? 1.1 : 0.8
             if abs(time-peak) < 0.00001, let cg {
-                let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("pokeball-demo-\(phase.rawValue).png")
+                let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("pokeball-\(white ? "white" : "demo")-\(phase.rawValue).png")
                 if let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) {
                     CGImageDestinationAddImage(destination, cg, nil); CGImageDestinationFinalize(destination)
                 }
             }
             return cg
+        }
+        for phase in PetSummonPhase.allCases {
+            if let cg = frame(phase, phase == .release ? 1.1 : 0.8, white: true) {
+                let pixels = NSBitmapImageRep(cgImage: cg)
+                var saturated = 0
+                for y in 0..<pixels.pixelsHigh { for x in 0..<pixels.pixelsWide {
+                    guard let c = pixels.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) else { continue }
+                    if phase == .release ? c.blueComponent > c.redComponent+0.3 && c.blueComponent > c.greenComponent+0.2 : c.redComponent > c.blueComponent+0.35 && c.redComponent > c.greenComponent+0.35 { saturated += 1 }
+                } }
+                report[phase.rawValue+"ContrastOnWhite"] = saturated > 500
+                report[phase.rawValue+"SaturatedPixelsOnWhite"] = saturated
+            }
         }
         for index in 0..<Int(PetSummonPhase.release.duration*framesPerSecond) {
             if let cg = frame(.release, Double(index)/framesPerSecond) { incoming.append(cg) }
@@ -730,6 +783,7 @@ final class BubblePanel: NSPanel {
 
     private func captureCharacterTest(_ initial: [String: Any]) {
         var report = initial
+        report["incomingHiddenDuringPreparation"] = hiddenIncomingChecks.count >= 4 && hiddenIncomingChecks.allSatisfy { $0 }
         petView.focusTimer = nil; petView.setYaw(0)
         petView.preview(.idle, at: 0)
         capturePreview(petView, name: "mewtwo-preview")

@@ -8,6 +8,7 @@ enum PetCharacter: String, CaseIterable, Identifiable {
     var number: String { switch self { case .arcanine: return "059"; case .mewtwo: return "150"; case .pikachu: return "025"; case .charizard: return "006" } }
     var typeName: String { switch self { case .arcanine: return "FUEGO"; case .mewtwo: return "PSÍQUICO"; case .pikachu: return "ELÉCTRICO"; case .charizard: return "FUEGO / VOLADOR" } }
     var symbol: String { switch self { case .arcanine, .charizard: return "flame.fill"; case .mewtwo: return "sparkles"; case .pikachu: return "bolt.fill" } }
+    var thumbnailResource: String { "preview-\(rawValue)" }
     var modelResource: String { "\(rawValue)-biblioteca" }
     var clips: [ArcanineClip] { self == .arcanine ? ArcanineClip.allCases : ArcanineClip.allCases.filter { $0 != .sniff && $0 != .chaseTail } }
     var description: String {

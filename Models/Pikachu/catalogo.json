@@ -4,7 +4,7 @@
     "license": "CC-BY-4.0",
     "source": "https://sketchfab.com/3d-models/pikachu-c22dab8fc3064c76a0c502d64555a74f",
     "title": "Pikachu",
-    "modifications": "Original rig and textures retained; head-attached expression atlas and nine articulated clips; Charizard tail curved in rebuilt bind pose. Generated for PokéDesk."
+    "modifications": "Original rig and textures retained; head-attached expression atlas and nine articulated clips; Pikachu shoulders lowered into a relaxed rebuilt bind pose. Generated for PokéDesk."
   },
   "joints": 49,
   "clips": [

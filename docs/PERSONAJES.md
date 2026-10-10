@@ -44,3 +44,13 @@ El menú conserva seis accesos en el arco y añade una cápsula central **Cambia
 La Pokébola espera a la preparación de los recursos de SceneKit antes de comenzar su reloj. Reabrir la app o mostrar la mascota repite su salida; también existe un botón manual. Las cargas canceladas no pueden iniciar efectos pendientes. Se respeta Reducir movimiento.
 
 `--roster-smoke-test` usa un perfil aislado y comprueba los dos modelos nuevos, nueve clips, parpadeos, ocho orientaciones en tres instantes por clip, conservación de datos, reapertura con Pokébola y selector rápido. `--pokeball-smoke-test` comprueba arranque real, retirada/salida y cambios rápidos o cancelados.
+
+## Correcciones visuales de 1.3.1
+
+El halo azul de salida y rojo de retirada usa una corona saturada con mezcla alfa, un centro blanco y un haz luminoso. La mezcla aditiva por sí sola desaparecía sobre escritorios blancos. La sustitución de la malla, la ocultación inicial y el primer fotograma de salida se publican en una sola transacción de SceneKit; durante la preparación de la GPU, la nueva mascota permanece oculta.
+
+Charizard conserva sus texturas originales de máscara: el fragment shader convierte la máscara en transparencia y color de fuego premultiplicado, sin rectángulos negros. Se amplía su límite de escala horizontal de 3,8 a 4,6 unidades, manteniendo el encuadre verificable al girarlo. Pikachu baja toda la cadena de cada brazo desde los hombros; se reconstruyen la geometría, normales e inverse binds y los gestos parten de esa postura de descanso.
+
+Las cuatro miniaturas son capturas estáticas de los modelos de la app, con la misma cámara, iluminación y encuadre de 320 × 320 píxeles. Se cargan explícitamente desde el bundle. Para regenerarlas, ejecuta el binario con `--thumbnail-test` y después `python3 scripts/make-thumbnails.py` (Pillow, solo durante el desarrollo).
+
+Las pruebas incluyen contraste rojo/azul sobre fondo blanco, preparación gráfica demorada sin aparición anticipada, manos de Pikachu por debajo de los hombros, presencia de las cuatro miniaturas y encuadre de los nueve gestos de Pikachu/Charizard desde ocho perfiles.
