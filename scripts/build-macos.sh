@@ -2,6 +2,7 @@
 set -euo pipefail
 ARCANINE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ARCANINE_DIST="$ARCANINE_ROOT/dist"
+ARCANINE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ARCANINE_ROOT/Info.plist")"
 ARCANINE_APP="$ARCANINE_DIST/Arcanine.app"
 ARCANINE_ARCHS="${ARCANINE_ARCHS:-arm64 x86_64}"
 ARCANINE_IDENTITY="${ARCANINE_SIGN_IDENTITY:--}"
@@ -31,5 +32,5 @@ if [ "$ARCANINE_IDENTITY" != "-" ]; then ARCANINE_SIGN_OPTIONS+=(--options runti
 codesign "${ARCANINE_SIGN_OPTIONS[@]}" "$ARCANINE_APP/Contents/Frameworks/GLTFKit2.framework"
 codesign "${ARCANINE_SIGN_OPTIONS[@]}" --identifier io.github.franciscorrandom.arcanine.ical "$ARCANINE_APP"
 codesign --verify --deep --strict "$ARCANINE_APP"
-ditto -c -k --sequesterRsrc --keepParent "$ARCANINE_APP" "$ARCANINE_DIST/Arcanine-1.0.0-macOS.zip"
-echo "App creada: $ARCANINE_DIST/Arcanine-1.0.0-macOS.zip"
+ditto -c -k --sequesterRsrc --keepParent "$ARCANINE_APP" "$ARCANINE_DIST/Arcanine-$ARCANINE_VERSION-macOS.zip"
+echo "App creada: $ARCANINE_DIST/Arcanine-$ARCANINE_VERSION-macOS.zip"

@@ -253,7 +253,8 @@ import ServiceManagement
         currentAlert = alert
         onAlert?(alert)
         let preferences = settings.voice ?? VoicePreferences()
-        if let phrase = VoiceClip.reminder(alert, preferences: preferences), !isTestStorage {
+        if let phrase = VoiceClip.reminder(alert, preferences: preferences), !isTestStorage,
+           voiceSpeaker.audioURL(phrase, voice: preferences.selectedEnglishVoice) != nil {
             voiceSpeaker.speak(phrase, preferences: preferences)
         } else if settings.soundEnabled { NSSound(named: "Glass")?.play() }
     }
@@ -314,8 +315,7 @@ import ServiceManagement
         settings.focusTimer = FocusTimer(minutes: minutes, now: clockNow)
         save()
         onFocusStarted?()
-        let preferences = settings.voice ?? VoicePreferences()
-        if preferences.speakTimers, !isTestStorage { voiceSpeaker.speak(VoiceClip.focusStart(minutes: minutes), preferences: preferences) }
+        if settings.soundEnabled, !isTestStorage { NSSound(named: "Glass")?.play() }
     }
 
     func pauseOrResumeFocus() {
