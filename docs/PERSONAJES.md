@@ -22,3 +22,11 @@ Los gestos son levitación y parpadeo, mirada curiosa, saludo con la mano, cola 
 Arcanine usa rojo y crema; Mewtwo usa violeta y lavanda. Una paleta común se aplica al panel completo, los accesos semicirculares, sus detalles, los avisos y el indicador de foco.
 
 La versión 1.1.0 incluye ambos modelos completos. El cambio se verifica en el visor nativo, incluyendo retorno a Arcanine, conservación de notas/tareas/timer, persistencia, rotación horizontal y los nueve clips. Los usuarios no necesitan cuenta de Sketchfab ni descargar modelos adicionales.
+
+## Aparición y retirada con Pokébola (1.2.0)
+
+La Pokébola se genera con geometría de SceneKit: dos semiesferas, revestimiento, bisagra, borde y botón. No requiere descargar un modelo adicional. El brillo combina material emisivo temporal sobre el Pokémon, luz puntual, halos con alfa gradual, un haz y destellos. La composición mantiene el fondo transparente del panel nativo.
+
+Al iniciar se reproduce la aparición (2,35 segundos). Al cambiar se valida primero el modelo entrante, se recoge el compañero actual (1,85 segundos) y se libera al siguiente. Las dos Pokébolas aparecen en posiciones distintas y su orientación es independiente de la rotación guardada del personaje. Una línea de tiempo única permite reproducción por reloj y capturas deterministas.
+
+Al terminar o cancelar se restauran tamaño, posición, opacidad y emisión originales; la geometría del efecto se elimina. La selección rápida descarta cargas y completaciones obsoletas. Desactivar movimiento o activar Reducir movimiento finaliza cualquier transición y muestra el compañero directamente. Se conservan tareas, notas y timers durante la secuencia. La opción de girar espera a que termine la transición; el arrastre normal sigue moviendo el panel.

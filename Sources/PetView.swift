@@ -40,7 +40,8 @@ final class PetView: NSView {
     let engine = Arcanine3DScene()
     private let sceneView: PetSceneView
     private let badge = PetTimerBadge()
-    var animate = true
+    var animate = true { didSet { engine.effectsEnabled = animate && summoningEnabled } }
+    var summoningEnabled = true { didSet { engine.effectsEnabled = animate && summoningEnabled } }
     var focusing = false
     var alerting = false
     var focusTimer: FocusTimer? { didSet { badge.focusTimer = focusTimer; badge.needsDisplay = true } }
@@ -61,6 +62,7 @@ final class PetView: NSView {
     private var initialOrigin = NSPoint.zero
     private var initialYaw = 0.0
     private var rotating = false
+    private var rotationBlocked = false
     private var petting = false
     private var pettedDuringDrag = false
     private(set) var dragging = false
@@ -90,6 +92,14 @@ final class PetView: NSView {
             self.play(self.alerting ? .alert : .greeting); self.tickMotion(); self.onReady?()
         }
         engine.onError = { [weak self] message in self?.needsDisplay = true; self?.onError?(message) }
+        engine.onSummonChanged = { [weak self] in
+            guard let self else { return }
+            if !self.engine.isTransitioning {
+                self.motion = Arcanine3DMotion(character: self.engine.character)
+                self.renderedRevision = -1
+            }
+            self.sceneView.needsDisplay = true
+        }
         setAccessibilityElement(true)
         toolTip = "Arrastra para mover · ⌥ Option + arrastra para girar · ⇧ Mayús + arrastra para acariciar"
         setAccessibilityLabel("Arcanine 3D, tu compañero de escritorio. Haz clic para abrir los accesos rápidos semicirculares; arrastra para moverlo; mantén Option y arrastra para girarlo horizontalmente; mantén Mayús y arrastra para acariciarlo.")
@@ -103,9 +113,17 @@ final class PetView: NSView {
         sceneView.frame = NSRect(x: 0, y: 28, width: bounds.width, height: max(1, bounds.height - 28))
         badge.frame = NSRect(x: 0, y: 0, width: bounds.width, height: 28)
     }
-    func loadModel(character: PetCharacter = .arcanine) { engine.load(character: character) }
+    func loadModel(character: PetCharacter = .arcanine) {
+        engine.effectsEnabled = animate && summoningEnabled
+        engine.load(character: character)
+    }
     func setYaw(_ angle: Double) { engine.setYaw(angle); sceneView.needsDisplay = true }
     func tickMotion() {
+        if !previewing { engine.updateSummoning(at: ProcessInfo.processInfo.systemUptime) }
+        if engine.isTransitioning {
+            sceneView.isPlaying = !previewing && animate && window?.isVisible == true
+            return
+        }
         guard engine.ready, !previewing else { return }
         let now = ProcessInfo.processInfo.systemUptime
         motion.focusing = focusing; motion.alerting = alerting
@@ -135,6 +153,11 @@ final class PetView: NSView {
         sceneView.sceneTime = 0
         engine.play(clip, preview: true, previewTime: time)
     }
+    func previewSummoning(_ phase: PetSummonPhase, at time: Double) {
+        preview(.idle, at: 0)
+        engine.previewSummoning(phase, at: time)
+        sceneView.needsDisplay = true
+    }
     func snapshot() -> NSImage {
         layoutSubtreeIfNeeded()
         let rendered = sceneView.snapshot()
@@ -152,10 +175,10 @@ final class PetView: NSView {
 
     func containsPet(_ point: NSPoint) -> Bool {
         if focusTimer?.showsOnFace(at: Date()) == true && badge.badgeRect.contains(point) { return true }
-        guard engine.ready else { return false }
+        guard engine.ready || engine.isTransitioning else { return false }
         let p = sceneView.convert(point, from: self)
         guard sceneView.bounds.contains(p) else { return false }
-        return !sceneView.hitTest(p, options: [.boundingBoxOnly: false, .ignoreHiddenNodes: true]).isEmpty
+        return !sceneView.hitTest(p, options: [.boundingBoxOnly: false, .ignoreHiddenNodes: true, .categoryBitMask: 1]).isEmpty
     }
     override func hitTest(_ point: NSPoint) -> NSView? { containsPet(point) ? self : nil }
     private func mousePosition(_ event: NSEvent) -> NSPoint {
@@ -166,6 +189,7 @@ final class PetView: NSView {
         initialYaw = yaw
         // Lock the gesture at mouse-down: releasing Option mid-drag never moves the panel.
         rotating = event.modifierFlags.contains(.option)
+        rotationBlocked = rotating && engine.isTransitioning
         petting = !rotating && event.modifierFlags.contains(.shift)
         pettedDuringDrag = false
         dragging = true; moved = false
@@ -182,6 +206,7 @@ final class PetView: NSView {
             return
         }
         if rotating {
+            guard !rotationBlocked && !engine.isTransitioning else { rotationBlocked = true; return }
             if abs(delta.x) > 4 { moved = true }
             if moved { setYaw(PetRotation.dragged(from: initialYaw, horizontalPoints: delta.x)) }
             return
@@ -200,7 +225,7 @@ final class PetView: NSView {
         }
         if rotating {
             rotating = false
-            if moved { onRotationEnd?(yaw) }
+            if moved && !rotationBlocked { onRotationEnd?(yaw) }
         } else if moved { onDragEnd?() } else { react(); onClick?() }
     }
     override func rightMouseDown(with event: NSEvent) { react(); onContextMenu?(event) }

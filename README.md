@@ -6,7 +6,7 @@ Mascota 3D flotante con Arcanine y Mewtwo, animaciones articuladas, agenda de Go
 
 Requiere **macOS 14 Sonoma o posterior**, en Mac Intel o Apple Silicon. La descarga es universal e incluye todos los recursos; no hay que instalar herramientas de programación.
 
-1. Descarga `Arcanine-1.1.0-macOS.zip` desde [Releases](https://github.com/franciscorrandom/arcanine-desktop-ical/releases).
+1. Descarga `Arcanine-1.2.0-macOS.zip` desde [Releases](https://github.com/franciscorrandom/arcanine-desktop-ical/releases).
 2. Descomprime el ZIP y arrastra `Arcanine.app` a Aplicaciones.
 3. Abre la app. Esta edición gratuita está firmada de forma local, **sin Developer ID ni notarización**. Si macOS bloquea la apertura, después de intentarla ve a **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente** y confirma. Sigue las [instrucciones de Apple](https://support.apple.com/es-cl/102445); no hace falta desactivar la seguridad del Mac.
 4. En la bienvenida pega tu enlace iCal de Google Calendar y pulsa **Conectar calendario**. Puedes usar tareas, notas, animaciones y concentración aunque no conectes un calendario.
@@ -30,6 +30,7 @@ La conexión es de lectura: crea o cambia reuniones desde Google Calendar. Las t
 - **⌥ Option + arrastrar:** rotación horizontal para ver otros perfiles.
 - **⇧ Mayús + arrastrar:** acariciar; también puedes elegir Acariciar en el menú.
 - **Compañero:** elige Arcanine o Mewtwo en Ajustes → Tu compañero. El menú, los avisos y el timer adoptan sus colores. Se conservan agenda, tareas, notas y orientación de cada personaje.
+- **Pokébolas 3D:** al abrir la app, una Pokébola se abre y materializa al compañero con luz blanca y azul. Al cambiar de personaje, otra lo recoge con luz rosada antes de liberar al nuevo. Tapa articulada, halo, haz y destellos sobre fondo transparente. Se omite cuando desactivas el movimiento o macOS tiene activado Reducir movimiento.
 - **Animaciones:** once gestos de Arcanine y nueve de Mewtwo, incluidos parpadeos, saludo, caricias, movimiento de cola y meditación.
 - **Agenda:** avisos anticipados configurables y botón para entrar cuando el evento contiene un enlace compatible de Google Meet, Zoom, Teams o Webex.
 - **Tareas:** crear recordatorios, completar o eliminar; se pueden repetir cada día o solo entre semana.
@@ -58,11 +59,11 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/Arcanine.app` y `dist/Arcanine-1.1.0-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/Arcanine.app` y `dist/Arcanine-1.2.0-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 
-Las pruebas cubren avisos, timers, datos persistentes, notas, movimiento, fechas iCal, recurrencias, cancelaciones, cambios de hora y respuestas HTTP con un servidor simulado. No acceden a calendarios reales ni al Llavero personal. El binario acepta `--smoke-test` y `--characters-smoke-test` para pruebas visuales automáticas con perfiles temporales. Para regenerar únicamente la biblioteca de Mewtwo se usa `python3 scripts/animate-mewtwo.py` con NumPy; esto no se necesita para compilar ni ejecutar la app.
+Las pruebas cubren avisos, timers, datos persistentes, notas, movimiento, secuencias de aparición y retirada, fechas iCal, recurrencias, cancelaciones, cambios de hora y respuestas HTTP con un servidor simulado. No acceden a calendarios reales ni al Llavero personal. El binario acepta `--smoke-test`, `--characters-smoke-test` y `--pokeball-smoke-test` para pruebas visuales automáticas con perfiles temporales. Para regenerar únicamente la biblioteca de Mewtwo se usa `python3 scripts/animate-mewtwo.py` con NumPy; esto no se necesita para compilar ni ejecutar la app.
 
 ## Créditos
 

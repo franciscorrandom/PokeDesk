@@ -20,10 +20,16 @@ final class BubblePanel: NSPanel {
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let characterTest = CommandLine.arguments.contains("--characters-smoke-test")
-    private let smokeTest = CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test")
+    private let pokeballTest = CommandLine.arguments.contains("--pokeball-smoke-test")
+    private let smokeTest = CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test") || CommandLine.arguments.contains("--pokeball-smoke-test")
     private var smokeStarted = false
     private var characterReady: (() -> Void)?
-    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
+    private var pokeballReady: (() -> Void)?
+    private var summonPhases = [String]()
+    private var recordSummons = true
+    private var cancelRecall = false
+    private var cancelIncoming = false
+    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(pokeballTest ? "arcanine-pokeball-smoke/estado.json" : characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
     private var petPanel: PetPanel!
     private var petView: PetView!
     private var dashboard: BubblePanel?
@@ -44,7 +50,8 @@ final class BubblePanel: NSPanel {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        if characterTest { model.settings.petCharacter = "arcanine" }
+        if characterTest || pokeballTest { model.settings.petCharacter = "arcanine" }
+        if pokeballTest { model.settings.motionEnabled = true; model.settings.soundEnabled = false }
         guard let image = NSImage(named: "arcanine") else {
             let alert = NSAlert()
             alert.messageText = "No encontré la imagen de Arcanine"
@@ -65,6 +72,24 @@ final class BubblePanel: NSPanel {
         petPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         petPanel.animationBehavior = .none
         petView = PetView(image: image, frame: NSRect(origin: .zero, size: size))
+        petView.summoningEnabled = !smokeTest || pokeballTest
+        if pokeballTest {
+            petView.engine.onSummonStarted = { [weak self] phase in
+                guard let self, self.recordSummons else { return }
+                self.summonPhases.append(phase.rawValue)
+                if phase == .recall && self.cancelRecall {
+                    self.cancelRecall = false
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.75) { _ = self.model.selectCharacter(.arcanine) }
+                }
+                if phase == .release && self.cancelIncoming {
+                    self.cancelIncoming = false
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.8) { _ = self.model.selectCharacter(.arcanine) }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now()+0.95) {
+                    self.capturePreview(self.petView, name: "pokeball-live-\(phase.rawValue)")
+                }
+            }
+        }
         petView.autoresizingMask = [.width, .height]
         petView.onClick = { [weak self] in self?.toggleQuickMenu() }
         petView.onPettingRequested = { [weak self] in self?.model.requestAnimation(.petting) }
@@ -128,10 +153,12 @@ final class BubblePanel: NSPanel {
         }
         petView.onReady = { [weak self] in
             guard let self, self.smokeTest else { return }
+            if self.pokeballTest, let next = self.pokeballReady { next(); return }
             if self.characterTest, let next = self.characterReady { next(); return }
             guard !self.smokeStarted else { return }
             self.smokeStarted = true
-            if self.characterTest { self.performCharacterTest() } else { self.performSmokeTest() }
+            if self.pokeballTest { self.performPokeballTest() }
+            else if self.characterTest { self.performCharacterTest() } else { self.performSmokeTest() }
         }
         setupMenu()
         applySettings()
@@ -178,12 +205,12 @@ final class BubblePanel: NSPanel {
         guard petPanel != nil else { return }
         quickState.character = model.settings.character
         petView.character = model.settings.character
+        petView.animate = model.settings.motionEnabled && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         petView.loadModel(character: model.settings.character)
         petPanel.title = "\(model.settings.character.name) — mascota"
         petPanel.setContentSize(panelSize())
         petPanel.setFrame(clamped(petPanel.frame), display: true)
         petView.setYaw(model.settings.characterYaw)
-        petView.animate = model.settings.motionEnabled && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         petView.focusing = model.settings.focusTimer?.phase == .running
         petView.tickMotion()
         petView.focusTimer = model.settings.focusTimer.flatMap { $0.showsOnFace(at: Date()) ? $0 : nil }
@@ -426,6 +453,133 @@ final class BubblePanel: NSPanel {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         petPanel.orderFrontRegardless()
         return true
+    }
+
+    private func performPokeballTest() {
+        var report: [String: Any] = ["startupReleases": summonPhases == ["release"], "startupRestores": petView.engine.summonRestored]
+        model.settings.petSize = 230
+        model.settings.tasks = [DailyTask(title: "Tarea conservada", hour: 10, minute: 0)]
+        model.settings.notes = [PetNote(title: "Nota conservada", body: "El efecto no cambia los datos", createdAt: Date(), updatedAt: Date())]
+        model.settings.setCharacterYaw(0.35)
+        model.startFocus(minutes: 10); model.pauseOrResumeFocus()
+        let tasks = model.settings.tasks, notes = model.settings.notes, timer = model.settings.focusTimer
+        pokeballReady = { [weak self] in
+            guard let self else { return }
+            report["switchRecallThenRelease"] = self.summonPhases == ["release", "recall", "release"]
+            report["mewtwoReadyAndRestored"] = self.petView.engine.character == .mewtwo && self.petView.engine.summonRestored
+            self.model.settings.setCharacterYaw(-0.7); self.model.save()
+            self.pokeballReady = {
+                report["returnRecallThenRelease"] = self.summonPhases.suffix(2) == ["recall", "release"]
+                report["yawRestored"] = abs(self.petView.yaw-0.35) < 0.0001
+                self.pokeballReady = nil
+                _ = self.model.selectCharacter(.mewtwo)
+                _ = self.model.selectCharacter(.arcanine)
+                DispatchQueue.main.asyncAfter(deadline: .now()+0.5) {
+                    report["pendingLoadCanCancel"] = self.petView.engine.character == .arcanine && self.petView.engine.loadingCharacter == nil && self.petView.engine.summonRestored
+                    self.cancelRecall = true
+                    _ = self.model.selectCharacter(.mewtwo)
+                    DispatchQueue.main.asyncAfter(deadline: .now()+3.1) {
+                        report["recallCanCancel"] = self.petView.engine.character == .arcanine && self.petView.engine.loadingCharacter == nil && self.petView.engine.summonRestored
+                        self.pokeballReady = {
+                            report["incomingCanCancel"] = self.petView.engine.character == .arcanine && self.petView.engine.loadingCharacter == nil && self.petView.engine.summonRestored
+                            let count = self.summonPhases.count
+                            self.model.settings.motionEnabled = false; self.model.save()
+                            self.pokeballReady = {
+                                report["reducedMotionSkipsEffects"] = self.summonPhases.count == count && self.petView.engine.summonRestored && self.petView.engine.character == .mewtwo
+                                report["tasksPreserved"] = self.model.settings.tasks == tasks
+                                report["notesPreserved"] = self.model.settings.notes == notes
+                                report["timerPreserved"] = self.model.settings.focusTimer == timer
+                                self.recordSummons = false; self.renderTimer?.invalidate()
+                                self.capturePokeballTest(report)
+                            }
+                            _ = self.model.selectCharacter(.mewtwo)
+                        }
+                        self.cancelIncoming = true
+                        _ = self.model.selectCharacter(.mewtwo)
+                    }
+                }
+            }
+            _ = self.model.selectCharacter(.arcanine)
+        }
+        _ = model.selectCharacter(.mewtwo)
+    }
+
+    private func capturePokeballTest(_ initial: [String: Any]) {
+        var report = initial
+        petView.focusTimer = nil; petView.setYaw(0)
+        let framesPerSecond = 20.0
+        var incoming = [CGImage]()
+        func fitsEffect() -> Bool {
+            for angle in stride(from: 0.0, to: .pi*2, by: .pi/4) {
+                petView.setYaw(angle)
+                for phase in PetSummonPhase.allCases {
+                    for time in [0.4, 0.85, 1.3, 1.7] {
+                        petView.previewSummoning(phase, at: time)
+                        guard let data = petView.snapshot().tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) else { return false }
+                        for x in 0..<bitmap.pixelsWide {
+                            for y in [0, bitmap.pixelsHigh-1] where (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+                        }
+                        for y in 0..<bitmap.pixelsHigh {
+                            for x in [0, bitmap.pixelsWide-1] where (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+                        }
+                        if petView.containsPet(NSPoint(x: 2, y: petView.bounds.height-2)) { return false }
+                    }
+                }
+            }
+            petView.setYaw(0); petView.engine.cancelSummoning()
+            return true
+        }
+        func frame(_ phase: PetSummonPhase, _ time: Double) -> CGImage? {
+            petView.previewSummoning(phase, at: time)
+            let rendered = petView.snapshot()
+            let composed = NSImage(size: rendered.size)
+            composed.lockFocus()
+            NSGradient(starting: NSColor(red: 0.09, green: 0.13, blue: 0.23, alpha: 1), ending: NSColor(red: 0.025, green: 0.04, blue: 0.085, alpha: 1))?.draw(in: NSRect(origin: .zero, size: rendered.size), angle: 90)
+            rendered.draw(in: NSRect(origin: .zero, size: rendered.size))
+            composed.unlockFocus()
+            guard let data = composed.tiffRepresentation else { return nil }
+            let cg = NSBitmapImageRep(data: data)?.cgImage
+            let peak = phase == .release ? 1.1 : 0.8
+            if abs(time-peak) < 0.00001, let cg {
+                let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("pokeball-demo-\(phase.rawValue).png")
+                if let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) {
+                    CGImageDestinationAddImage(destination, cg, nil); CGImageDestinationFinalize(destination)
+                }
+            }
+            return cg
+        }
+        for index in 0..<Int(PetSummonPhase.release.duration*framesPerSecond) {
+            if let cg = frame(.release, Double(index)/framesPerSecond) { incoming.append(cg) }
+        }
+        petView.previewSummoning(.release, at: 0.90); capturePreview(petView, name: "pokeball-mewtwo-light")
+        petView.previewSummoning(.release, at: 0.38); capturePreview(petView, name: "pokeball-3d-closed")
+        petView.engine.cancelSummoning()
+        report["previewCleanup"] = petView.engine.summonRestored
+        report["mewtwoEffectsFitAndCornersPassThrough"] = fitsEffect()
+        pokeballReady = { [weak self] in
+            guard let self else { return }
+            self.petView.setYaw(0); self.petView.focusTimer = nil
+            report["arcanineEffectsFitAndCornersPassThrough"] = fitsEffect()
+            let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("pokeball-cambio.gif")
+            let count = Int(PetSummonPhase.recall.duration*framesPerSecond)+incoming.count
+            if let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, count, nil) {
+                CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+                let properties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 1/framesPerSecond]] as CFDictionary
+                for index in 0..<Int(PetSummonPhase.recall.duration*framesPerSecond) {
+                    autoreleasepool { if let cg = frame(.recall, Double(index)/framesPerSecond) { CGImageDestinationAddImage(destination, cg, properties) } }
+                }
+                for cg in incoming { CGImageDestinationAddImage(destination, cg, properties) }
+                report["demoCreated"] = CGImageDestinationFinalize(destination)
+            }
+            self.petView.previewSummoning(.recall, at: 0.85); self.capturePreview(self.petView, name: "pokeball-arcanine-recall")
+            self.petView.previewSummoning(.release, at: 1.10); self.capturePreview(self.petView, name: "pokeball-arcanine-release")
+            self.petView.engine.cancelSummoning()
+            report["finalCleanup"] = self.petView.engine.summonRestored
+            let reportURL = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("pokeball-smoke-test.json")
+            if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: reportURL) }
+            NSApp.terminate(nil)
+        }
+        _ = model.selectCharacter(.arcanine)
     }
 
     private func performCharacterTest() {

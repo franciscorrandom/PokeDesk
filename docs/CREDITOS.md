@@ -1,6 +1,7 @@
 # Créditos y licencias
 
 - **Código propio de Arcanine:** Copyright 2026 Arcanine contributors. MIT; véase `LICENSE`. Esta licencia no concede derechos sobre personajes ni recursos de terceros.
+- **Pokébola 3D y efectos:** geometría y secuencia creadas mediante código para este proyecto, inspiradas en la representación de Pokémon. No se usa un modelo de Pokébola ni una animación descargada de terceros. Los derechos del diseño de Pokémon permanecen con sus titulares.
 - **Arcanine 3D:** [nguyenlouis32 en Sketchfab](https://sketchfab.com/3d-models/arcanine-82c02a3bc6294f94b4423ae454a7b2aa), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Se modificaron articulaciones, ojos para parpadeos y once clips de animación. Atribución incluida también en `Assets/modelo-3d-origen.txt`.
 - **Mewtwo 3D:** [nguyenlouis32 en Sketchfab](https://sketchfab.com/3d-models/mewtwo-f6ef9b83b4744706a24cf7c5eb4d689e), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Se preparó una postura relajada, expresiones de ojos desde el atlas original y nueve clips articulados. El original, el generador y el catálogo se conservan en el repositorio. La imagen de presentación es una captura del modelo modificado.
 - **GLTFKit2:** [Warren Moore](https://github.com/warrenm/GLTFKit2), MIT. La licencia completa se conserva en `Assets/modelo-3d-origen.txt`. Revisión fijada: `be89e833aa85bde67bd27d4ecff3b7816c58ce56`.
