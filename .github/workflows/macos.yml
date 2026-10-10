@@ -37,4 +37,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ARCANINE_TAG: ${{ github.ref_name }}
-        run: gh release create "$ARCANINE_TAG" dist/Arcanine-1.0.0-macOS.zip --verify-tag --title "Arcanine $ARCANINE_TAG" --notes-file docs/RELEASE.md
+        run: |
+          if gh release view "$ARCANINE_TAG" >/dev/null 2>&1; then
+            echo "Release already published; keeping reviewed downloads."
+          else
+            gh release create "$ARCANINE_TAG" dist/Arcanine-1.0.0-macOS.zip --verify-tag --title "Arcanine $ARCANINE_TAG" --notes-file docs/RELEASE.md
+          fi
