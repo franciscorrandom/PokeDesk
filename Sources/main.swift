@@ -4,6 +4,7 @@ import Combine
 import ImageIO
 import UniformTypeIdentifiers
 import simd
+import SceneKit
 
 final class PetPanel: NSPanel {
     override var canBecomeKey: Bool { false }
@@ -18,8 +19,11 @@ final class BubblePanel: NSPanel {
 }
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    private let smokeTest = CommandLine.arguments.contains("--smoke-test")
-    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-ical-smoke/estado.json") : nil)
+    private let characterTest = CommandLine.arguments.contains("--characters-smoke-test")
+    private let smokeTest = CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test")
+    private var smokeStarted = false
+    private var characterReady: (() -> Void)?
+    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
     private var petPanel: PetPanel!
     private var petView: PetView!
     private var dashboard: BubblePanel?
@@ -40,6 +44,7 @@ final class BubblePanel: NSPanel {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        if characterTest { model.settings.petCharacter = "arcanine" }
         guard let image = NSImage(named: "arcanine") else {
             let alert = NSAlert()
             alert.messageText = "No encontré la imagen de Arcanine"
@@ -67,7 +72,7 @@ final class BubblePanel: NSPanel {
         petView.onDrag = { [weak self] in self?.positionBubble(); self?.positionDashboard(); self?.positionQuickMenu() }
         petView.onDragEnd = { [weak self] in self?.savePosition() }
         petView.onRotationEnd = { [weak self] angle in
-            self?.model.settings.petYaw = angle
+            self?.model.settings.setCharacterYaw(angle)
             self?.model.save()
         }
         petPanel.contentView = petView
@@ -108,6 +113,10 @@ final class BubblePanel: NSPanel {
         petView.onError = { [weak self] message in
             guard let self else { return }
             self.model.errorMessage = message
+            if self.petView.engine.ready {
+                self.model.settings.petCharacter = self.petView.engine.character.rawValue
+                self.model.save()
+            }
             if self.smokeTest {
                 let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("smoke-test.json")
                 try? JSONSerialization.data(withJSONObject: ["model3DLoaded": false, "error": message]).write(to: url)
@@ -117,13 +126,19 @@ final class BubblePanel: NSPanel {
                 alert.informativeText = message; alert.runModal()
             }
         }
-        petView.onReady = { [weak self] in if self?.smokeTest == true { self?.performSmokeTest() } }
+        petView.onReady = { [weak self] in
+            guard let self, self.smokeTest else { return }
+            if self.characterTest, let next = self.characterReady { next(); return }
+            guard !self.smokeStarted else { return }
+            self.smokeStarted = true
+            if self.characterTest { self.performCharacterTest() } else { self.performSmokeTest() }
+        }
         setupMenu()
         applySettings()
         renderTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30, repeats: true) { [weak self] _ in DispatchQueue.main.async { self?.renderTick() } }
         RunLoop.main.add(renderTimer!, forMode: .common)
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in DispatchQueue.main.async { self?.savePosition() } }
-        petView.loadModel()
+        petView.loadModel(character: model.settings.character)
         if !smokeTest {
             model.start()
             if model.feeds.isEmpty { model.dashboardTab = 3; showDashboard() }
@@ -161,9 +176,13 @@ final class BubblePanel: NSPanel {
     }
     private func applySettings() {
         guard petPanel != nil else { return }
+        quickState.character = model.settings.character
+        petView.character = model.settings.character
+        petView.loadModel(character: model.settings.character)
+        petPanel.title = "\(model.settings.character.name) — mascota"
         petPanel.setContentSize(panelSize())
         petPanel.setFrame(clamped(petPanel.frame), display: true)
-        petView.setYaw(model.settings.petYaw ?? 0)
+        petView.setYaw(model.settings.characterYaw)
         petView.animate = model.settings.motionEnabled && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         petView.focusing = model.settings.focusTimer?.phase == .running
         petView.tickMotion()
@@ -265,8 +284,8 @@ final class BubblePanel: NSPanel {
         }
         let gestures = addMenu("Animaciones 3D", action: nil)
         let gestureMenu = NSMenu()
-        for clip in ArcanineClip.allCases {
-            let item = NSMenuItem(title: clip.title, action: #selector(playGesture(_:)), keyEquivalent: "")
+        for clip in model.settings.character.clips {
+            let item = NSMenuItem(title: model.settings.character.title(for: clip), action: #selector(playGesture(_:)), keyEquivalent: "")
             item.target = self; item.representedObject = clip.rawValue; gestureMenu.addItem(item)
         }
         gestures.submenu = gestureMenu
@@ -407,6 +426,132 @@ final class BubblePanel: NSPanel {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         petPanel.orderFrontRegardless()
         return true
+    }
+
+    private func performCharacterTest() {
+        renderTimer?.invalidate()
+        model.settings.soundEnabled = false
+        model.settings.petSize = 230
+        model.settings.tasks = [DailyTask(title: "Tarea que conserva el cambio", hour: 10, minute: 0)]
+        model.settings.notes = [PetNote(title: "Nota compartida", body: "Se conserva entre compañeros", createdAt: Date(), updatedAt: Date())]
+        model.settings.petCharacter = "arcanine"
+        model.settings.setCharacterYaw(0.4)
+        model.startFocus(minutes: 10); model.pauseOrResumeFocus()
+        let taskIDs = model.settings.tasks.map(\.id)
+        let notes = model.settings.notes
+        let timerID = model.settings.focusTimer?.id
+        var report: [String: Any] = [:]
+        characterReady = { [weak self] in
+            guard let self else { return }
+            report["mewtwoLoaded"] = self.petView.engine.character == .mewtwo
+            report["mewtwoJoints"] = self.petView.engine.jointCount
+            report["mewtwoClips"] = self.petView.engine.clipCount
+            self.model.settings.setCharacterYaw(-0.7); self.model.save()
+            self.characterReady = {
+                report["arcanineReturns"] = self.petView.engine.character == .arcanine && self.petView.engine.clipCount == 11
+                report["arcanineYawPreserved"] = abs(self.petView.yaw-0.4) < 0.0001
+                self.characterReady = {
+                    report["mewtwoYawPreserved"] = abs(self.petView.yaw+0.7) < 0.0001
+                    report["tasksPreserved"] = self.model.settings.tasks.map(\.id) == taskIDs
+                    report["notesPreserved"] = self.model.settings.notes == notes
+                    report["timerPreserved"] = self.model.settings.focusTimer?.id == timerID && self.model.settings.focusTimer?.phase == .paused
+                    let saved = PetModel(storageURL: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-characters-smoke/estado.json"))
+                    report["characterPersists"] = saved.settings.character == .mewtwo
+                    report["voicePreserved"] = saved.settings.voice?.selectedEnglishVoice == self.model.settings.voice?.selectedEnglishVoice
+                    self.characterReady = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.3) { self.captureCharacterTest(report) }
+                }
+                _ = self.model.selectCharacter(.mewtwo)
+            }
+            _ = self.model.selectCharacter(.arcanine)
+        }
+        if petView.engine.character == .mewtwo {
+            characterReady?()
+        } else { _ = model.selectCharacter(.mewtwo) }
+    }
+
+    private func captureCharacterTest(_ initial: [String: Any]) {
+        var report = initial
+        petView.focusTimer = nil; petView.setYaw(0)
+        petView.preview(.idle, at: 0)
+        capturePreview(petView, name: "mewtwo-preview")
+        petView.preview(.idle, at: 3)
+        capturePreview(petView, name: "mewtwo-blink-preview")
+        report["blinkClosesEyes"] = (petView.node("MewtwoEyesClosed")?.presentation.scale.x ?? 0) > 0.9
+        report["blinkHidesPupils"] = (petView.node("MewtwoPupils")?.presentation.scale.x ?? 1) < 0.1
+        var moving = [String](); var articulated = [String](); var clipped = [String]()
+        func fits(_ image: NSImage) -> Bool {
+            guard let data = image.tiffRepresentation, let b = NSBitmapImageRep(data: data) else { return false }
+            for x in 0..<b.pixelsWide {
+                for y in [0, 1, b.pixelsHigh-2, b.pixelsHigh-1] {
+                    if (b.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+                }
+            }
+            for y in 0..<b.pixelsHigh {
+                for x in [0, 1, b.pixelsWide-2, b.pixelsWide-1] {
+                    if (b.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+                }
+            }
+            return true
+        }
+        for clip in PetCharacter.mewtwo.clips {
+            petView.preview(clip, at: 0)
+            let before = petView.snapshot().tiffRepresentation
+            let joints = ["Head_052", "LArm_039", "Tail5_029", "Spine1_036"]
+            let beforeJoints = joints.map { petView.node($0)?.presentation.simdOrientation.vector }
+            petView.preview(clip, at: clip.duration*0.4)
+            let after = petView.snapshot().tiffRepresentation
+            if before != after { moving.append(clip.rawValue) }
+            if beforeJoints != joints.map({ petView.node($0)?.presentation.simdOrientation.vector }) { articulated.append(clip.rawValue) }
+            capturePreview(petView, name: "mewtwo-3d-\(clip.rawValue)")
+            for angle in stride(from: 0.0, to: .pi*2, by: .pi/4) {
+                petView.setYaw(angle)
+                for fraction in [0.0, 0.4, 0.75] {
+                    petView.preview(clip, at: clip.duration*fraction)
+                    if !fits(petView.snapshot()) { clipped.append("\(clip.rawValue):\(angle):\(fraction)") }
+                }
+            }
+            petView.setYaw(0)
+        }
+        report["allClipsMove"] = moving.count == 9
+        report["allClipsArticulated"] = articulated.count == 9
+        report["movingClips"] = moving
+        report["rotationWithoutClipping"] = clipped.isEmpty
+        report["clippedSamples"] = clipped
+        petView.preview(.idle, at: 0)
+        _ = petView.snapshot()
+        report["petClickable"] = stride(from: 20.0, to: petView.bounds.width, by: 20).contains { x in
+            stride(from: 35.0, to: petView.bounds.height, by: 20).contains { y in petView.containsPet(NSPoint(x: x, y: y)) }
+        }
+        model.dashboardTab = 3; showDashboard()
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+            if let view = self.dashboard?.contentView { self.capturePreview(view, name: "mewtwo-settings-preview") }
+            self.closeDashboard(); self.toggleQuickMenu()
+            if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "mewtwo-quick-menu-preview") }
+            report["quickMenuCharacterTheme"] = self.quickState.character == .mewtwo
+            report["quickMenuVisible"] = self.quickMenu?.isVisible == true
+            self.captureCharacterAnimation(.greeting, name: "mewtwo-saludo")
+            let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("characters-smoke-test.json")
+            if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: url) }
+            NSApp.terminate(nil)
+        }
+    }
+
+    private func captureCharacterAnimation(_ clip: ArcanineClip, name: String) {
+        let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent(name+".gif")
+        let frames = 60
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames, nil) else { return }
+        CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+        petView.setYaw(0)
+        for frame in 0..<frames {
+            autoreleasepool {
+                petView.preview(clip, at: Double(frame)/Double(frames)*clip.duration)
+                if let data = petView.snapshot().tiffRepresentation, let bitmap = NSBitmapImageRep(data: data), let cg = bitmap.cgImage {
+                    CGImageDestinationAddImage(destination, cg, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: clip.duration/Double(frames)]] as CFDictionary)
+                }
+            }
+        }
+        CGImageDestinationFinalize(destination)
     }
 
     private func performSmokeTest() {

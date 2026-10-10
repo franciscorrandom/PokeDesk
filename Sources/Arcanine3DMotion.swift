@@ -36,6 +36,7 @@ enum ArcanineClip: String, CaseIterable {
 
 /// Chooses gestures independently of rendering, so alerts can interrupt play and focus stays calm.
 struct Arcanine3DMotion {
+    var character: PetCharacter = .arcanine
     private(set) var clip: ArcanineClip = .idle
     private(set) var startedAt: TimeInterval = 0
     private(set) var revision = 0
@@ -46,6 +47,7 @@ struct Arcanine3DMotion {
     private var enabled = true
     var focusing = false
     var alerting = false
+    init(character: PetCharacter = .arcanine) { self.character = character }
 
     mutating func setEnabled(_ value: Bool, at now: TimeInterval) {
         guard enabled != value else { return }
@@ -53,7 +55,7 @@ struct Arcanine3DMotion {
         start(.idle, at: now)
     }
     mutating func request(_ value: ArcanineClip, at now: TimeInterval, manual: Bool = false) {
-        guard enabled else { return }
+        guard enabled, character.clips.contains(value) else { return }
         if !manual {
             if value == .chaseTail && (focusing || now - lastChase < 180) { return }
             if clip != .idle && value.priority < clip.priority {
@@ -66,7 +68,8 @@ struct Arcanine3DMotion {
     mutating func click(at now: TimeInterval) {
         var choices: [ArcanineClip] = [.curious, .greeting, .happyTail, .sniff, .stretch]
         if !focusing && now - lastChase >= 180 { choices.append(.chaseTail) }
-        choices.removeAll { $0 == lastOptional }
+        choices.removeAll { !character.clips.contains($0) }
+        if choices.count > 1 { choices.removeAll { $0 == lastOptional } }
         if let choice = choices.randomElement() { request(choice, at: now) }
     }
     mutating func tick(at now: TimeInterval) {
@@ -77,7 +80,8 @@ struct Arcanine3DMotion {
         }
         if clip == .idle && now >= nextGesture && !alerting {
             var choices: [ArcanineClip] = focusing ? [.curious, .sniff] : [.curious, .happyTail, .sniff, .stretch]
-            choices.removeAll { $0 == lastOptional }
+            choices.removeAll { !character.clips.contains($0) }
+            if choices.count > 1 { choices.removeAll { $0 == lastOptional } }
             if let choice = choices.randomElement() { start(choice, at: now) }
         }
     }

@@ -131,4 +131,25 @@ check(VoiceClip.reminder(spokenMeeting, preferences: voice) == nil, "Respetar si
 voice.speakMeetings = true
 voice.enabled = false
 check(VoiceClip.reminder(spokenMeeting, preferences: voice) == nil, "Respetar silenciamiento general")
-print("\(count) comprobaciones correctas de timers, cara, voz, migración, recurrencia y recordatorios.")
+var companions = settings
+companions.petCharacter = nil
+companions.characterYaws = nil
+companions.petYaw = 0.7
+check(companions.character == .arcanine && companions.characterYaw == 0.7, "El perfil anterior conserva Arcanine y su orientación")
+companions.setCharacterYaw(1.1)
+companions.petCharacter = "mewtwo"
+check(companions.character == .mewtwo && companions.characterYaw == 0, "Una mascota nueva comienza con su propia orientación")
+companions.setCharacterYaw(-0.8)
+let companionsSaved = try JSONDecoder().decode(PetSettings.self, from: JSONEncoder().encode(companions))
+check(companionsSaved.character == .mewtwo && companionsSaved.characterYaw == -0.8, "Personaje y orientación sobreviven al reinicio")
+check(companionsSaved.tasks == settings.tasks && companionsSaved.notes == settings.notes && companionsSaved.focusTimer == settings.focusTimer, "Cambiar de personaje conserva tareas, notas y timer")
+check(companionsSaved.calendarFeeds == settings.calendarFeeds && companionsSaved.firedMeetings == settings.firedMeetings && companionsSaved.voice?.selectedEnglishVoice == settings.voice?.selectedEnglishVoice, "Conservar calendario, avisos enviados y voz")
+companions.petCharacter = "arcanine"
+check(companions.characterYaw == 1.1, "Volver a Arcanine recupera su orientación")
+companions.petCharacter = "personaje-futuro"
+check(companions.character == .arcanine, "Un identificador desconocido permite recuperar el perfil")
+var previousProfile = try JSONSerialization.jsonObject(with: JSONEncoder().encode(companions)) as! [String: Any]
+previousProfile.removeValue(forKey: "petCharacter"); previousProfile.removeValue(forKey: "characterYaws")
+let previousCompanion = try JSONDecoder().decode(PetSettings.self, from: JSONSerialization.data(withJSONObject: previousProfile))
+check(previousCompanion.character == .arcanine && previousCompanion.tasks == settings.tasks, "Migrar perfiles sin campos de personajes")
+print("\(count) comprobaciones correctas de timers, cara, voz, migración, recurrencia, personajes y recordatorios.")

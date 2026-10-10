@@ -1,10 +1,9 @@
 import SwiftUI
 import ServiceManagement
 
-private let arcanineAccent = ArcanineTheme.red
-private let arcanineInk = ArcanineTheme.ink
 
 struct DashboardView: View {
+    private var theme: PetTheme { PetTheme(character: model.settings.character) }
     @ObservedObject var model: PetModel
     var onClose: () -> Void = {}
     @State private var taskTitle = ""
@@ -19,7 +18,7 @@ struct DashboardView: View {
             HStack(spacing: 12) {
                 PokedexLens()
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ARCANINE").font(.system(size: 20, weight: .heavy, design: .rounded)).tracking(1.4)
+                    Text(model.settings.character.name.uppercased()).font(.system(size: 20, weight: .heavy, design: .rounded)).tracking(1.4)
                     Text(model.dashboardTab == -1 ? "Tu compañero de escritorio" : ["Tu agenda", "Tus tareas", "Tu tiempo de foco", "Tus ajustes", "Tus animaciones", "Tus notas e ideas"][max(0, min(5, model.dashboardTab))])
                         .font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.8))
                 }
@@ -30,12 +29,12 @@ struct DashboardView: View {
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 22).padding(.top, 22).padding(.bottom, 18)
-            .background(LinearGradient(colors: [ArcanineTheme.red, ArcanineTheme.deepRed], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .background(LinearGradient(colors: [theme.red, theme.deepRed], startPoint: .topLeading, endPoint: .bottomTrailing))
             HStack(spacing: 4) {
-                Circle().fill(ArcanineTheme.red).frame(width: 5, height: 5)
-                Circle().fill(ArcanineTheme.gold).frame(width: 5, height: 5)
-                Circle().fill(ArcanineTheme.green).frame(width: 5, height: 5)
-                Rectangle().fill(ArcanineTheme.line).frame(height: 1).padding(.horizontal, 9)
+                Circle().fill(theme.red).frame(width: 5, height: 5)
+                Circle().fill(theme.gold).frame(width: 5, height: 5)
+                Circle().fill(theme.green).frame(width: 5, height: 5)
+                Rectangle().fill(theme.line).frame(height: 1).padding(.horizontal, 9)
                 PokeballMark().frame(width: 19, height: 19)
             }.padding(.horizontal, 22).padding(.vertical, 10)
             if model.dashboardTab != -1 {
@@ -45,12 +44,12 @@ struct DashboardView: View {
                             Text(["Agenda", "Tareas", "Foco", "Ajustes", "Gestos", "Notas"][tab])
                                 .font(.system(size: 11, weight: .semibold))
                                 .frame(maxWidth: .infinity).padding(.vertical, 9)
-                                .foregroundStyle(model.dashboardTab == tab ? .white : ArcanineTheme.muted)
-                                .background(model.dashboardTab == tab ? arcanineAccent : .clear)
+                                .foregroundStyle(model.dashboardTab == tab ? .white : theme.muted)
+                                .background(model.dashboardTab == tab ? theme.red : .clear)
                                 .clipShape(RoundedRectangle(cornerRadius: 7))
                         }.buttonStyle(.plain)
                     }
-                }.padding(5).background(ArcanineTheme.line.opacity(0.22)).clipShape(RoundedRectangle(cornerRadius: 10))
+                }.padding(5).background(theme.line.opacity(0.22)).clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal, 20).padding(.bottom, 16)
             }
             ScrollViewReader { scroll in
@@ -58,10 +57,10 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     if let error = model.errorMessage {
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Arcanine necesita tu atención", systemImage: "exclamationmark.circle").foregroundStyle(ArcanineTheme.fire)
+                            Label("\(model.settings.character.name) necesita tu atención", systemImage: "exclamationmark.circle").foregroundStyle(theme.fire)
                             Text(error).font(.system(size: 12)).fixedSize(horizontal: false, vertical: true)
                             Button("Entendido") { model.errorMessage = nil }
-                        }.padding(12).background(ArcanineTheme.gold.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 10))
+                        }.padding(12).background(theme.gold.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     if model.dashboardTab == -1 { PokedexHomeView(model: model) }
                     if model.dashboardTab == 0 { agenda }
@@ -79,18 +78,18 @@ struct DashboardView: View {
                 if model.dashboardTab == 5 { scroll.scrollTo("notes-start", anchor: .top) }
             }
             }
-            Rectangle().fill(ArcanineTheme.line).frame(height: 1).padding(.horizontal, 20)
+            Rectangle().fill(theme.line).frame(height: 1).padding(.horizontal, 20)
             HStack {
-                Text("ARRASTRA A ARCANINE PARA MOVERLO").font(.system(size: 8, weight: .medium, design: .monospaced)).tracking(0.4).foregroundStyle(ArcanineTheme.muted)
+                Text("ARRASTRA A \(model.settings.character.name.uppercased()) PARA MOVERLO").font(.system(size: 8, weight: .medium, design: .monospaced)).tracking(0.4).foregroundStyle(theme.muted)
                 Spacer()
-                Button("Probar aviso") { model.testAlert() }.buttonStyle(.plain).font(.system(size: 10, weight: .semibold)).foregroundStyle(arcanineAccent)
+                Button("Probar aviso") { model.testAlert() }.buttonStyle(.plain).font(.system(size: 10, weight: .semibold)).foregroundStyle(theme.red)
             }.padding(.horizontal, 20).padding(.vertical, 15)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .foregroundStyle(arcanineInk)
-        .background(PokedexBackground())
+        .foregroundStyle(theme.ink)
+        .background(PokedexBackground()).environment(\.petTheme, theme)
         .clipShape(PokedexShape())
-        .tint(arcanineAccent)
+        .tint(theme.red)
         .buttonStyle(PokedexButtonStyle())
         .toggleStyle(.switch)
         .controlSize(.small)
@@ -109,11 +108,11 @@ struct DashboardView: View {
                 card {
                     Label("Conecta tu calendario", systemImage: "calendar.badge.clock").font(.headline)
                     Text("Pega el enlace privado iCal en Ajustes. No necesitas una cuenta de Google Cloud ni autorizar Google Tasks.")
-                        .font(.system(size: 13)).foregroundStyle(ArcanineTheme.muted)
+                        .font(.system(size: 13)).foregroundStyle(theme.muted)
                     Button("Configurar calendario") { model.dashboardTab = 3 }.buttonStyle(PokedexButtonStyle(prominent: true))
                 }
             }
-            Text(model.calendarMessage).font(.system(size: 12)).foregroundStyle(ArcanineTheme.muted)
+            Text(model.calendarMessage).font(.system(size: 12)).foregroundStyle(theme.muted)
             if model.calendarConnected && model.meetings.isEmpty && !model.calendarBusy {
                 card { Label("No hay reuniones próximas en los siguientes 7 días", systemImage: "sun.max") }
             }
@@ -122,17 +121,17 @@ struct DashboardView: View {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(meeting.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
-                            Text(meeting.start, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated)).font(.system(size: 12)).foregroundStyle(ArcanineTheme.muted)
+                            Text(meeting.start, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated)).font(.system(size: 12)).foregroundStyle(theme.muted)
                             Text(meeting.allDay ? "Todo el día" : "\(ReminderRules.time(meeting.start)) – \(ReminderRules.time(meeting.end))")
-                                .font(.system(size: 13, weight: .medium)).foregroundStyle(arcanineAccent)
-                            Text(meeting.calendarName).font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
+                                .font(.system(size: 13, weight: .medium)).foregroundStyle(theme.red)
+                            Text(meeting.calendarName).font(.system(size: 11)).foregroundStyle(theme.muted)
                         }
                         Spacer()
                         if let url = meeting.joinURL { Button("Unirme") { model.openMeeting(url) }.buttonStyle(PokedexButtonStyle()) }
                     }
                 }
             }
-            if model.meetings.count > 18 { Text("Mostrando las primeras 18 reuniones.").font(.caption).foregroundStyle(ArcanineTheme.muted) }
+            if model.meetings.count > 18 { Text("Mostrando las primeras 18 reuniones.").font(.caption).foregroundStyle(theme.muted) }
         }
     }
 
@@ -140,7 +139,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Pequeños pendientes, a tiempo").font(.system(size: 19, weight: .semibold, design: .rounded))
             card {
-                TextField("Por ejemplo: revisar los pendientes del día", text: $taskTitle).textFieldStyle(.plain).padding(10).background(ArcanineTheme.paper).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(arcanineAccent.opacity(0.18), lineWidth: 1))
+                TextField("Por ejemplo: revisar los pendientes del día", text: $taskTitle).textFieldStyle(.plain).padding(10).background(theme.paper).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.red.opacity(0.18), lineWidth: 1))
                     .onSubmit { addTask() }
                 HStack {
                     DatePicker("Avisarme a las", selection: $taskTime, displayedComponents: .hourAndMinute)
@@ -149,28 +148,28 @@ struct DashboardView: View {
                 Toggle("Repetir cada día", isOn: $taskDaily)
                 if taskDaily { Toggle("Solo de lunes a viernes", isOn: $taskWeekdays) }
                 Text(taskDaily ? "Las tareas completadas vuelven a estar pendientes al día siguiente que corresponda." : "El aviso es para hoy. Si la hora ya pasó, te avisaré al crearla.")
-                    .font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted).fixedSize(horizontal: false, vertical: true)
+                    .font(.system(size: 11)).foregroundStyle(theme.muted).fixedSize(horizontal: false, vertical: true)
                 Button("Añadir tarea") { addTask() }.buttonStyle(PokedexButtonStyle(prominent: true))
                     .disabled(taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             if model.settings.tasks.isEmpty {
                 Text("Añade tu primera tarea. Puedes usarlo para revisar correos, tomar una pausa o preparar tu jornada.")
-                    .font(.system(size: 13)).foregroundStyle(ArcanineTheme.muted)
+                    .font(.system(size: 13)).foregroundStyle(theme.muted)
             }
             ForEach(model.settings.tasks.sorted { ($0.hour, $0.minute) < ($1.hour, $1.minute) }) { task in
                 let complete = task.isComplete(at: Date())
                 card {
                     HStack(spacing: 12) {
                         Button { model.completeTask(task.id) } label: {
-                            Image(systemName: complete ? "checkmark.circle.fill" : "circle").font(.system(size: 22)).foregroundStyle(complete ? arcanineAccent : .gray)
+                            Image(systemName: complete ? "checkmark.circle.fill" : "circle").font(.system(size: 22)).foregroundStyle(complete ? theme.red : .gray)
                         }.buttonStyle(.plain).disabled(complete).help("Marcar como completada")
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(task.title).font(.system(size: 13, weight: .medium)).strikethrough(complete).foregroundStyle(complete ? ArcanineTheme.muted : ArcanineTheme.ink)
+                            Text(task.title).font(.system(size: 13, weight: .medium)).strikethrough(complete).foregroundStyle(complete ? theme.muted : theme.ink)
                             Text(String(format: "%02d:%02d", task.hour, task.minute) + " · " + (task.repeatsDaily ? (task.weekdaysOnly ? "Lunes a viernes" : "Cada día") : "Una vez"))
-                                .font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
+                                .font(.system(size: 11)).foregroundStyle(theme.muted)
                         }
                         Spacer()
-                        Button { model.deleteTask(task.id) } label: { Image(systemName: "trash") }.buttonStyle(.plain).foregroundStyle(ArcanineTheme.muted).help("Eliminar tarea")
+                        Button { model.deleteTask(task.id) } label: { Image(systemName: "trash") }.buttonStyle(.plain).foregroundStyle(theme.muted).help("Eliminar tarea")
                     }
                 }
             }
@@ -180,6 +179,7 @@ struct DashboardView: View {
     private var preferences: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("A tu ritmo").font(.system(size: 19, weight: .semibold, design: .rounded))
+            characterPreferences
             CalendarSettingsView(model: model)
             voicePreferences
             card {
@@ -187,9 +187,9 @@ struct DashboardView: View {
                     ForEach([1, 5, 10, 15, 30], id: \.self) { Text("\($0) minutos").tag($0) }
                 }.onChange(of: model.settings.meetingLeadMinutes) { model.save(); model.tick() }
                 Toggle("Sonido al recibir un aviso", isOn: $model.settings.soundEnabled).onChange(of: model.settings.soundEnabled) { model.save() }
-                Toggle("Animaciones y reacciones de Arcanine", isOn: $model.settings.motionEnabled).onChange(of: model.settings.motionEnabled) { model.save() }
-                Text("Arcanine 3D parpadea, saluda, olfatea, se estira y persigue su cola. Celebra tus tareas y timers; durante el foco se mueve menos. Respeta Reducir movimiento de macOS.").font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
-                Text("Arrastra para mover · ⌥ Option + arrastra hacia los lados para girar. La orientación elegida se guarda.").font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
+                Toggle("Animaciones y reacciones de \(model.settings.character.name)", isOn: $model.settings.motionEnabled).onChange(of: model.settings.motionEnabled) { model.save() }
+                Text("\(model.settings.character.description) Celebra tus tareas y timers; durante el foco se mueve menos. Respeta Reducir movimiento de macOS.").font(.system(size: 11)).foregroundStyle(theme.muted)
+                Text("Arrastra para mover · ⌥ Option + arrastra hacia los lados para girar. La orientación elegida se guarda.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 Button("Restablecer vista") { model.resetPetView() }
                 HStack {
                     Text("Tamaño")
@@ -200,11 +200,40 @@ struct DashboardView: View {
                     Button("Autorizar inicio automático en macOS") { SMAppService.openSystemSettingsLoginItems() }
                 }
                 Text("Para el inicio automático, coloca Arcanine.app en Aplicaciones y activa esta opción desde esa copia.")
-                    .font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
+                    .font(.system(size: 11)).foregroundStyle(theme.muted)
                 Button(model.settings.pausedUntil.map({ $0 > Date() }) == true ? "Reanudar avisos" : "Pausar avisos durante 1 hora") { model.togglePause() }
             }
             Text("Tus tareas y notas se guardan en este Mac. Los enlaces privados se guardan en el Llavero; la app consulta Google directamente. Los avisos funcionan mientras Arcanine está abierto y el Mac está despierto.")
-                .font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted).fixedSize(horizontal: false, vertical: true)
+                .font(.system(size: 11)).foregroundStyle(theme.muted).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var characterPreferences: some View {
+        card {
+            Label("Tu compañero", systemImage: "person.crop.circle.badge.checkmark").font(.headline)
+            HStack(spacing: 10) {
+                ForEach(PetCharacter.allCases) { character in
+                    let selected = model.settings.character == character
+                    let available = character.isAvailable()
+                    Button { model.selectCharacter(character) } label: {
+                        VStack(spacing: 7) {
+                            if let art = NSImage(named: character.rawValue) {
+                                Image(nsImage: art).resizable().scaledToFit().frame(height: 62)
+                            } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: 62) }
+                            Text(character.name).font(.system(size: 13, weight: .bold, design: .rounded))
+                            Text(selected ? "Elegido" : available ? "Elegir" : "Próximamente")
+                                .font(.system(size: 10, weight: .semibold))
+                        }.frame(maxWidth: .infinity).padding(12)
+                            .foregroundStyle(selected ? theme.red : theme.ink)
+                            .background(selected ? theme.red.opacity(0.08) : theme.paper)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(selected ? theme.red : theme.line, lineWidth: selected ? 2 : 1))
+                    }.buttonStyle(.plain).disabled(!available)
+                        .accessibilityLabel("\(character.name), \(selected ? "elegido" : available ? "elegir compañero" : "próximamente")")
+                }
+            }
+            Text("El cambio conserva tu agenda, tareas, notas y timer. Cada compañero recuerda su orientación.")
+                .font(.system(size: 11)).foregroundStyle(theme.muted)
         }
     }
 
@@ -214,10 +243,10 @@ struct DashboardView: View {
 
     var voicePreferences: some View {
         card {
-            Label("La voz de Arcanine", systemImage: "waveform").font(.headline)
+            Label("La voz de \(model.settings.character.name)", systemImage: "waveform").font(.headline)
             Toggle("Avisos hablados", isOn: voiceBinding(\.enabled))
             if model.settings.voice?.enabled != false {
-                Text("Avisos de reuniones en inglés").font(.system(size: 12)).foregroundStyle(ArcanineTheme.muted)
+                Text("Avisos de reuniones en inglés").font(.system(size: 12)).foregroundStyle(theme.muted)
                 Picker("Voz", selection: Binding(get: { (model.settings.voice ?? VoicePreferences()).selectedEnglishVoice.rawValue }, set: { model.selectEnglishVoice($0) })) {
                     ForEach(EnglishVoice.allCases) { voice in Text(voice.name).tag(voice.rawValue) }
                 }
@@ -226,7 +255,7 @@ struct DashboardView: View {
                 let meetingsReady = !missing.contains(.meeting) && !missing.contains(.meetingWithLink)
                 if meetingsReady {
                     Label("Avisos de reuniones listos", systemImage: "checkmark.circle.fill")
-                        .font(.system(size: 11)).foregroundStyle(arcanineAccent)
+                        .font(.system(size: 11)).foregroundStyle(theme.red)
                     Button("Probar aviso de reunión") { model.testVoice(clip: .meeting) }
                         .buttonStyle(PokedexButtonStyle())
                 }
@@ -237,7 +266,7 @@ struct DashboardView: View {
                     Button("Silenciar ahora") { model.voiceSpeaker.stop() }.disabled(!model.speaking)
                 }
                 Text("Las voces funcionan sin conexión y anuncian reuniones sin nombres personales. Los timers y las tareas usan un sonido; sus detalles aparecen en pantalla.")
-                    .font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted).fixedSize(horizontal: false, vertical: true)
+                    .font(.system(size: 11)).foregroundStyle(theme.muted).fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -250,10 +279,10 @@ struct DashboardView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(focus.phase == .paused ? "En pausa" : (focus.phase == .finished ? "¡Tiempo completado!" : "Tiempo de concentración")).font(.headline)
-                            Text(focus.phase == .finished ? "\(focus.durationSeconds / 60) min completados" : focus.display(at: model.clockNow)).font(.system(size: focus.phase == .finished ? 23 : 46, weight: .medium, design: .rounded)).monospacedDigit().foregroundStyle(arcanineAccent)
+                            Text(focus.phase == .finished ? "\(focus.durationSeconds / 60) min completados" : focus.display(at: model.clockNow)).font(.system(size: focus.phase == .finished ? 23 : 46, weight: .medium, design: .rounded)).monospacedDigit().foregroundStyle(theme.red)
                         }
                         Spacer()
-                        Image(systemName: focus.phase == .finished ? "checkmark.seal" : "timer").font(.system(size: 34)).foregroundStyle(arcanineAccent.opacity(0.7))
+                        Image(systemName: focus.phase == .finished ? "checkmark.seal" : "timer").font(.system(size: 34)).foregroundStyle(theme.red.opacity(0.7))
                     }
                     ProgressView(value: focus.progress(at: model.clockNow))
                     HStack {
@@ -277,13 +306,13 @@ struct DashboardView: View {
                     Button("Iniciar") { model.startFocus(minutes: customMinutes) }
                 }
                 Divider()
-                TextField("Pídeme: timer de 5 minutos", text: $focusRequest).textFieldStyle(.plain).padding(10).background(ArcanineTheme.paper).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(arcanineAccent.opacity(0.18), lineWidth: 1))
+                TextField("Pídeme: timer de 5 minutos", text: $focusRequest).textFieldStyle(.plain).padding(10).background(theme.paper).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.red.opacity(0.18), lineWidth: 1))
                     .onSubmit { model.runFocusCommand(focusRequest); focusRequest = "" }
-                Button("Pedir a Arcanine") { model.runFocusCommand(focusRequest); focusRequest = "" }
+                Button("Pedir a \(model.settings.character.name)") { model.runFocusCommand(focusRequest); focusRequest = "" }
                     .disabled(focusRequest.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            Text("La cuenta regresiva aparece bajo las patas de Arcanine y desaparece al terminar. También puedes iniciar un timer con clic derecho sobre la mascota. El timer continúa al cerrar la app o dormir el Mac; si lo pausas, el tiempo restante se conserva.")
-                .font(.system(size: 12)).foregroundStyle(ArcanineTheme.muted).fixedSize(horizontal: false, vertical: true)
+            Text("La cuenta regresiva aparece bajo tu compañero y desaparece al terminar. También puedes iniciar un timer con clic derecho sobre la mascota. El timer continúa al cerrar la app o dormir el Mac; si lo pausas, el tiempo restante se conserva.")
+                .font(.system(size: 12)).foregroundStyle(theme.muted).fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -298,6 +327,7 @@ struct DashboardView: View {
 }
 
 struct AlertBubbleView: View {
+    private var theme: PetTheme { PetTheme(character: model.settings.character) }
     @ObservedObject var model: PetModel
     var body: some View {
         if let alert = model.currentAlert {
@@ -309,18 +339,18 @@ struct AlertBubbleView: View {
                     Spacer()
                     if model.speaking { PokedexIconButton(symbol: "speaker.slash", label: "Silenciar voz", onRed: true) { model.voiceSpeaker.stop() } }
                     PokedexIconButton(symbol: "xmark", label: "Cerrar aviso", onRed: true) { model.dismissAlert() }
-                }.padding(10).background(ArcanineTheme.red).clipShape(RoundedRectangle(cornerRadius: 12))
+                }.padding(10).background(theme.red).clipShape(RoundedRectangle(cornerRadius: 12))
                 Text(alert.title).font(.system(size: 17, weight: .semibold, design: .rounded)).lineLimit(2)
-                Text(alert.message).font(.system(size: 12)).foregroundStyle(ArcanineTheme.muted).lineLimit(2)
+                Text(alert.message).font(.system(size: 12)).foregroundStyle(theme.muted).lineLimit(2)
                 if let url = alert.joinURL, alert.meetingID != nil {
                     Button { model.openMeeting(url) } label: {
                         HStack(alignment: .top, spacing: 7) {
                             Image(systemName: "link")
                             Text(url.absoluteString).font(.system(size: 10, design: .monospaced)).lineLimit(2).truncationMode(.middle)
                         }.frame(maxWidth: .infinity, alignment: .leading)
-                    }.buttonStyle(.plain).foregroundStyle(arcanineAccent).help(url.absoluteString)
+                    }.buttonStyle(.plain).foregroundStyle(theme.red).help(url.absoluteString)
                 } else if alert.meetingID != nil {
-                    Text("Esta reunión no incluye un enlace de videollamada.").font(.system(size: 11)).foregroundStyle(ArcanineTheme.muted)
+                    Text("Esta reunión no incluye un enlace de videollamada.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 }
                 Spacer(minLength: 0)
                 HStack(spacing: 8) {
@@ -335,8 +365,8 @@ struct AlertBubbleView: View {
                 }.controlSize(.small)
             }
             .padding(18).frame(width: 350, height: 320, alignment: .topLeading)
-            .background(PokedexBackground()).clipShape(PokedexShape())
-            .foregroundStyle(arcanineInk).tint(arcanineAccent).preferredColorScheme(.light)
+            .background(PokedexBackground()).environment(\.petTheme, theme).clipShape(PokedexShape())
+            .foregroundStyle(theme.ink).tint(theme.red).preferredColorScheme(.light).environment(\.petTheme, theme)
         }
     }
 }

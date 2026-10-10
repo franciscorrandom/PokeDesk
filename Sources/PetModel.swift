@@ -59,8 +59,9 @@ import ServiceManagement
     }
 
     func requestAnimation(_ clip: ArcanineClip) {
+        guard settings.character.clips.contains(clip) else { return }
         guard settings.motionEnabled else {
-            errorMessage = "Activa los movimientos en Ajustes para reproducir las animaciones de Arcanine."
+            errorMessage = "Activa los movimientos en Ajustes para reproducir las animaciones de \(settings.character.name)."
             return
         }
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
@@ -171,7 +172,24 @@ import ServiceManagement
         return true
     }
 
-    func resetPetView() { settings.petYaw = nil; save() }
+    func resetPetView() {
+        let selected = settings.character
+        settings.characterYaws?.removeValue(forKey: selected.rawValue)
+        if settings.character == .arcanine { settings.petYaw = nil }
+        save()
+    }
+
+    @discardableResult func selectCharacter(_ character: PetCharacter) -> Bool {
+        guard character != settings.character else { return true }
+        guard character.isAvailable() else {
+            errorMessage = "No encontré el modelo de \(character.name). Vuelve a descargar la app completa."
+            return false
+        }
+        let previous = settings.petCharacter
+        settings.petCharacter = character.rawValue
+        guard save() else { settings.petCharacter = previous; onSettingsChanged?(); return false }
+        return true
+    }
 
     func addTask(title: String, date: Date, daily: Bool, weekdays: Bool) {
         let title = title.trimmingCharacters(in: .whitespacesAndNewlines)

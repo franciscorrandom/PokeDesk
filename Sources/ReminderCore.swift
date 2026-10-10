@@ -68,6 +68,8 @@ struct PetSettings: Codable {
     var positionX: Double?
     var positionY: Double?
     var petYaw: Double?
+    var petCharacter: String?
+    var characterYaws: [String: Double]?
     var firedMeetings: [String: Date] = [:]
     var snoozed: [PetAlert] = []
     var pausedUntil: Date?
@@ -75,6 +77,14 @@ struct PetSettings: Codable {
     var voice: VoicePreferences?
     // Optional for compatibility with state files saved before notes existed.
     var notes: [PetNote]?
+    var character: PetCharacter { PetCharacter(rawValue: petCharacter ?? "") ?? .arcanine }
+    var characterYaw: Double { characterYaws?[character.rawValue] ?? (character == .arcanine ? petYaw ?? 0 : 0) }
+    mutating func setCharacterYaw(_ angle: Double) {
+        let selected = character
+        if characterYaws == nil { characterYaws = [:] }
+        characterYaws?[selected.rawValue] = PetRotation.normalized(angle)
+        if selected == .arcanine { petYaw = PetRotation.normalized(angle) }
+    }
 }
 
 struct NoteRevision: Identifiable, Codable, Equatable {

@@ -74,6 +74,31 @@ for clip in ArcanineClip.allCases {
         check(manual.clip == .idle, "Cada gesto, incluidas caricias y sentarse, vuelve a reposo")
     }
 }
+var psychic = Arcanine3DMotion(character: .mewtwo)
+for clip in PetCharacter.mewtwo.clips {
+    psychic.request(clip, at: 0, manual: true)
+    check(psychic.clip == clip, "Mewtwo permite todos sus gestos manuales")
+    psychic.tick(at: 10)
+}
+psychic.request(.idle, at: 0)
+psychic.request(.chaseTail, at: 1, manual: true)
+check(psychic.clip == .idle, "Mewtwo no recibe la persecución canina")
+for index in 0..<50 {
+    let t = Double(index) * 200
+    psychic.click(at: t)
+    check(PetCharacter.mewtwo.clips.contains(psychic.clip), "Cada clic usa un gesto compatible con Mewtwo")
+    psychic.tick(at: t + 10)
+}
+psychic.focusing = true
+for index in 0..<8 {
+    let t = 20_000 + Double(index) * 200
+    psychic.tick(at: t)
+    check(psychic.clip == .curious, "Mewtwo mantiene gestos tranquilos durante el foco, sin atascarse al repetir el único gesto disponible")
+    psychic.tick(at: t + 6)
+}
+psychic.request(.alert, at: 30_000)
+psychic.click(at: 30_001)
+check(psychic.clip == .alert, "Los avisos de reunión conservan prioridad con Mewtwo")
 print("\(checks) comprobaciones 3D correctas")
 let screens = [FloatingRect(x: 0, y: 0, width: 1440, height: 900),
                FloatingRect(x: -1440, y: 24, width: 1440, height: 876),

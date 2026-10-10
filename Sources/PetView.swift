@@ -1,5 +1,6 @@
 import AppKit
 import SceneKit
+import SwiftUI
 
 private final class PetSceneView: SCNView {
     override var isOpaque: Bool { false }
@@ -8,6 +9,7 @@ private final class PetSceneView: SCNView {
 
 private final class PetTimerBadge: NSView {
     var focusTimer: FocusTimer?
+    var character: PetCharacter = .arcanine
     override var isOpaque: Bool { false }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
     var badgeRect: NSRect {
@@ -19,8 +21,9 @@ private final class PetTimerBadge: NSView {
         guard let focus = focusTimer, focus.showsOnFace(at: Date()) else { return }
         let rect = badgeRect
         let path = NSBezierPath(roundedRect: rect, xRadius: 9, yRadius: 9)
-        NSColor(red: 0.99, green: 0.96, blue: 0.88, alpha: 0.98).setFill(); path.fill()
-        let color = NSColor(red: 0.76, green: 0.17, blue: 0.17, alpha: 1)
+        let theme = PetTheme(character: character)
+        NSColor(theme.paper).withAlphaComponent(0.98).setFill(); path.fill()
+        let color = NSColor(theme.red)
         color.withAlphaComponent(0.55).setStroke(); path.lineWidth = 0.8; path.stroke()
         let label = (focus.phase == .paused ? "Ⅱ " : "◷ ") + focus.display(at: Date())
         let attributes: [NSAttributedString.Key: Any] = [
@@ -41,6 +44,7 @@ final class PetView: NSView {
     var focusing = false
     var alerting = false
     var focusTimer: FocusTimer? { didSet { badge.focusTimer = focusTimer; badge.needsDisplay = true } }
+    var character: PetCharacter = .arcanine { didSet { badge.character = character; badge.needsDisplay = true } }
     var speaking = false
     var onReady: (() -> Void)?
     var onError: ((String) -> Void)?
@@ -80,7 +84,10 @@ final class PetView: NSView {
         addSubview(sceneView); addSubview(badge)
         engine.onReady = { [weak self] in
             guard let self else { return }
-            self.play(.greeting); self.tickMotion(); self.onReady?()
+            self.motion = Arcanine3DMotion(character: self.engine.character)
+            self.previewing = false; self.renderedRevision = -1
+            self.setAccessibilityLabel("\(self.engine.character.name) 3D. Haz clic para abrir los accesos rápidos; arrastra para mover; Option y arrastra para girar; Mayús y arrastra para acariciar.")
+            self.play(self.alerting ? .alert : .greeting); self.tickMotion(); self.onReady?()
         }
         engine.onError = { [weak self] message in self?.needsDisplay = true; self?.onError?(message) }
         setAccessibilityElement(true)
@@ -96,7 +103,7 @@ final class PetView: NSView {
         sceneView.frame = NSRect(x: 0, y: 28, width: bounds.width, height: max(1, bounds.height - 28))
         badge.frame = NSRect(x: 0, y: 0, width: bounds.width, height: 28)
     }
-    func loadModel() { engine.load() }
+    func loadModel(character: PetCharacter = .arcanine) { engine.load(character: character) }
     func setYaw(_ angle: Double) { engine.setYaw(angle); sceneView.needsDisplay = true }
     func tickMotion() {
         guard engine.ready, !previewing else { return }

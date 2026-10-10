@@ -14,6 +14,9 @@ final class Arcanine3DScene {
     private(set) var clipCount = 0
     private(set) var ready = false
     private(set) var loadError: String?
+    private(set) var character: PetCharacter = .arcanine
+    private(set) var loadingCharacter: PetCharacter?
+    private var loadGeneration = 0
     private var playerKey = ""
     private var sequence = 0
     var onReady: (() -> Void)?
@@ -42,23 +45,34 @@ final class Arcanine3DScene {
         scene.rootNode.addChildNode(key)
     }
 
-    func load() {
-        guard let url = Bundle.main.url(forResource: "arcanine-biblioteca", withExtension: "glb") else {
-            fail("Falta el modelo 3D. Vuelve a construir Arcanine con construir.command."); return
+    func load(character requested: PetCharacter = .arcanine) {
+        if ready && character == requested {
+            if loadingCharacter != nil { loadGeneration += 1; loadingCharacter = nil }
+            return
+        }
+        guard loadingCharacter != requested else { return }
+        loadGeneration += 1
+        let generation = loadGeneration
+        loadingCharacter = requested; loadError = nil
+        guard let url = Bundle.main.url(forResource: requested.modelResource, withExtension: "glb") else {
+            fail("Falta el modelo de \(requested.name). Vuelve a descargar la app completa."); return
         }
         GLTFAsset.load(with: url, options: [:]) { [weak self] _, status, asset, error, _ in
-            if let error { DispatchQueue.main.async { self?.fail(error.localizedDescription) }; return }
-            guard status == .complete, let asset else { return }
-            DispatchQueue.main.async { self?.install(asset) }
+            DispatchQueue.main.async {
+                guard let self, generation == self.loadGeneration else { return }
+                if let error { self.fail(error.localizedDescription); return }
+                guard status == .complete, let asset else { return }
+                self.install(asset, character: requested)
+            }
         }
     }
 
-    private func install(_ asset: GLTFAsset) {
+    private func install(_ asset: GLTFAsset, character requested: PetCharacter) {
         let source = GLTFSCNSceneSource(asset: asset)
-        guard let model = source.defaultScene else { fail("No pude leer la escena 3D de Arcanine."); return }
+        guard let model = source.defaultScene else { fail("No pude leer la escena 3D de \(requested.name)."); return }
         let clips = Dictionary(uniqueKeysWithValues: source.animations.map { ($0.name, $0.animationPlayer.animation) })
-        guard ArcanineClip.allCases.allSatisfy({ clips[$0.rawValue] != nil }) else {
-            fail("La biblioteca de Arcanine no contiene todas las animaciones. Vuelve a construir la app."); return
+        guard requested.clips.allSatisfy({ clips[$0.rawValue] != nil }) else {
+            fail("La biblioteca de \(requested.name) no contiene todas las animaciones. Vuelve a descargar la app completa."); return
         }
         let modelRoot = model.rootNode
         let box = modelRoot.boundingBox
@@ -68,14 +82,18 @@ final class Arcanine3DScene {
         placement.scale = SCNVector3(scale, scale, scale)
         placement.position = SCNVector3(-(box.max.x + box.min.x) * scale / 2, -box.min.y * scale, -(box.max.z + box.min.z) * scale / 2)
         placement.addChildNode(modelRoot)
+        // Replace only after validation. A failed or stale load leaves the existing pet intact.
+        orientation.childNodes.forEach { $0.removeFromParentNode() }
+        restTransforms.removeAll(); playerKey = ""
         orientation.addChildNode(placement)
         modelRoot.enumerateChildNodes { node, _ in self.restTransforms.append((node, node.transform)) }
         root = modelRoot; animations = clips
         jointCount = asset.skins.first?.joints.count ?? 0; clipCount = clips.count
+        character = requested; loadingCharacter = nil; loadError = nil
         ready = true; onReady?()
     }
 
-    private func fail(_ message: String) { loadError = message; onError?(message) }
+    private func fail(_ message: String) { loadingCharacter = nil; loadError = message; onError?(message) }
 
     func setYaw(_ value: Double) {
         let angle = PetRotation.normalized(value)

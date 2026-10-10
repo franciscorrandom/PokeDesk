@@ -1,0 +1,10 @@
+Mewtwo 3D — nguyenlouis32
+Modelo: https://sketchfab.com/3d-models/mewtwo-f6ef9b83b4744706a24cf7c5eb4d689e
+Autor: https://sketchfab.com/nguyenlouis32
+Licencia del modelo: CC BY 4.0
+https://creativecommons.org/licenses/by/4.0/
+Descarga oficial GLB: 10 de octubre de 2026.
+Modificaciones: postura relajada con cola curvada, geometría y matrices de enlace
+adaptadas a esa postura, expresiones del atlas original unidas a la cabeza,
+nueve clips de animación articulada y captura de presentación.
+El personaje Pokémon pertenece a sus respectivos titulares.
