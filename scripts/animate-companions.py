@@ -103,15 +103,22 @@ def world_rotation(i, axis, angle, world, q=None):
 
 # Relax Pikachu's arms and compact Charizard's long tail, retaining rig weights.
 if pika:
-    for shoulder, hand, sign in [(45,48,1),(50,53,-1)]:
-        # Lower the entire forward-pointing chain at the shoulder, rather than
-        # rolling an extended arm. Hands settle beside the belly, slightly bent.
+    def aim_child(joint, child, target):
         world = worlds()
-        direction = world[hand][:3,3] - world[shoulder][:3,3]
+        direction = world[child][:3,3] - world[joint][:3,3]
         direction /= np.linalg.norm(direction)
-        target = np.array([sign*.50, -.84, .20]); target /= np.linalg.norm(target)
+        target = np.asarray(target); target /= np.linalg.norm(target)
         axis = np.cross(direction, target); axis /= np.linalg.norm(axis)
-        nodes[shoulder]['rotation'] = world_rotation(shoulder, axis, math.acos(np.dot(direction,target)), world)
+        nodes[joint]['rotation'] = world_rotation(joint, axis, math.acos(np.clip(np.dot(direction,target),-1,1)), world)
+    for shoulder, arm, elbow, hand, sign in [(45,46,47,48,1),(50,51,52,53,-1)]:
+        # Preserve the shoulder's forward exit from the chest. Lower the arm
+        # at its own joint, then gently bend the elbow so the paw rests in front
+        # of the belly instead of dragging the shoulder mesh down the flank.
+        aim_child(shoulder, arm, [sign*.62, -.12, .775])
+        aim_child(arm, elbow, [sign*.30, -.87, .39])
+        aim_child(elbow, hand, [-sign*.10, -.91, .41])
+    # Pitch the skull and its attached eyes/ears together toward a level gaze.
+    nodes[head]['rotation'] = world_rotation(head, [1,0,0], .17, worlds())
 if not pika:
     for i,a in zip(tail,[.13,.22,.28,.30,.29,.24,.16]):
         nodes[i]['rotation'] = world_rotation(i,[0,1,0],a,worlds())
@@ -238,7 +245,7 @@ for clip,duration in catalog:
             anim['channels'].append({'sampler':si,'target':{'node':i,'path':path}})
     doc['animations'].append(anim);manifest.append({'id':clip,'duration':duration,'channels':len(anim['channels'])})
 extras=doc['asset'].setdefault('extras',{})
-extras.update(author='jacobjksn42' if pika else 'nguyenlouis32',license='CC-BY-4.0',source='https://sketchfab.com/3d-models/'+('pikachu-c22dab8fc3064c76a0c502d64555a74f' if pika else 'charizard-29bae357dcb74bad8f432704e2d9f531'),modifications='Original rig and textures retained; head-attached expression atlas and nine articulated clips; '+('Pikachu shoulders lowered into a relaxed rebuilt bind pose.' if pika else 'Charizard tail curved in rebuilt bind pose.')+' Generated for PokéDesk.')
+extras.update(author='jacobjksn42' if pika else 'nguyenlouis32',license='CC-BY-4.0',source='https://sketchfab.com/3d-models/'+('pikachu-c22dab8fc3064c76a0c502d64555a74f' if pika else 'charizard-29bae357dcb74bad8f432704e2d9f531'),modifications='Original rig and textures retained; head-attached expression atlas and nine articulated clips; '+('Pikachu chest attachment retained, arms lowered with softly bent elbows and forward resting paws; head pitched 9.7 degrees toward a level gaze; rebuilt bind pose.' if pika else 'Charizard tail curved in rebuilt bind pose.')+' Generated for PokéDesk.')
 doc['buffers'][0]['byteLength']=len(binary)
 encoded=json.dumps(doc,separators=(',',':'),ensure_ascii=False).encode();encoded+=b' '*(-len(encoded)%4);binary.extend(b'\0'*(-len(binary)%4))
 result=struct.pack('<4sII',b'glTF',2,28+len(encoded)+len(binary))+struct.pack('<II',len(encoded),0x4E4F534A)+encoded+struct.pack('<II',len(binary),0x004E4942)+binary

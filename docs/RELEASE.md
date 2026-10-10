@@ -1,13 +1,12 @@
-PokéDesk 1.3.1 para macOS 14 o posterior, Intel y Apple Silicon.
+PokéDesk 1.3.2 para macOS 14 o posterior, Intel y Apple Silicon.
 
-- Pokébola: halo azul de salida y rojo de retirada más intenso, con núcleo blanco brillante y contraste sobre escritorios blancos.
-- El Pokémon entrante permanece oculto hasta su materialización; se elimina el destello del modelo previo a la salida.
-- Charizard: llama con transparencia y colores de fuego, y un tamaño mayor.
-- Pikachu: brazos relajados junto al cuerpo; saludo y otros gestos adaptados a la nueva postura.
-- Selector: cuatro miniaturas estáticas de los modelos 3D con iluminación y encuadre uniformes.
+- Pikachu conserva una unión más natural entre hombros y pecho.
+- Brazos relajados con codos suavemente doblados y manos un poco más hacia delante, junto al abdomen.
+- Cabeza ligeramente inclinada para mirar más al frente. Ojos y orejas acompañan el movimiento.
+- Nueve gestos y miniatura 3D actualizados para partir de la nueva postura.
 
-Cierra la versión anterior desde su menú → Salir. Descarga PokeDesk-1.3.1-macOS.zip, descomprímelo y mueve PokeDesk.app a Aplicaciones. Se conservan calendario iCal, tareas, notas, timers y ajustes de la edición anterior con iCal. Comprueba 1.3.1 en el menú de la barra superior.
+Cierra la versión anterior desde su menú → Salir. Descarga PokeDesk-1.3.2-macOS.zip, descomprímelo y mueve PokeDesk.app a Aplicaciones. Se conservan calendario iCal, tareas, notas, timers, ajustes y demás compañeros. Comprueba 1.3.2 en la barra superior.
 
-Esta edición está firmada localmente, sin Developer ID ni notarización. Si macOS impide la apertura, después de intentarla ve a Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente. No necesitas herramientas de desarrollo, Google Cloud ni cuenta de Sketchfab.
+Esta edición está firmada localmente, sin Developer ID ni notarización. Si macOS impide abrirla, después de intentarlo ve a Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente. No necesitas herramientas de desarrollo, Google Cloud ni cuenta de Sketchfab.
 
 Código propio MIT. Modelos y demás recursos: consulta docs/CREDITOS.md. Proyecto de fans independiente, sin afiliación con Pokémon, Nintendo, Game Freak ni Creatures.

@@ -45,10 +45,13 @@ def validate(character, joint_count, author):
         world_cache[i]=multiply(world(parents[i]),m) if i in parents else m
         return world_cache[i]
     if character=='pikachu':
-        for shoulder,hand in [(45,48),(50,53)]:
-            a,b=world(shoulder),world(hand)
-            assert b[1][3] < a[1][3]-8, 'Hands must rest below the shoulders'
-            assert abs(b[2][3]-a[2][3]) < 4, 'Hands must not remain extended forward'
+        for shoulder,arm,elbow,hand in [(45,46,47,48),(50,51,52,53)]:
+            chest,upper,fore,paw=world(shoulder),world(arm),world(elbow),world(hand)
+            assert -1.5 < upper[1][3]-chest[1][3] < 0, 'Shoulder exit must not be dragged down the torso'
+            assert paw[1][3] < upper[1][3]-8, 'Hands must rest below the upper arm'
+            assert 3 < paw[2][3]-upper[2][3] < 5, 'Resting hands should sit slightly forward'
+            assert abs(paw[0][3]) < abs(fore[0][3]), 'Elbows should bend gently inward'
+
 
     expected = {'reposo', 'curiosidad', 'saludo', 'cola-alegre', 'estiramiento', 'aviso-reunion', 'celebracion', 'caricias', 'sentarse'}
     assert len(doc['animations']) == 9

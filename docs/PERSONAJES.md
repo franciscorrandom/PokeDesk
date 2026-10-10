@@ -54,3 +54,9 @@ Charizard conserva sus texturas originales de máscara: el fragment shader convi
 Las cuatro miniaturas son capturas estáticas de los modelos de la app, con la misma cámara, iluminación y encuadre de 320 × 320 píxeles. Se cargan explícitamente desde el bundle. Para regenerarlas, ejecuta el binario con `--thumbnail-test` y después `python3 scripts/make-thumbnails.py` (Pillow, solo durante el desarrollo).
 
 Las pruebas incluyen contraste rojo/azul sobre fondo blanco, preparación gráfica demorada sin aparición anticipada, manos de Pikachu por debajo de los hombros, presencia de las cuatro miniaturas y encuadre de los nueve gestos de Pikachu/Charizard desde ocho perfiles.
+
+## Postura natural de Pikachu (1.3.2)
+
+El hombro mantiene su unión anterior con el pecho. El brazo se baja desde su propia articulación y el codo se dobla ligeramente hacia dentro, dejando las manos delante del abdomen. Esto evita que la rotación de toda la cadena desde el hombro deforme la salida del brazo. La cabeza se inclina 9,7 grados hacia delante junto con los ojos y las orejas. Se reconstruyen la malla y sus enlaces antes de generar los nueve gestos.
+
+La miniatura se actualiza desde el visor nativo. El modo `--thumbnail-test` captura además frente y perfil de Pikachu para revisar la postura; `--roster-smoke-test` comprueba sus nueve clips desde ocho orientaciones en tres instantes por clip.

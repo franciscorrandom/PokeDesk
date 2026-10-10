@@ -507,6 +507,14 @@ final class BubblePanel: NSPanel {
                 self.petView.preview(.idle, at: 0)
                 DispatchQueue.main.asyncAfter(deadline: .now()+0.25) {
                     self.capturePreview(self.petView, name: "thumbnail-source-"+character.rawValue)
+                    if character == .pikachu {
+                        for (name, angle) in [("frente", atan2(3.2,5.4)), ("perfil", atan2(3.2,5.4)+Double.pi/2)] {
+                            self.petView.setYaw(angle)
+                            self.petView.preview(.idle, at: 0)
+                            self.capturePreview(self.petView, name: "pikachu-postura-"+name)
+                        }
+                        self.petView.setYaw(0)
+                    }
                     next()
                 }
             }
