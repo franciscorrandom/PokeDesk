@@ -35,6 +35,7 @@ import ServiceManagement
     private var clockTimer: Timer?
     var onTaskCompleted: (() -> Void)?
     var onFocusStarted: (() -> Void)?
+    var onPokeballRequested: (() -> Void)?
     var onAnimationRequested: ((ArcanineClip) -> Void)?
     var onAlert: ((PetAlert) -> Void)?
     var onSettingsChanged: (() -> Void)?
@@ -56,6 +57,14 @@ import ServiceManagement
                 errorMessage = "No pude leer tus datos guardados. El archivo original se conserva; revisa estado.json antes de guardar cambios."
             }
         } else { settings = PetSettings() }
+    }
+
+    func requestPokeball() {
+        guard settings.motionEnabled, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
+            errorMessage = "Activa las animaciones y desactiva Reducir movimiento de macOS para ver el efecto de la Pokébola."
+            return
+        }
+        onPokeballRequested?()
     }
 
     func requestAnimation(_ clip: ArcanineClip) {
@@ -295,7 +304,7 @@ import ServiceManagement
         if let meeting = meetings.first(where: { !$0.allDay && $0.joinURL != nil && $0.end > Date() }) {
             enqueue(PetAlert(title: meeting.title, message: "Vista previa del aviso · \(ReminderRules.time(meeting.start))", meetingID: meeting.id, joinURL: meeting.joinURL, dueAt: Date()))
         } else {
-            enqueue(PetAlert(title: "¡Hola! Soy Arcanine", message: "Así te avisaré. Cuando una reunión incluya un enlace, podrás entrar desde aquí.", dueAt: Date()))
+            enqueue(PetAlert(title: "¡Hola! Soy \(settings.character.name)", message: "Así te avisaré. Cuando una reunión incluya un enlace, podrás entrar desde aquí.", dueAt: Date()))
         }
         presentNextAlert()
     }
@@ -313,7 +322,7 @@ import ServiceManagement
             loginStatus = SMAppService.mainApp.status
             if loginStatus == .requiresApproval { SMAppService.openSystemSettingsLoginItems() }
         } catch {
-            errorMessage = "No pude cambiar el inicio automático. Copia Arcanine.app a Aplicaciones y vuelve a intentarlo. \(error.localizedDescription)"
+            errorMessage = "No pude cambiar el inicio automático. Copia PokeDesk.app a Aplicaciones y vuelve a intentarlo. \(error.localizedDescription)"
         }
     }
 

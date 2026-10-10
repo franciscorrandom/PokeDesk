@@ -84,6 +84,12 @@ final class PetView: NSView {
         sceneView.allowsCameraControl = false
         sceneView.isPlaying = true
         addSubview(sceneView); addSubview(badge)
+        // Start the short light sequence only after SceneKit has uploaded its
+        // geometry, textures and materials. A cold renderer must not consume it.
+        engine.prepareSummon = { [weak self] node, begin in
+            guard let self else { return }
+            self.sceneView.prepare([node]) { _ in DispatchQueue.main.async { begin() } }
+        }
         engine.onReady = { [weak self] in
             guard let self else { return }
             self.motion = Arcanine3DMotion(character: self.engine.character)
@@ -116,6 +122,13 @@ final class PetView: NSView {
     func loadModel(character: PetCharacter = .arcanine) {
         engine.effectsEnabled = animate && summoningEnabled
         engine.load(character: character)
+    }
+    @discardableResult func replaySummoning() -> Bool {
+        guard animate, summoningEnabled else { return false }
+        previewing = false
+        let started = engine.replaySummoning()
+        tickMotion()
+        return started
     }
     func setYaw(_ angle: Double) { engine.setYaw(angle); sceneView.needsDisplay = true }
     func tickMotion() {

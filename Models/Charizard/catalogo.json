@@ -1,0 +1,57 @@
+{
+  "source": {
+    "author": "nguyenlouis32",
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/charizard-29bae357dcb74bad8f432704e2d9f531",
+    "title": "Charizard",
+    "modifications": "Original rig and textures retained; head-attached expression atlas and nine articulated clips; Charizard tail curved in rebuilt bind pose. Generated for PokéDesk."
+  },
+  "joints": 87,
+  "clips": [
+    {
+      "id": "reposo",
+      "duration": 8,
+      "channels": 20
+    },
+    {
+      "id": "curiosidad",
+      "duration": 4,
+      "channels": 20
+    },
+    {
+      "id": "saludo",
+      "duration": 4,
+      "channels": 23
+    },
+    {
+      "id": "cola-alegre",
+      "duration": 4.8,
+      "channels": 20
+    },
+    {
+      "id": "estiramiento",
+      "duration": 5,
+      "channels": 24
+    },
+    {
+      "id": "aviso-reunion",
+      "duration": 4,
+      "channels": 22
+    },
+    {
+      "id": "celebracion",
+      "duration": 3.6,
+      "channels": 23
+    },
+    {
+      "id": "caricias",
+      "duration": 5.6,
+      "channels": 20
+    },
+    {
+      "id": "sentarse",
+      "duration": 7.2,
+      "channels": 27
+    }
+  ]
+}

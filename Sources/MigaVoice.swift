@@ -68,7 +68,7 @@ import AppKit
             guard self.player === player else { return }
             self.player = nil
             self.onSpeakingChanged?(false)
-            self.onError?("No pude leer la grabación de voz. Vuelve a abrir la copia completa de Arcanine.app.")
+            self.onError?("No pude leer la grabación de voz. Vuelve a abrir la copia completa de PokeDesk.app.")
         }
     }
 }

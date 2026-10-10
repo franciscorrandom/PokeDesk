@@ -19,9 +19,10 @@ final class BubblePanel: NSPanel {
 }
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private let rosterTest = CommandLine.arguments.contains("--roster-smoke-test")
     private let characterTest = CommandLine.arguments.contains("--characters-smoke-test")
     private let pokeballTest = CommandLine.arguments.contains("--pokeball-smoke-test")
-    private let smokeTest = CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test") || CommandLine.arguments.contains("--pokeball-smoke-test")
+    private let smokeTest = CommandLine.arguments.contains("--roster-smoke-test") || CommandLine.arguments.contains("--smoke-test") || CommandLine.arguments.contains("--characters-smoke-test") || CommandLine.arguments.contains("--pokeball-smoke-test")
     private var smokeStarted = false
     private var characterReady: (() -> Void)?
     private var pokeballReady: (() -> Void)?
@@ -29,7 +30,7 @@ final class BubblePanel: NSPanel {
     private var recordSummons = true
     private var cancelRecall = false
     private var cancelIncoming = false
-    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(pokeballTest ? "arcanine-pokeball-smoke/estado.json" : characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
+    private lazy var model = PetModel(storageURL: smokeTest ? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(rosterTest ? "pokedesk-roster-smoke/estado.json" : pokeballTest ? "arcanine-pokeball-smoke/estado.json" : characterTest ? "arcanine-characters-smoke/estado.json" : "arcanine-ical-smoke/estado.json") : nil)
     private var petPanel: PetPanel!
     private var petView: PetView!
     private var dashboard: BubblePanel?
@@ -50,19 +51,19 @@ final class BubblePanel: NSPanel {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        if characterTest || pokeballTest { model.settings.petCharacter = "arcanine" }
+        if characterTest || pokeballTest || rosterTest { model.settings.petCharacter = "arcanine" }
         if pokeballTest { model.settings.motionEnabled = true; model.settings.soundEnabled = false }
         guard let image = NSImage(named: "arcanine") else {
             let alert = NSAlert()
             alert.messageText = "No encontré la imagen de Arcanine"
-            alert.informativeText = "Vuelve a descargar el ZIP completo de Arcanine."
+            alert.informativeText = "Vuelve a descargar el ZIP completo de PokéDesk."
             alert.runModal()
             NSApp.terminate(nil)
             return
         }
         let size = panelSize()
         petPanel = PetPanel(contentRect: NSRect(origin: initialPosition(size: size), size: size), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        petPanel.title = "Arcanine — mascota"
+        petPanel.title = "PokéDesk — compañero"
         petPanel.backgroundColor = .clear
         petPanel.isOpaque = false
         petPanel.hasShadow = false
@@ -103,7 +104,7 @@ final class BubblePanel: NSPanel {
         petPanel.contentView = petView
         petPanel.orderFrontRegardless()
         bubblePanel = BubblePanel(contentRect: NSRect(x: 0, y: 0, width: 350, height: 320), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        bubblePanel.title = "Arcanine — aviso"
+        bubblePanel.title = "PokéDesk — aviso"
         bubblePanel.backgroundColor = .clear
         bubblePanel.isOpaque = false
         bubblePanel.hasShadow = true
@@ -134,6 +135,7 @@ final class BubblePanel: NSPanel {
         model.onSettingsChanged = { [weak self] in self?.applySettings() }
         model.onTaskCompleted = { [weak self] in self?.petView.play(.celebration) }
         model.onFocusStarted = { [weak self] in self?.petView.play(.curious) }
+        model.onPokeballRequested = { [weak self] in self?.replayPokeball() }
         model.onAnimationRequested = { [weak self] clip in self?.petView.play(clip, manual: true) }
         petView.onError = { [weak self] message in
             guard let self else { return }
@@ -147,17 +149,18 @@ final class BubblePanel: NSPanel {
                 try? JSONSerialization.data(withJSONObject: ["model3DLoaded": false, "error": message]).write(to: url)
                 NSApp.terminate(nil)
             } else {
-                let alert = NSAlert(); alert.messageText = "No pude abrir Arcanine 3D"
+                let alert = NSAlert(); alert.messageText = "No pude abrir el compañero 3D"
                 alert.informativeText = message; alert.runModal()
             }
         }
         petView.onReady = { [weak self] in
             guard let self, self.smokeTest else { return }
             if self.pokeballTest, let next = self.pokeballReady { next(); return }
-            if self.characterTest, let next = self.characterReady { next(); return }
+            if (self.characterTest || self.rosterTest), let next = self.characterReady { next(); return }
             guard !self.smokeStarted else { return }
             self.smokeStarted = true
             if self.pokeballTest { self.performPokeballTest() }
+            else if self.rosterTest { self.performRosterTest() }
             else if self.characterTest { self.performCharacterTest() } else { self.performSmokeTest() }
         }
         setupMenu()
@@ -279,7 +282,7 @@ final class BubblePanel: NSPanel {
     private func setupMenu() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "pawprint.fill", accessibilityDescription: "Arcanine")
-        statusItem.button?.toolTip = "Arcanine · tu mascota de escritorio"
+        statusItem.button?.toolTip = "PokéDesk · tu compañero de escritorio"
         menu.delegate = self
         statusItem.menu = menu
         updateMenu()
@@ -287,9 +290,19 @@ final class BubblePanel: NSPanel {
     func menuWillOpen(_ menu: NSMenu) { updateMenu() }
     private func updateMenu() {
         menu.removeAllItems()
-        addMenu("Arcanine · tu compañero", action: nil).isEnabled = false
+        addMenu("PokéDesk · \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")", action: nil).isEnabled = false
         menu.addItem(.separator())
-        addMenu("Abrir menú de Arcanine", action: #selector(showHome))
+        addMenu("Abrir menú de PokéDesk", action: #selector(showHome))
+        let companions = addMenu("Cambiar Pokémon", action: nil)
+        let companionMenu = NSMenu()
+        for character in PetCharacter.allCases {
+            let item = NSMenuItem(title: character.name, action: #selector(changeCompanion(_:)), keyEquivalent: "")
+            item.target = self; item.representedObject = character.rawValue
+            item.state = model.settings.character == character ? .on : .off
+            item.isEnabled = character.isAvailable(); companionMenu.addItem(item)
+        }
+        companions.submenu = companionMenu
+        addMenu("Repetir salida de la Pokébola", action: #selector(replayPokeball)).isEnabled = petView.animate && !petView.engine.isTransitioning
         let timers = addMenu("Timer de concentración", action: nil)
         let timerMenu = NSMenu()
         for minutes in [5, 10, 30] {
@@ -322,7 +335,7 @@ final class BubblePanel: NSPanel {
         addMenu("Volver a la esquina", action: #selector(resetPosition))
         addMenu(model.settings.pausedUntil.map({ $0 > Date() }) == true ? "Reanudar avisos" : "Pausar avisos 1 hora", action: #selector(pauseReminders))
         menu.addItem(.separator())
-        addMenu("Salir de Arcanine", action: #selector(quit), key: "q")
+        addMenu("Salir de PokéDesk", action: #selector(quit), key: "q")
     }
     @discardableResult private func addMenu(_ title: String, action: Selector?, key: String = "") -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
@@ -334,7 +347,7 @@ final class BubblePanel: NSPanel {
         closeQuickMenu(restoreAlert: false)
         if dashboard == nil {
             let window = BubblePanel(contentRect: NSRect(x: 0, y: 0, width: 430, height: 415), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-            window.title = "Arcanine · menú flotante"
+            window.title = "PokéDesk · menú flotante"
             window.isReleasedWhenClosed = false
             window.backgroundColor = .clear
             window.isOpaque = false
@@ -371,7 +384,7 @@ final class BubblePanel: NSPanel {
     }
     private func showQuickMenu() {
         if quickMenu == nil {
-            let panel = makeQuickPanel(title: "Arcanine · accesos rápidos", width: QuickMenuLayout.width, height: QuickMenuLayout.height)
+            let panel = makeQuickPanel(title: "PokéDesk · accesos rápidos", width: QuickMenuLayout.width, height: QuickMenuLayout.height)
             panel.hasShadow = false
             let host = PetQuickHostingView(rootView: PetQuickMenuView(state: quickState,
                 onSelect: { [weak self] in self?.selectQuickAction($0) },
@@ -398,15 +411,16 @@ final class BubblePanel: NSPanel {
         }
         quickState.selected = action
         if quickDetail == nil {
-            quickDetail = makeQuickPanel(title: "Arcanine · vista rápida", width: 350, height: action.detailHeight)
+            quickDetail = makeQuickPanel(title: "PokéDesk · vista rápida", width: 350, height: action.detailHeight)
             quickDetail?.hasShadow = true
         }
-        quickDetail?.title = "Arcanine · \(action.title) rápida"
+        quickDetail?.title = "PokéDesk · \(action.title) rápida"
         quickDetail?.contentView = NSHostingView(rootView: PetQuickDetailView(model: model, action: action,
             onExpand: { [weak self] in self?.model.dashboardTab = action.tab ?? -1; self?.showDashboard() },
             onClose: { [weak self] in self?.quickDetail?.orderOut(nil); self?.quickState.selected = nil; self?.quickMenu?.makeKeyAndOrderFront(nil) },
             onTimer: { [weak self] in self?.runQuickTimer($0) },
-            onAnimation: { [weak self] in self?.runQuickAnimation($0) }))
+            onAnimation: { [weak self] in self?.runQuickAnimation($0) },
+            onCharacter: { [weak self] character in self?.closeQuickMenu(restoreAlert: false); _ = self?.model.selectCharacter(character) }))
         if action == .agenda { model.refreshCalendar() }
         positionQuickMenu()
         quickDetail?.makeKeyAndOrderFront(nil)
@@ -433,13 +447,21 @@ final class BubblePanel: NSPanel {
     @objc private func playGesture(_ item: NSMenuItem) {
         if let id = item.representedObject as? String, let clip = ArcanineClip(rawValue: id) { model.requestAnimation(clip) }
     }
+    @objc private func changeCompanion(_ item: NSMenuItem) {
+        guard let id = item.representedObject as? String, let character = PetCharacter(rawValue: id) else { return }
+        closeQuickMenu(restoreAlert: false); _ = model.selectCharacter(character)
+    }
+    @objc private func replayPokeball() {
+        closeQuickMenu(restoreAlert: false); closeDashboard(); petPanel.orderFrontRegardless()
+        _ = petView.replaySummoning()
+    }
     @objc private func testReminder() { model.testAlert() }
     @objc private func resetView() { model.resetPetView() }
     @objc private func startQuickTimer(_ item: NSMenuItem) { if let minutes = item.representedObject as? Int { model.startFocus(minutes: minutes) } }
     @objc private func showFocus() { model.dashboardTab = 2; showDashboard() }
     @objc private func toggleFocus() { model.pauseOrResumeFocus() }
     @objc private func stopFocus() { model.stopFocus() }
-    @objc private func togglePet() { if petPanel.isVisible { closeDashboard(); closeQuickMenu(restoreAlert: false); bubblePanel.orderOut(nil); petPanel.orderOut(nil) } else { petPanel.orderFrontRegardless() } }
+    @objc private func togglePet() { if petPanel.isVisible { closeDashboard(); closeQuickMenu(restoreAlert: false); bubblePanel.orderOut(nil); petPanel.orderOut(nil) } else { petPanel.orderFrontRegardless(); _ = petView.replaySummoning() } }
     @objc private func resetPosition() {
         let size = panelSize()
         let screen = NSScreen.main!.visibleFrame
@@ -452,7 +474,89 @@ final class BubblePanel: NSPanel {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         petPanel.orderFrontRegardless()
+        _ = petView.replaySummoning()
         return true
+    }
+
+    private func performRosterTest() {
+        renderTimer?.invalidate()
+        model.settings.soundEnabled = false
+        model.settings.petSize = 230
+        model.settings.tasks = [DailyTask(title: "Tarea conservada", hour: 10, minute: 0)]
+        model.settings.notes = [PetNote(title: "Nota conservada", body: "Cuatro compañeros", createdAt: Date(), updatedAt: Date())]
+        model.startFocus(minutes: 10); model.pauseOrResumeFocus()
+        let tasks = model.settings.tasks, notes = model.settings.notes, timerID = model.settings.focusTimer?.id
+        var report: [String: Any] = [:]
+        var remaining: [PetCharacter] = [.pikachu, .charizard]
+        func fits(_ image: NSImage) -> Bool {
+            guard let data = image.tiffRepresentation, let b = NSBitmapImageRep(data: data) else { return false }
+            for x in 0..<b.pixelsWide { for y in [0,1,b.pixelsHigh-2,b.pixelsHigh-1] {
+                if (b.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+            } }
+            for y in 0..<b.pixelsHigh { for x in [0,1,b.pixelsWide-2,b.pixelsWide-1] {
+                if (b.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 { return false }
+            } }
+            return true
+        }
+        func next() {
+            guard !remaining.isEmpty else {
+                self.characterReady = nil
+                report["dataPreserved"] = self.model.settings.tasks == tasks && self.model.settings.notes == notes && self.model.settings.focusTimer?.id == timerID
+                report["fourModelsBundled"] = PetCharacter.allCases.count == 4 && PetCharacter.allCases.allSatisfy { $0.isAvailable() }
+                self.petView.focusTimer = nil
+                self.showQuickMenu(); self.selectQuickAction(.companions)
+                DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                    if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "pokedesk-quick-menu") }
+                    if let view = self.quickDetail?.contentView { self.capturePreview(view, name: "pokedesk-companions") }
+                    report["quickSelectorVisible"] = self.quickState.selected == .companions && self.quickDetail?.isVisible == true
+                    report["versionVisible"] = self.menu.items.first?.title.contains("1.3.0") == true
+                    let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("roster-smoke-test.json")
+                    try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted,.sortedKeys]).write(to: url)
+                    NSApp.terminate(nil)
+                }
+                return
+            }
+            let character = remaining.removeFirst()
+            self.characterReady = {
+                self.petView.focusTimer = nil; self.petView.setYaw(0)
+                self.petView.preview(.idle, at: 0)
+                self.capturePreview(self.petView, name: character.rawValue+"-preview")
+                self.petView.preview(.idle, at: 3)
+                self.capturePreview(self.petView, name: character.rawValue+"-blink-preview")
+                report[character.rawValue+"Blink"] = (self.petView.node(character.name+"EyesClosed")?.presentation.scale.x ?? 0) > 0.9
+                report[character.rawValue+"Joints"] = self.petView.engine.jointCount == (character == .pikachu ? 49 : 87)
+                var clipped = [String](), moving = [String]()
+                for clip in character.clips {
+                    self.petView.preview(clip, at: 0); let before = self.petView.snapshot().tiffRepresentation
+                    self.petView.preview(clip, at: clip.duration*0.4)
+                    if before != self.petView.snapshot().tiffRepresentation { moving.append(clip.rawValue) }
+                    for angle in stride(from: 0.0, to: .pi*2, by: .pi/4) {
+                        self.petView.setYaw(angle)
+                        for fraction in [0.0,0.4,0.75] {
+                            self.petView.preview(clip, at: clip.duration*fraction)
+                            if !fits(self.petView.snapshot()) { clipped.append("\(clip.rawValue):\(angle):\(fraction)") }
+                        }
+                    }
+                    self.petView.setYaw(0)
+                }
+                report[character.rawValue+"AllClipsMove"] = moving.count == 9
+                report[character.rawValue+"RotationFits"] = clipped.isEmpty
+                report[character.rawValue+"ClippedSamples"] = clipped
+                self.captureCharacterAnimation(character == .charizard ? .happyTail : .greeting, name: character.rawValue+"-demo")
+                self.characterReady = nil
+                self.petView.engine.cancelSummoning()
+                self.petView.summoningEnabled = true
+                _ = self.applicationShouldHandleReopen(NSApp, hasVisibleWindows: true)
+                report[character.rawValue+"ReopenReleases"] = self.petView.engine.summoningPhase == .release
+                self.petView.engine.finishSummoningImmediately()
+                report[character.rawValue+"ReplayRestores"] = self.petView.engine.summonRestored
+                self.petView.summoningEnabled = false
+                self.characterReady = nil
+                DispatchQueue.main.asyncAfter(deadline: .now()+0.1) { next() }
+            }
+            _ = self.model.selectCharacter(character)
+        }
+        next()
     }
 
     private func performPokeballTest() {
@@ -757,7 +861,7 @@ final class BubblePanel: NSPanel {
                 ,"appDisplayName": Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
                 ,"appExecutable": Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable") as? String ?? ""
                 ,"separateDataIdentity": Bundle.main.bundleIdentifier == "io.github.franciscorrandom.arcanine.ical"
-                ,"statusMenuRenamed": self.menu.items.contains { $0.title == "Salir de Arcanine" } && !self.menu.items.contains { $0.title.contains("Miga") }
+                ,"statusMenuRenamed": self.menu.items.contains { $0.title == "Salir de PokéDesk" } && !self.menu.items.contains { $0.title.contains("Miga") }
                 ,"menuTheme": "Pokédex · rojo, crema y Fuego"
                 ,"model3DLoaded": self.petView.engine.ready
                 ,"jointCount": self.petView.engine.jointCount
@@ -859,7 +963,7 @@ final class BubblePanel: NSPanel {
         checks["quickMenuActions"] = PetQuickAction.allCases.map(\.title)
         quickHostingView?.layoutSubtreeIfNeeded()
         let host = quickHostingView!
-        checks["quickMenuEmptyCenterPassesClicks"] = !host.containsControl(NSPoint(x: QuickMenuLayout.width / 2, y: host.isFlipped ? 108 : 82))
+        checks["quickMenuEmptyCenterPassesClicks"] = !host.containsControl(NSPoint(x: QuickMenuLayout.width / 2, y: host.isFlipped ? 94 : 96))
         checks["quickMenuButtonsClickable"] = (0..<PetQuickAction.allCases.count).allSatisfy { index in
             let p = QuickMenuLayout.buttonCenter(index)
             return host.containsControl(NSPoint(x: p.x, y: host.isFlipped ? p.y : QuickMenuLayout.height - p.y))

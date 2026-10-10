@@ -119,7 +119,7 @@ for screen in screens {
 }
 for index in 0..<QuickMenuLayout.buttonCount {
     let point = QuickMenuLayout.buttonCenter(index)
-    check(QuickMenuLayout.containsControl(x: point.x, y: point.y), "Los seis accesos tienen una zona de clic")
+    check(QuickMenuLayout.containsControl(x: point.x, y: point.y), "Los siete accesos tienen una zona de clic")
 }
-check(!QuickMenuLayout.containsControl(x: QuickMenuLayout.width / 2, y: 108), "El centro vacío del arco permite pasar los clics")
+check(!QuickMenuLayout.containsControl(x: QuickMenuLayout.width / 2, y: 94), "El centro vacío del arco permite pasar los clics")
 print("\(checks) comprobaciones de movimiento y posición de accesos correctas")

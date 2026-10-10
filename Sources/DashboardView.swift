@@ -18,8 +18,8 @@ struct DashboardView: View {
             HStack(spacing: 12) {
                 PokedexLens()
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(model.settings.character.name.uppercased()).font(.system(size: 20, weight: .heavy, design: .rounded)).tracking(1.4)
-                    Text(model.dashboardTab == -1 ? "Tu compañero de escritorio" : ["Tu agenda", "Tus tareas", "Tu tiempo de foco", "Tus ajustes", "Tus animaciones", "Tus notas e ideas"][max(0, min(5, model.dashboardTab))])
+                    Text("POKÉDESK").font(.system(size: 20, weight: .heavy, design: .rounded)).tracking(1.4)
+                    Text(model.dashboardTab == -1 ? "Tu compañero de escritorio · \(model.settings.character.name)" : ["Tu agenda", "Tus tareas", "Tu tiempo de foco", "Tus ajustes", "Tus animaciones", "Tus notas e ideas"][max(0, min(5, model.dashboardTab))])
                         .font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.8))
                 }
                 Spacer()
@@ -190,20 +190,21 @@ struct DashboardView: View {
                 Toggle("Animaciones y reacciones de \(model.settings.character.name)", isOn: $model.settings.motionEnabled).onChange(of: model.settings.motionEnabled) { model.save() }
                 Text("\(model.settings.character.description) Celebra tus tareas y timers; durante el foco se mueve menos. Respeta Reducir movimiento de macOS.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 Text("Arrastra para mover · ⌥ Option + arrastra hacia los lados para girar. La orientación elegida se guarda.").font(.system(size: 11)).foregroundStyle(theme.muted)
+                Button("Repetir salida de la Pokébola") { model.requestPokeball() }
                 Button("Restablecer vista") { model.resetPetView() }
                 HStack {
                     Text("Tamaño")
                     Slider(value: $model.settings.petSize, in: 110...230, step: 10).onChange(of: model.settings.petSize) { model.save() }
                 }
-                Toggle("Abrir Arcanine al iniciar sesión", isOn: Binding(get: { model.loginStatus == .enabled }, set: { _ in model.toggleLogin() }))
+                Toggle("Abrir PokéDesk al iniciar sesión", isOn: Binding(get: { model.loginStatus == .enabled }, set: { _ in model.toggleLogin() }))
                 if model.loginStatus == .requiresApproval {
                     Button("Autorizar inicio automático en macOS") { SMAppService.openSystemSettingsLoginItems() }
                 }
-                Text("Para el inicio automático, coloca Arcanine.app en Aplicaciones y activa esta opción desde esa copia.")
+                Text("Para el inicio automático, coloca PokeDesk.app en Aplicaciones y activa esta opción desde esa copia.")
                     .font(.system(size: 11)).foregroundStyle(theme.muted)
                 Button(model.settings.pausedUntil.map({ $0 > Date() }) == true ? "Reanudar avisos" : "Pausar avisos durante 1 hora") { model.togglePause() }
             }
-            Text("Tus tareas y notas se guardan en este Mac. Los enlaces privados se guardan en el Llavero; la app consulta Google directamente. Los avisos funcionan mientras Arcanine está abierto y el Mac está despierto.")
+            Text("Tus tareas y notas se guardan en este Mac. Los enlaces privados se guardan en el Llavero; la app consulta Google directamente. Los avisos funcionan mientras PokéDesk está abierto y el Mac está despierto.")
                 .font(.system(size: 11)).foregroundStyle(theme.muted).fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -211,27 +212,7 @@ struct DashboardView: View {
     private var characterPreferences: some View {
         card {
             Label("Tu compañero", systemImage: "person.crop.circle.badge.checkmark").font(.headline)
-            HStack(spacing: 10) {
-                ForEach(PetCharacter.allCases) { character in
-                    let selected = model.settings.character == character
-                    let available = character.isAvailable()
-                    Button { model.selectCharacter(character) } label: {
-                        VStack(spacing: 7) {
-                            if let art = NSImage(named: character.rawValue) {
-                                Image(nsImage: art).resizable().scaledToFit().frame(height: 62)
-                            } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: 62) }
-                            Text(character.name).font(.system(size: 13, weight: .bold, design: .rounded))
-                            Text(selected ? "Elegido" : available ? "Elegir" : "Próximamente")
-                                .font(.system(size: 10, weight: .semibold))
-                        }.frame(maxWidth: .infinity).padding(12)
-                            .foregroundStyle(selected ? theme.red : theme.ink)
-                            .background(selected ? theme.red.opacity(0.08) : theme.paper)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(selected ? theme.red : theme.line, lineWidth: selected ? 2 : 1))
-                    }.buttonStyle(.plain).disabled(!available)
-                        .accessibilityLabel("\(character.name), \(selected ? "elegido" : available ? "elegir compañero" : "próximamente")")
-                }
-            }
+            PetCharacterChooser(selected: model.settings.character) { model.selectCharacter($0) }
             Text("El cambio conserva tu agenda, tareas, notas y timer. Cada compañero recuerda su orientación.")
                 .font(.system(size: 11)).foregroundStyle(theme.muted)
         }
@@ -334,7 +315,7 @@ struct AlertBubbleView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     PokeballMark().frame(width: 22, height: 22)
-                    Label(alert.focusTimerID != nil ? "TU TIEMPO" : ((alert.taskID != nil) ? "TU TAREA" : "ARCANINE TE AVISA"), systemImage: alert.focusTimerID != nil ? "timer" : ((alert.taskID != nil) ? "checklist" : "calendar"))
+                    Label(alert.focusTimerID != nil ? "TU TIEMPO" : ((alert.taskID != nil) ? "TU TAREA" : "POKÉDESK TE AVISA"), systemImage: alert.focusTimerID != nil ? "timer" : ((alert.taskID != nil) ? "checklist" : "calendar"))
                         .font(.system(size: 9, weight: .bold, design: .rounded)).tracking(0.5).foregroundStyle(.white)
                     Spacer()
                     if model.speaking { PokedexIconButton(symbol: "speaker.slash", label: "Silenciar voz", onRed: true) { model.voiceSpeaker.stop() } }

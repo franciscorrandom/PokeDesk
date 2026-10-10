@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Arcanine</string>
+	<string>PokéDesk</string>
 	<key>CFBundleExecutable</key>
-	<string>Arcanine</string>
+	<string>PokeDesk</string>
 	<key>CFBundleIconFile</key>
-	<string>Arcanine.icns</string>
+	<string>PokeDesk.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>io.github.franciscorrandom.arcanine.ical</string>
 	<key>CFBundleName</key>
-	<string>Arcanine</string>
+	<string>PokeDesk</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.0</string>
+	<string>1.3.0</string>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>5</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>

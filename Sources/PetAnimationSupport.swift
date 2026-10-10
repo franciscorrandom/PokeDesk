@@ -57,18 +57,21 @@ enum FloatingLayout {
 
 enum QuickMenuLayout {
     static let width = 548.0, height = 190.0
-    static let buttonCount = 6
+    static let buttonCount = 7
+    static let arcButtonCount = 6
     static let radiusX = width / 2 - 52
     static func buttonCenter(_ index: Int) -> (x: Double, y: Double) {
-        let angle = (166 - Double(index) * 152 / Double(buttonCount - 1)) * .pi / 180
+        if index == arcButtonCount { return (width / 2, 126) }
+        let angle = (166 - Double(index) * 152 / Double(arcButtonCount - 1)) * .pi / 180
         return (width / 2 + radiusX * cos(angle), 151 - 104 * sin(angle))
     }
     // Coordinates use the top-left origin of the SwiftUI menu.
     static func containsControl(x: Double, y: Double) -> Bool {
-        for index in 0..<buttonCount {
+        for index in 0..<arcButtonCount {
             let p = buttonCenter(index)
             if abs(x - p.x) <= 47 && abs(y - p.y) <= 38 { return true }
         }
+        if abs(x - width / 2) <= 83 && abs(y - 126) <= 17 { return true }
         return hypot(x - width / 2, y - 164) <= 15
     }
     static func place(anchorX: Double, anchorY: Double, screen: FloatingRect) -> FloatingRect {

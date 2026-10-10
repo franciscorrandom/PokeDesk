@@ -30,6 +30,7 @@ final class Arcanine3DScene {
     var effectsEnabled = true { didSet { if !effectsEnabled { finishSummoningImmediately() } } }
     var isTransitioning: Bool { summon != nil }
     var summoningPhase: PetSummonPhase? { summon?.phase }
+    var prepareSummon: ((SCNNode, @escaping () -> Void) -> Void)?
     var onSummonStarted: ((PetSummonPhase) -> Void)?
     var onSummonChanged: (() -> Void)?
     var onReady: (() -> Void)?
@@ -96,9 +97,28 @@ final class Arcanine3DScene {
             fail("La biblioteca de \(requested.name) no contiene todas las animaciones. Vuelve a descargar la app completa."); return
         }
         let modelRoot = model.rootNode
+        if requested == .charizard {
+            modelRoot.enumerateChildNodes { node, _ in
+                for material in node.geometry?.materials ?? [] where material.name?.hasPrefix("CharizardFlame") == true {
+                    material.lightingModel = .constant
+                    material.writesToDepthBuffer = false
+                    material.emission.contents = NSColor(srgbRed: 1, green: material.name == "CharizardFlame3" ? 0.25 : 0.65, blue: 0.025, alpha: 1)
+                    material.emission.intensity = 0.6
+                    var modifiers = material.shaderModifiers ?? [:]
+                    modifiers[.fragment] = """
+                    #pragma transparent
+                    #pragma body
+                    float mask = max(_surface.diffuse.r, max(_surface.diffuse.g, _surface.diffuse.b));
+                    _output.color.a *= smoothstep(0.035, 0.20, mask);
+                    """
+                    material.shaderModifiers = modifiers
+                }
+            }
+        }
         let box = modelRoot.boundingBox
         guard box.max.y > box.min.y else { fail("El modelo 3D no tiene una altura válida."); return }
-        let scale = 2.2 / (box.max.y - box.min.y)
+        let footprint = hypot(box.max.x - box.min.x, box.max.z - box.min.z)
+        let scale = requested == .charizard ? min(2.2 / (box.max.y - box.min.y), 3.8 / max(0.01, footprint)) : 2.2 / (box.max.y - box.min.y)
         let placement = SCNNode()
         placement.scale = SCNVector3(scale, scale, scale)
         placement.position = SCNVector3(-(box.max.x + box.min.x) * scale / 2, -box.min.y * scale, -(box.max.z + box.min.z) * scale / 2)
@@ -152,6 +172,13 @@ final class Arcanine3DScene {
     }
     var orientationAngles: SCNVector3 { orientation.eulerAngles }
 
+    @discardableResult func replaySummoning() -> Bool {
+        guard ready, effectsEnabled, loadingCharacter == nil, !isTransitioning else { return false }
+        rest()
+        startSummoning(.release) { [weak self] in self?.onReady?() }
+        return true
+    }
+
     private func startSummoning(_ phase: PetSummonPhase, completion: (() -> Void)? = nil) {
         cancelSummoning()
         var seen = Set<ObjectIdentifier>()
@@ -161,14 +188,20 @@ final class Arcanine3DScene {
             }
         }
         let effect = Pokeball3DEffect(phase: phase)
-        summon = effect; summonStarted = ProcessInfo.processInfo.systemUptime
+        summon = effect; summonStarted = 0
         summonCompletion = completion; scene.rootNode.addChildNode(effect.node)
         applySummoning(PetSummonFrame(phase: phase, time: 0))
-        onSummonStarted?(phase); onSummonChanged?()
+        onSummonChanged?()
+        let begin = { [weak self, weak effect] in
+            guard let self, let effect, self.summon === effect, !self.summonPreview else { return }
+            self.summonStarted = ProcessInfo.processInfo.systemUptime
+            self.onSummonStarted?(phase)
+        }
+        if let prepareSummon { prepareSummon(scene.rootNode, begin) } else { begin() }
     }
 
     func updateSummoning(at time: Double) {
-        guard let effect = summon, !summonPreview else { return }
+        guard let effect = summon, !summonPreview, summonStarted > 0 else { return }
         let elapsed = time-summonStarted
         applySummoning(PetSummonFrame(phase: effect.phase, time: elapsed))
         if elapsed >= effect.phase.duration { completeSummoning() }

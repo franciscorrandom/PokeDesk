@@ -18,8 +18,8 @@ jobs:
         run: bash scripts/build-macos.sh
       - uses: actions/upload-artifact@v7
         with:
-          name: Arcanine-macOS
-          path: dist/Arcanine-*-macOS.zip
+          name: PokeDesk-macOS
+          path: dist/PokeDesk-*-macOS.zip
           if-no-files-found: error
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
-          name: Arcanine-macOS
+          name: PokeDesk-macOS
           path: dist
       - name: Publish release
         env:
@@ -41,5 +41,5 @@ jobs:
           if gh release view "$ARCANINE_TAG" >/dev/null 2>&1; then
             echo "Release already published; keeping reviewed downloads."
           else
-            gh release create "$ARCANINE_TAG" dist/Arcanine-*-macOS.zip --verify-tag --title "Arcanine $ARCANINE_TAG" --notes-file docs/RELEASE.md
+            gh release create "$ARCANINE_TAG" dist/PokeDesk-*-macOS.zip --verify-tag --title "PokéDesk $ARCANINE_TAG" --notes-file docs/RELEASE.md
           fi

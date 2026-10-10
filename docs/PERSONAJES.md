@@ -30,3 +30,17 @@ La Pokébola se genera con geometría de SceneKit: dos semiesferas, revestimient
 Al iniciar se reproduce la aparición (2,35 segundos). Al cambiar se valida primero el modelo entrante, se recoge el compañero actual (1,85 segundos) y se libera al siguiente. Las dos Pokébolas aparecen en posiciones distintas y su orientación es independiente de la rotación guardada del personaje. Una línea de tiempo única permite reproducción por reloj y capturas deterministas.
 
 Al terminar o cancelar se restauran tamaño, posición, opacidad y emisión originales; la geometría del efecto se elimina. La selección rápida descarta cargas y completaciones obsoletas. Desactivar movimiento o activar Reducir movimiento finaliza cualquier transición y muestra el compañero directamente. Se conservan tareas, notas y timers durante la secuencia. La opción de girar espera a que termine la transición; el arrastre normal sigue moviendo el panel.
+
+## PokéDesk 1.3.0: cuatro compañeros
+
+Pikachu y Charizard se descargaron desde el botón oficial de Sketchfab el 10 de octubre de 2026. Los originales, autores y licencias están en `Models/Pikachu` y `Models/Charizard` y en [Créditos](CREDITOS.md). No requieren descargas adicionales ni cuenta de Sketchfab para el usuario final.
+
+El generador `scripts/animate-companions.py` conserva los rigs originales (49 y 87 huesos), hornea una postura compacta con normales e inverse binds coherentes y genera nueve clips de 30 fps: reposo, curiosidad, saludo, cola, estiramiento, aviso, celebración, caricias y descanso. Pikachu mueve sus orejas; Charizard articula las alas y la llama. Los parpadeos usan los atlas originales, adheridos al hueso de la cabeza. Los clips cierran en la postura de reposo con curvas de entrada y salida suaves.
+
+Los colores son rojo/crema para Arcanine, violeta/lavanda para Mewtwo, ámbar/amarillo para Pikachu y azul verdoso/naranja para Charizard. La paleta se aplica al menú, los paneles, los avisos y el timer.
+
+El menú conserva seis accesos en el arco y añade una cápsula central **Cambiar Pokémon**, que abre una cuadrícula de cuatro miniaturas. También hay un selector en la barra de menús. Agenda, notas, tareas, voz y timer se conservan; cada personaje recuerda su orientación. El nombre PokéDesk mantiene el identificador y el perfil anterior para conservar la configuración.
+
+La Pokébola espera a la preparación de los recursos de SceneKit antes de comenzar su reloj. Reabrir la app o mostrar la mascota repite su salida; también existe un botón manual. Las cargas canceladas no pueden iniciar efectos pendientes. Se respeta Reducir movimiento.
+
+`--roster-smoke-test` usa un perfil aislado y comprueba los dos modelos nuevos, nueve clips, parpadeos, ocho orientaciones en tres instantes por clip, conservación de datos, reapertura con Pokébola y selector rápido. `--pokeball-smoke-test` comprueba arranque real, retirada/salida y cambios rápidos o cancelados.

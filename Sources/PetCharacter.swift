@@ -1,36 +1,34 @@
 import Foundation
 
-/// The assistant's data belongs to the app; a character changes only its appearance and gestures.
+/// Data belongs to the app; a companion changes its appearance and gestures.
 enum PetCharacter: String, CaseIterable, Identifiable {
-    case arcanine, mewtwo
+    case arcanine, mewtwo, pikachu, charizard
     var id: String { rawValue }
-    var name: String { self == .arcanine ? "Arcanine" : "Mewtwo" }
-    var number: String { self == .arcanine ? "059" : "150" }
-    var typeName: String { self == .arcanine ? "FUEGO" : "PSÍQUICO" }
-    var symbol: String { self == .arcanine ? "flame.fill" : "sparkles" }
+    var name: String { rawValue.prefix(1).uppercased() + rawValue.dropFirst() }
+    var number: String { switch self { case .arcanine: return "059"; case .mewtwo: return "150"; case .pikachu: return "025"; case .charizard: return "006" } }
+    var typeName: String { switch self { case .arcanine: return "FUEGO"; case .mewtwo: return "PSÍQUICO"; case .pikachu: return "ELÉCTRICO"; case .charizard: return "FUEGO / VOLADOR" } }
+    var symbol: String { switch self { case .arcanine, .charizard: return "flame.fill"; case .mewtwo: return "sparkles"; case .pikachu: return "bolt.fill" } }
     var modelResource: String { "\(rawValue)-biblioteca" }
-    var clips: [ArcanineClip] {
-        self == .arcanine ? ArcanineClip.allCases : ArcanineClip.allCases.filter { $0 != .sniff && $0 != .chaseTail }
-    }
+    var clips: [ArcanineClip] { self == .arcanine ? ArcanineClip.allCases : ArcanineClip.allCases.filter { $0 != .sniff && $0 != .chaseTail } }
     var description: String {
-        self == .arcanine
-            ? "Parpadea, saluda, olfatea, se estira y persigue su cola."
-            : "Levita, parpadea, saluda, mueve su cola y reacciona con gestos psíquicos."
+        switch self {
+        case .arcanine: return "Parpadea, saluda, olfatea, se estira y persigue su cola."
+        case .mewtwo: return "Levita, parpadea, saluda, mueve su cola y reacciona con gestos psíquicos."
+        case .pikachu: return "Parpadea, mueve sus orejas y cola, saluda y disfruta las caricias."
+        case .charizard: return "Parpadea, respira, mueve las alas y cola, saluda y descansa."
+        }
     }
     func title(for clip: ArcanineClip) -> String {
-        guard self == .mewtwo else { return clip.title }
+        guard self != .arcanine else { return clip.title }
         switch clip {
-        case .idle: return "Levitación y parpadeo"
+        case .idle: return self == .mewtwo ? "Levitación y parpadeo" : self == .pikachu ? "Orejas y parpadeo" : "Respiración y parpadeo"
         case .greeting: return "Saludo con la mano"
         case .curious: return "Mirada curiosa"
-        case .happyTail: return "Cola en movimiento"
-        case .alert: return "Aviso psíquico"
-        case .petting: return "Disfrutar las caricias"
-        case .sit: return "Meditación"
+        case .happyTail: return self == .charizard ? "Alas y cola" : "Cola en movimiento"
+        case .alert: return self == .mewtwo ? "Aviso psíquico" : "Aviso atento"
+        case .sit: return self == .mewtwo ? "Meditación" : "Descansar"
         default: return clip.title
         }
     }
-    func isAvailable(in bundle: Bundle = .main) -> Bool {
-        bundle.url(forResource: modelResource, withExtension: "glb") != nil
-    }
+    func isAvailable(in bundle: Bundle = .main) -> Bool { bundle.url(forResource: modelResource, withExtension: "glb") != nil }
 }

@@ -8,7 +8,7 @@ struct CalendarSettingsView: View {
     @State private var replacing: UUID?
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label(model.feeds.isEmpty ? "Bienvenido a Arcanine" : "Calendario por iCal", systemImage: "calendar").font(.headline)
+            Label(model.feeds.isEmpty ? "Bienvenido a PokéDesk" : "Calendario por iCal", systemImage: "calendar").font(.headline)
             Text("Pega el enlace privado de Google Calendar y empieza a recibir avisos. Tareas, notas y concentración ya están disponibles.")
                 .font(.system(size: 12)).foregroundStyle(theme.muted)
             SecureField("Dirección secreta en formato iCal", text: $address).textFieldStyle(.roundedBorder)

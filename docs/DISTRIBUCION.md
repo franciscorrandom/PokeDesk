@@ -12,7 +12,7 @@ El código fuente y los recursos van en el repositorio. El binario y el framewor
 
 La cuenta gratuita de Apple Developer permite desarrollo y pruebas, pero no incluye los certificados Developer ID. Necesitas una membresía del [Apple Developer Program](https://developer.apple.com/developer-id/), un certificado **Developer ID Application**, y credenciales de notarización guardadas de forma segura.
 
-Con el certificado instalado, define `ARCANINE_SIGN_IDENTITY` al ejecutar el build. El script activa hardened runtime y sello de tiempo, y firma el framework antes de la app. Envía el ZIP a Apple con `xcrun notarytool submit … --keychain-profile … --wait`; únicamente después de una respuesta **Accepted**, aplica `xcrun stapler staple dist/Arcanine.app` y vuelve a generar el ZIP. Verifica con `codesign --verify --deep --strict` y `spctl --assess --type execute`.
+Con el certificado instalado, define `ARCANINE_SIGN_IDENTITY` al ejecutar el build. El script activa hardened runtime y sello de tiempo, y firma el framework antes de la app. Envía el ZIP a Apple con `xcrun notarytool submit … --keychain-profile … --wait`; únicamente después de una respuesta **Accepted**, aplica `xcrun stapler staple dist/PokeDesk.app` y vuelve a generar el ZIP. Verifica con `codesign --verify --deep --strict` y `spctl --assess --type execute`.
 
 El build local actual no ejecuta notarización ni guarda credenciales. Nunca publiques certificados `.p12`, claves, perfiles o contraseñas en el repositorio. La cuenta gratuita no impide compartir la edición actual con autorización manual de apertura.
 

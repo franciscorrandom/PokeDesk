@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum PetQuickAction: String, CaseIterable {
-    case petting, agenda, focus, animations, notes, openPanel
+    case petting, agenda, focus, animations, notes, openPanel, companions
     var title: String {
         switch self {
         case .petting: return "Acariciar"
@@ -11,6 +11,7 @@ enum PetQuickAction: String, CaseIterable {
         case .animations: return "Animaciones"
         case .notes: return "Notas"
         case .openPanel: return "Abrir panel"
+        case .companions: return "Cambiar Pokémon"
         }
     }
     var symbol: String {
@@ -21,6 +22,7 @@ enum PetQuickAction: String, CaseIterable {
         case .animations: return "pawprint.fill"
         case .notes: return "note.text"
         case .openPanel: return "square.grid.2x2.fill"
+        case .companions: return "arrow.triangle.2.circlepath"
         }
     }
     var tab: Int? {
@@ -31,9 +33,10 @@ enum PetQuickAction: String, CaseIterable {
         case .notes: return 5
         case .openPanel: return -1
         case .petting: return nil
+        case .companions: return 3
         }
     }
-    var detailHeight: Double { self == .notes ? 400 : self == .animations ? 360 : self == .agenda ? 310 : 252 }
+    var detailHeight: Double { self == .companions ? 372 : self == .notes ? 400 : self == .animations ? 360 : self == .agenda ? 310 : 252 }
 }
 
 @MainActor final class PetQuickMenuState: ObservableObject {
@@ -80,7 +83,7 @@ private struct PetShortcutButton: View {
                 .scaleEffect(hovering && !reduceMotion ? 1.06 : 1)
         }.buttonStyle(.plain).onHover { hovering = $0 }
             .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-            .accessibilityLabel(action.title).help(action == .openPanel ? "Abrir todas las opciones de Arcanine" : action.title)
+            .accessibilityLabel(action.title).help(action == .openPanel ? "Abrir todas las opciones de PokéDesk" : action.title)
     }
 }
 
@@ -103,11 +106,19 @@ struct PetQuickMenuView: View {
             arc.stroke(theme.line, style: StrokeStyle(lineWidth: 58, lineCap: .round))
                 .shadow(color: .black.opacity(0.10), radius: 3, y: 2).allowsHitTesting(false)
             arc.stroke(theme.paper.opacity(0.98), style: StrokeStyle(lineWidth: 54, lineCap: .round)).allowsHitTesting(false)
-            ForEach(Array(PetQuickAction.allCases.enumerated()), id: \.element.rawValue) { index, action in
+            ForEach(Array(PetQuickAction.allCases.filter { $0 != .companions }.enumerated()), id: \.element.rawValue) { index, action in
                 let point = QuickMenuLayout.buttonCenter(index)
                 PetShortcutButton(action: action, selected: state.selected == action) { onSelect(action) }
                     .position(x: point.x, y: point.y)
             }
+            Button { onSelect(.companions) } label: {
+                Label("Cambiar Pokémon", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundStyle(state.selected == .companions ? .white : theme.red)
+                    .frame(width: 166, height: 34)
+                    .background(state.selected == .companions ? theme.red : theme.paper)
+                    .clipShape(Capsule()).overlay(Capsule().stroke(theme.gold, lineWidth: 1.5))
+            }.buttonStyle(.plain).position(x: QuickMenuLayout.width / 2, y: 126)
             Button(action: onClose) {
                 Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
                     .foregroundStyle(theme.muted).frame(width: 26, height: 26)
@@ -128,6 +139,7 @@ struct PetQuickDetailView: View {
     let onClose: () -> Void
     let onTimer: (Int) -> Void
     let onAnimation: (ArcanineClip) -> Void
+    let onCharacter: (PetCharacter) -> Void
     private var clips: [ArcanineClip] { [.petting, .sit] + model.settings.character.clips.filter { $0 != .petting && $0 != .sit } }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -139,6 +151,7 @@ struct PetQuickDetailView: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
+                    if action == .companions { PetCharacterChooser(selected: model.settings.character, onSelect: onCharacter) }
                     if action == .agenda { agenda }
                     if action == .focus { focus }
                     if action == .animations { animations }
