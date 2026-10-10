@@ -130,7 +130,7 @@ struct PokedexHomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 14) {
-                if let art = NSImage(named: model.settings.character.rawValue) {
+                if let url = Bundle.main.url(forResource: model.settings.character.thumbnailResource, withExtension: "png"), let art = NSImage(contentsOf: url) {
                     Image(nsImage: art).resizable().interpolation(.high).scaledToFit().frame(width: 78, height: 78).accessibilityHidden(true)
                 }
                 VStack(alignment: .leading, spacing: 7) {
