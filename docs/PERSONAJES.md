@@ -1,6 +1,6 @@
 # Personajes y evolución del producto
 
-La edición nativa para Mac con iCal (`arcanine-ical`) es la base del producto que se seguirá mejorando. Su repositorio es https://github.com/franciscorrandom/arcanine-desktop-ical. Las versiones anteriores con OAuth y la adaptación anterior de Windows son referencias separadas.
+La edición nativa para Mac con iCal (`arcanine-ical`) es la base del producto que se seguirá mejorando. Su repositorio es https://github.com/franciscorrandom/PokeDesk. Las versiones anteriores con OAuth y la adaptación anterior de Windows son referencias separadas.
 
 ## Preparación del selector
 

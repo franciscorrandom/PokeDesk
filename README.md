@@ -6,14 +6,14 @@ Mascota 3D flotante con Arcanine, Mewtwo, Pikachu y Charizard, animaciones artic
 
 Requiere **macOS 14 Sonoma o posterior**, en Mac Intel o Apple Silicon. La descarga es universal e incluye todos los recursos; no hay que instalar herramientas de programación.
 
-1. Descarga `PokeDesk-1.3.2-macOS.zip` desde [Releases](https://github.com/franciscorrandom/arcanine-desktop-ical/releases).
+1. Descarga `PokeDesk-1.3.2-macOS.zip` desde [Releases](https://github.com/franciscorrandom/PokeDesk/releases).
 2. Descomprime el ZIP y arrastra `PokeDesk.app` a Aplicaciones.
 3. Abre la app. Esta edición gratuita está firmada de forma local, **sin Developer ID ni notarización**. Si macOS bloquea la apertura, después de intentarla ve a **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente** y confirma. Sigue las [instrucciones de Apple](https://support.apple.com/es-cl/102445); no hace falta desactivar la seguridad del Mac.
 4. En la bienvenida pega tu enlace iCal de Google Calendar y pulsa **Conectar calendario**. Puedes usar tareas, notas, animaciones y concentración aunque no conectes un calendario.
 
 La cuenta gratuita de Apple Developer no incluye Developer ID. Para distribuir una futura versión notarizada se necesita una membresía del Apple Developer Program y el certificado correspondiente. [Información de Apple](https://developer.apple.com/developer-id/).
 
-**Actualizar desde Arcanine 1.0–1.2:** cierra la app anterior desde su icono de la barra de menús antes de abrir PokéDesk. El nombre visible y el icono cambian, pero el identificador, los datos y los enlaces del Llavero se conservan. El repositorio mantiene su URL original. Comprueba la versión en el menú de la barra superior.
+**Actualizar desde Arcanine 1.0–1.2:** cierra la app anterior desde su icono de la barra de menús antes de abrir PokéDesk. El nombre visible y el icono cambian, pero el identificador, los datos y los enlaces del Llavero se conservan. El repositorio se llama **PokeDesk**; los enlaces de su nombre anterior redirigen al nuevo. Comprueba la versión en el menú de la barra superior.
 
 ## Conectar Google Calendar
 
