@@ -45,3 +45,10 @@ test('Una tarea de una sola vez recuerda tras suspensión, respeta completado y 
   assert.equal(checkReminders(s,later).length,1);assert.equal(checkReminders(s,later+86400000).length,0);
   s.reminders={};task.completedAt=later;assert.equal(checkReminders(s,later+1000).length,0);
 });
+test('Una tarea de una vez no vuelve a avisar después de limpiar el historial de la semana',()=>{
+  const s=defaults(),created=new Date(2026,9,8,8).getTime(),first=new Date(2026,9,8,11).getTime();
+  saveTask(s,{title:'Una vez',time:'09:00',repeat:false},created);
+  assert.equal(checkReminders(s,first).length,1);
+  checkReminders(s,first+9*86400000);
+  assert.equal(checkReminders(s,first+9*86400000+1000).length,0);
+});

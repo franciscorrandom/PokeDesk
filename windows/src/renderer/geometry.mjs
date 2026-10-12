@@ -41,6 +41,11 @@ export function migratePosition(saved, workArea, demo = false) {
   }
   return { x: workArea.x + (demo ? 150 : workArea.width - 530), y: workArea.y + workArea.height - 550, ...PET_SIZE };
 }
+export function restorePosition(saved, workArea, scale = 1, demo = false) {
+  const fresh=migratePosition(null,workArea,demo);
+  return {x:Number.isFinite(saved?.x)?saved.x:fresh.x,y:Number.isFinite(saved?.y)?saved.y:fresh.y,
+    width:Math.round(PET_SIZE.width*scale),height:Math.round(PET_SIZE.height*scale)};
+}
 export function maskHit(mask, x, y, padding = 1) {
   if (!mask || x < 0 || y < 0 || x >= mask.width || y >= mask.height) return false;
   const px = Math.floor(x), py = Math.floor(y);

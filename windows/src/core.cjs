@@ -106,7 +106,7 @@ function checkReminders(state, now = Date.now()) {
     }
   }
   // Keep a week of acknowledgements so a wake-up cannot repeat the same reminder.
-  for (const [key, timestamp] of Object.entries(state.reminders)) if (timestamp < now - 8 * 86400000) delete state.reminders[key];
+  for (const [key, timestamp] of Object.entries(state.reminders)) if (timestamp < now - 8 * 86400000 && !key.endsWith(':once')) delete state.reminders[key];
   return notices;
 }
 class Motion {

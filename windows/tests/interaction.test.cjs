@@ -70,3 +70,11 @@ test('La actualización conserva el centro y la base de la antigua posición', a
   assert.equal(old.x + old.width / 2, next.x + next.width / 2);
   assert.equal(old.y + old.height, next.y + next.height);
 });
+test('La posición guardada no deriva al reiniciar con un tamaño personalizado',async()=>{
+  const {restorePosition}=await geometry,area={x:-1920,y:0,width:1920,height:1080};
+  for(const scale of [.7,1,1.25,1.4]){
+    let saved={x:-600,y:300,width:Math.round(620*scale),height:Math.round(520*scale)};
+    for(let restart=0;restart<10;restart++)saved=restorePosition(saved,area,scale);
+    assert.equal(saved.x,-600);assert.equal(saved.y,300);assert.equal(saved.width,Math.round(620*scale));
+  }
+});

@@ -60,7 +60,8 @@ function closeMenus() { menuOpen = false; if(!panelFull)windows.get('dashboard')
 function fitPet(bounds = windows.get('pet').getBounds(), point = null) {
   const body = interaction.shape?.body ?? geometry.DEFAULT_BODY;
   const visible = geometry.visibleBounds(body, menuOpen, !!store.state.focus);
-  const display = point ? screen.getDisplayNearestPoint(point) : screen.getDisplayNearestPoint({ x: Math.round(bounds.x + (body.left + body.right) / 2), y: Math.round(bounds.y + body.bottom) });
+  const scale=bounds.width/geometry.PET_SIZE.width;
+  const display = point ? screen.getDisplayNearestPoint(point) : screen.getDisplayNearestPoint({ x: Math.round(bounds.x + (body.left + body.right) / 2*scale), y: Math.round(bounds.y + body.bottom*scale) });
   return geometry.fitVisibleWindow(bounds, visible, display.workArea);
 }
 function resizePet() {
@@ -240,7 +241,7 @@ async function execute(name, p = {}, view = 'dashboard') {
       if (Number.isFinite(p.petScale)) {allowed.petScale=Math.round(Math.max(.7,Math.min(1.4,p.petScale))*20)/20;}
       if (Number.isFinite(p.leadMinutes)) allowed.leadMinutes = Math.max(1, Math.min(60, Math.round(p.leadMinutes)));
       if ('autoStart' in allowed && process.platform === 'win32') app.setLoginItemSettings({ openAtLogin: allowed.autoStart });
-      await mutate(s => Object.assign(s.settings, allowed)); if('petScale' in allowed) resizePet(); if('motion' in allowed) {motion.setEnabled(allowed.motion,Date.now());broadcast();} break;
+      await mutate(s => Object.assign(s.settings, allowed)); if('petScale' in allowed) {resizePet();await mutate(s=>{s.settings.petPosition=windows.get('pet').getBounds();});} if('motion' in allowed) {motion.setEnabled(allowed.motion,Date.now());broadcast();} break;
     }
     case 'calendarAdd': {
       if(syncing)throw new Error('Espera a que termine la actualización actual.');
@@ -398,8 +399,7 @@ app.whenReady().then(async () => {
   const pet = createWindow('pet', geometry.PET_SIZE.width, geometry.PET_SIZE.height, { focusable: false });
   const a = screen.getPrimaryDisplay().workArea;
   const initial = store.state.settings.petPosition;
-  const initialBounds=geometry.migratePosition(initial,a,smoke||interactiveDemo);
-  initialBounds.width=Math.round(geometry.PET_SIZE.width*store.state.settings.petScale);initialBounds.height=Math.round(geometry.PET_SIZE.height*store.state.settings.petScale);
+  const initialBounds=geometry.restorePosition(initial,a,store.state.settings.petScale,smoke||interactiveDemo);
   pet.setBounds(fitPet(initialBounds));
   // The pet asks to show only after its initial GPU resources are prepared.
   tray = new Tray(nativeImage.createFromPath(path.join(root, 'assets/PokeDesk.png')).resize({ width: 22, height: 22 }));
