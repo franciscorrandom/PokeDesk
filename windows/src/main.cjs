@@ -32,7 +32,7 @@ function sendAll(event, value) { for (const [view,w] of windows) if (!w.isDestro
 function snapshot() {
   return { ...structuredClone(store.state), now: Date.now(), remaining: remainingTimer(store.state.focus), section, calendarStatus: {...calendarStatus, syncing}, clips: character(store.state.settings.character).clips, characters: CHARACTERS, characterLoading,
     motion: { clip: motion.clip, revision: motion.revision, enabled: motion.enabled }, notice: notices[0] ?? null, noticeCount: notices.length,
-    error, menuOpen, fullPanel:panelFull, version: app.getVersion(), platform: process.platform, demo: smoke || interactiveDemo };
+    error, menuOpen, fullPanel:panelFull, version: app.getVersion(), platform: process.platform, demo: smoke || interactiveDemo, smokeTest:smoke };
 }
 function broadcast() { sendAll('state', snapshot()); }
 async function mutate(fn) { const result = await store.update(fn); error = ''; broadcast(); return result; }

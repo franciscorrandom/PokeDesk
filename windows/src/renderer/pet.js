@@ -18,7 +18,9 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   const orientation=new THREE.Group();scene.add(orientation);
   const appearance=new THREE.Group();appearance.position.y=1.1;orientation.add(appearance);
   const effect=createPokeball();scene.add(effect.root);
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const systemReduced=matchMedia('(prefers-reduced-motion: reduce)');
+  // CI desktops disable OS animations. Only the isolated smoke profile overrides that preference.
+  const reduced=settings.testEffects?{matches:false,addEventListener(){}}:systemReduced;
   let initialized=false;
   let current=null,pendingId='',switching=false,motionEnabled=settings.motion!==false,visible=!document.hidden,disposed=false,contextLost=false;
   const phaseHistory=[];

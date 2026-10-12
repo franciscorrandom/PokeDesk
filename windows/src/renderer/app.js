@@ -265,6 +265,6 @@ if (view === 'pet') {
   };
   try { const {createPet}=await import('./pet.js');
     const initial=await api.command('snapshot');
-    pet = await createPet(document.getElementById('pet-stage'), publishPetShape, initial.settings, info=>api.ready(info),()=>api.command('petPrepared'));api.ready(pet.info); } catch (e) { root.innerHTML = '<div class="pet-error">' + esc(e.message) + '</div>'; api.ready({ ok: false, error: e.message }); }
+    pet = await createPet(document.getElementById('pet-stage'), publishPetShape, {...initial.settings,testEffects:initial.smokeTest}, info=>api.ready(info),()=>api.command('petPrepared'));api.ready(pet.info); } catch (e) { root.innerHTML = '<div class="pet-error">' + esc(e.message) + '</div>'; api.ready({ ok: false, error: e.message }); }
 }
 applyState(await api.command('snapshot'));
