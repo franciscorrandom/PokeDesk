@@ -105,7 +105,7 @@ function settings() {
 
 function renderNotice() {
   const n = state.notice;const key=JSON.stringify(n);if(key===renderKey)return;renderKey=key;
-  root.innerHTML = n ? '<article class="notice-panel"><div class="row spread"><p class="eyebrow">' + (n.type === 'meeting' ? '◷ Próxima reunión' : n.type === 'task' ? '✓ Recordatorio' : '◉ Foco terminado') + '</p>' + button('×', 'noticeDismiss', 'aria-label="Cerrar aviso"', 'icon') + '</div><h3>' + esc(n.title) + '</h3><p class="muted">' + esc(n.body) + '</p><div class="row">' + (n.link ? button('Entrar ↗', 'join', 'data-id="' + esc(n.id) + '"', 'primary small') : '') + button('En 5 min', 'noticeSnooze', '', 'small') + '</div></article>' : '';
+  root.innerHTML = n ? '<article class="notice-panel"><div class="row spread"><p class="eyebrow">' + (n.type === 'meeting' ? '◷ Próxima reunión' : n.type === 'task' ? '✓ Recordatorio' : '◉ Foco terminado') + '</p>' + button('×', 'noticeDismiss', 'data-id="' + esc(n.id) + '" aria-label="Cerrar aviso"', 'icon') + '</div><h3>' + esc(n.title) + '</h3><p class="muted">' + esc(n.body) + '</p><div class="row">' + (n.link ? button('Entrar ↗', 'join', 'data-id="' + esc(n.id) + '"', 'primary small') : '') + button('En 5 min', 'noticeSnooze', 'data-id="' + esc(n.id) + '"', 'small') + '</div></article>' : '';
 }
 function renderPanel(force = false) {
   const key = JSON.stringify([state.notes, state.tasks, state.focus, state.cache, state.settings, state.calendarStatus, state.section, state.error]);
@@ -185,7 +185,7 @@ root.addEventListener('click', async e => {
   else if (action === 'toggleArchive') { showArchived = !showArchived; renderPanel(true); }
   else if (action === 'section') await command(action, { section: b.dataset.section, full: b.dataset.full === 'true' || view === 'dashboard' });
   else if (action === 'timerStart') await command(action, { minutes: Number(b.dataset.minutes) });
-  else if (action === 'calendarRemove' || action === 'character' || action === 'animation' || action === 'join' || action === 'taskDelete') await command(action, { id: b.dataset.id });
+  else if (action === 'noticeDismiss' || action === 'noticeSnooze' || action === 'calendarRemove' || action === 'character' || action === 'animation' || action === 'join' || action === 'taskDelete') await command(action, { id: b.dataset.id });
   else if (action === 'notesArchive') await command(action, { id: b.dataset.id, archived: b.dataset.archived === 'true' });
   else if(action==='pauseNotices') await command(action,{paused:b.dataset.paused==='true'});
   else await command(action);

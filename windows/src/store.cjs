@@ -41,10 +41,10 @@ class TokenVault {
   async read() {
     let data;
     try { data = await fs.readFile(this.file); } catch (e) { if (e.code === 'ENOENT') return null; throw e; }
-    const { result, shouldReEncrypt } = await this.safeStorage.decryptStringAsync(data);
-    const value = JSON.parse(result);
-    if (shouldReEncrypt) await this.write(value);
-    return value;
+    try {
+      const {result,shouldReEncrypt}=await this.safeStorage.decryptStringAsync(data);
+      const value=JSON.parse(result);if(shouldReEncrypt)await this.write(value);return value;
+    }catch{throw new Error('No pude recuperar las conexiones cifradas. Vuelve a pegar el enlace iCal en Ajustes.');}
   }
   async clear() { await fs.rm(this.file, { force: true }); }
 }

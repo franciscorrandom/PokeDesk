@@ -13,7 +13,7 @@ const dayKey = time => {
 };
 function defaults() {
   return {
-    version: 1, notes: [], tasks: [], focus: null, reminders: {},
+    version: 1, notes: [], tasks: [], focus: null, reminders: {}, snoozes: [],
     settings: { name: '', voice: 'Gracie', sound: true, volume: 0.8, motion: true, leadMinutes: 10, yaw: 0, petPosition: null, autoStart: false, character: 'arcanine', characterYaws: {}, petScale: 1, pausedUntil: null },
     feeds: [],
     cache: { calendars: [], taskLists: [], events: [], tasks: [], updatedAt: null }
@@ -24,6 +24,7 @@ function validateState(input) {
   const base = defaults();
   const result={ ...base, ...input, settings: { ...base.settings, ...input.settings }, feeds: Array.isArray(input.feeds) ? input.feeds : [], cache: base.cache };
   if(!result.notes.every(n=>n && typeof n.body==='string' && Array.isArray(n.revisions)) || !result.tasks.every(t=>t && typeof t.title==='string' && Array.isArray(t.days) && Array.isArray(t.completedDays)))throw new Error('Los datos guardados no tienen un formato compatible.');
+  result.snoozes=Array.isArray(result.snoozes)?result.snoozes:[];
   result.settings.character=character(result.settings.character).id;
   result.settings.petScale=Number.isFinite(result.settings.petScale)?Math.max(.7,Math.min(1.4,result.settings.petScale)):1;
   result.settings.yaw=Number.isFinite(result.settings.yaw)?result.settings.yaw:0;

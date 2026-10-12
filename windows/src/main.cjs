@@ -22,7 +22,8 @@ const windows = new Map(), ready = new Map(), motion = new Motion();
 const interaction = new Interaction();
 let geometry, menuOpen = false, panelFull=true;
 let store, calendars, tray, calendarStatus = {syncing:false, errors:[]}, characterLoading = true, section = 'home', yaw = 0, timerTick, cursorTick, nextSync = 0, syncing = false, syncFailures = 0;
-let notices = [], snoozes = [], error = '', petVisible = true, lastMotionRevision = -1;
+let noticeActionBusy=false;
+let notices = [], error = '', petVisible = true, lastMotionRevision = -1;
 const logs = [], smokeResults = {};
 function record(message) { logs.push(message); if (smoke || process.env.POKEDESK_DIAGNOSTICS === '1') console.log(message); }
 function ownWindow(sender) { return [...windows.values()].find(w => !w.isDestroyed() && w.webContents === sender); }
@@ -200,7 +201,8 @@ async function tick() {
     const committed = await store.update(s => checkReminders(s, now));
     committed.forEach(pushNotice);
   }
-  snoozes = snoozes.filter(s => { if (s.at <= now) { pushNotice(s.notice); return false; } return true; });
+  const pending=store.state.snoozes.filter(s=>s.at<=now);
+  if(pending.length){await store.update(s=>{s.snoozes=s.snoozes.filter(s=>s.at>now);});pending.forEach(s=>pushNotice(s.notice));}
   if (store.state.focus || due.length || motion.revision !== lastMotionRevision) { lastMotionRevision = motion.revision; broadcast(); }
   if (!smoke && !interactiveDemo) syncCalendars().catch(showError);
 }
@@ -255,9 +257,11 @@ async function execute(name, p = {}, view = 'dashboard') {
     case 'calendarRemove': {
       if(syncing)throw new Error('Espera a que termine la actualización actual.');
       if(!store.state.feeds.some(f=>f.id===p.id))throw new Error('Calendario no encontrado.');
-      await calendars.remove(p.id);
+      syncing=true;broadcast();
+      try{await calendars.remove(p.id);
       await mutate(s=>{s.feeds=s.feeds.filter(f=>f.id!==p.id);s.cache.events=s.cache.events.filter(e=>e.feedId!==p.id);});
-      calendarStatus.errors=calendarStatus.errors.filter(e=>e.id!==p.id);broadcast();break;
+      calendarStatus.errors=calendarStatus.errors.filter(e=>e.id!==p.id);}
+      finally{syncing=false;broadcast();}break;
     }
     case 'calendarSync': await syncCalendars(true); break;
     case 'character': {
@@ -277,8 +281,8 @@ async function execute(name, p = {}, view = 'dashboard') {
       if (smoke || interactiveDemo) { record('Demo: enlace ' + url.host); break; }
       await shell.openExternal(url.href); break;
     }
-    case 'noticeDismiss': notices.shift(); advanceNotice(); broadcast(); break;
-    case 'noticeSnooze': if (notices.length) snoozes.push({ notice: notices.shift(), at: Date.now() + 300000 }); advanceNotice(); broadcast(); break;
+    case 'noticeDismiss': if(noticeActionBusy)break;if(p.id&&p.id!==notices[0]?.id)break;notices.shift(); advanceNotice(); broadcast(); break;
+    case 'noticeSnooze': if(noticeActionBusy||p.id&&p.id!==notices[0]?.id)break;noticeActionBusy=true;try{if(notices.length){const notice=notices[0];await mutate(s=>{s.snoozes.push({notice,at:Date.now()+300000});});notices.shift();}advanceNotice();broadcast();}finally{noticeActionBusy=false;}break;
     case 'voicePreview': sound('meeting', true); break;
     case 'quit': app.quit(); break;
     default: throw new Error('Acción no disponible.');
@@ -357,6 +361,9 @@ async function runSmoke() {
   if(parsed.events.length!==1)throw new Error('El lector iCal empaquetado no funcionó.');
   smokeResults.calendarWorker=true;
   if(process.platform==='win32') {const vault=new TokenVault(path.join(app.getPath('userData'),'fake-calendar-links.enc'),safeStorage);await vault.write({fake:'enlace-ficticio'});if((await vault.read()).fake!=='enlace-ficticio')throw new Error('No se recuperó el enlace cifrado en Windows.');await vault.clear();smokeResults.windowsEncryption=true;}
+  await execute('noticeSnooze',{id:notices[0].id});
+  if(JSON.parse(await fs.readFile(store.file,'utf8')).snoozes.length!==1)throw new Error('No se conservó el aviso pospuesto.');
+  await mutate(s=>{s.snoozes[0].at=Date.now()-1;});await tick();if(store.state.snoozes.length)throw new Error('El aviso pospuesto no se reanudó.');smokeResults.snoozePersistence=true;
   smokeResults.hostPlatform=process.platform;smokeResults.electron=process.versions.electron;smokeResults.gpu=await app.getGPUInfo('basic');smokeResults.metrics=app.getAppMetrics();
   await fs.writeFile(path.join(diagnosticsRoot,'smoke-results.json'),JSON.stringify({...smokeResults,logs},null,2));
   if(logs.some(l=>/error|failed|not found|refused/i.test(l)))throw new Error('Errores del visor: '+logs.join('\n'));

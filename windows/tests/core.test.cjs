@@ -58,3 +58,16 @@ test('El almacén seguro nunca guarda tokens en texto plano cuando no hay cifrad
   await assert.rejects(v.write({ refresh_token: 'private' }), /segura/);
   await assert.rejects(fs.access(file));
 });
+test('Los avisos pospuestos sobreviven al reinicio; la agenda descargada no se guarda en disco', async t=>{
+  const folder=await fs.mkdtemp(path.join(os.tmpdir(),'pokedesk-snooze-'));t.after(()=>fs.rm(folder,{recursive:true,force:true}));
+  const file=path.join(folder,'estado.json'),a=new Store(file);await a.load();
+  await a.update(s=>{s.snoozes.push({notice:{id:'fake',title:'Aviso ficticio'},at:1234});s.cache.events.push({id:'memory-only',title:'Agenda ficticia'});});
+  const b=new Store(file);await b.load();assert.equal(b.state.snoozes.length,1);assert.deepEqual(b.state.cache.events,[]);
+  assert.ok(!(await fs.readFile(file,'utf8')).includes('Agenda ficticia'));
+});
+test('Un fallo al recuperar conexiones cifradas no expone fragmentos del enlace privado',async t=>{
+  const folder=await fs.mkdtemp(path.join(os.tmpdir(),'pokedesk-private-'));t.after(()=>fs.rm(folder,{recursive:true,force:true}));
+  const file=path.join(folder,'links.enc');await fs.writeFile(file,'fake-encrypted');
+  const vault=new TokenVault(file,{decryptStringAsync:async()=>({result:'private-secret-url invalid json',shouldReEncrypt:false})});
+  await assert.rejects(vault.read(),e=>e.message.includes('cifradas')&&!e.message.includes('private-secret'));
+});

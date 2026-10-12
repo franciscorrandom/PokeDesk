@@ -25,7 +25,7 @@ La app debe estar abierta para avisar. Tras suspensión comprueba los timers y r
 
 ## Datos
 
-`%APPDATA%\PokeDesk\estado.json`: tareas, notas, timer y ajustes. `calendar-links.enc`: enlaces iCal cifrados mediante el almacén seguro del sistema; nunca se incluyen en los snapshots enviados al visor. Los calendarios descargados permanecen en memoria durante la sesión. No hay analítica, servidor propio ni sincronización de datos entre dispositivos. No compartir enlaces privados iCal.
+`%APPDATA%\PokeDesk\estado.json`: tareas, notas, timer, avisos pospuestos y ajustes. `calendar-links.enc`: enlaces iCal cifrados mediante el almacén seguro del sistema; nunca se incluyen en los snapshots enviados al visor. Los calendarios descargados permanecen en memoria durante la sesión. No hay analítica, servidor propio ni sincronización de datos entre dispositivos. No compartir enlaces privados iCal.
 
 ## Desarrollo y compilación
 
