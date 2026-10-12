@@ -52,6 +52,10 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ## Compilar y verificar
 
+### Primera beta de Windows
+
+La edición **PokéDesk 1.4.0-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos cuatro modelos y animaciones, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac 1.3.2 se conserva. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
 Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior. Desde la carpeta del proyecto:
