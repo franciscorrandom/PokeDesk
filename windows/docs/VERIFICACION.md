@@ -2,7 +2,7 @@
 
 Fecha: 12 de octubre de 2026. Host local: Mac con Apple Silicon; Electron 44.7.0, Three.js 0.186.1. Estas mediciones corresponden a la vista Electron en Mac, no a la app Swift ni a un equipo Windows.
 
-- 24 pruebas de lógica: iCal, enlaces, recurrencias, zonas horarias, cambios de hora, cancelaciones, HTTP condicional, errores, tareas, timer, notas, guardado e interacción.
+- 25 pruebas de lógica: iCal, enlaces, recurrencias, zonas horarias, cambios de hora, cancelaciones, HTTP condicional, errores, tareas, timer, notas, guardado e interacción.
 - 1.000 ciclos del controlador de gestos y 300 ciclos por IPC en la aplicación.
 - 38 animaciones con transformaciones finitas y movimiento articulado.
 - 2.280 perfiles: cinco fases de cada clip por doce orientaciones. Sin recortes.

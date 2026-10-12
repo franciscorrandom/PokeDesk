@@ -33,6 +33,12 @@ export function fitVisibleWindow(bounds, visible, workArea) {
   const maxY = workArea.y + workArea.height - 8 - visible.bottom * sy;
   return { ...bounds, x: Math.round(clamp(bounds.x, minX, Math.max(minX, maxX))), y: Math.round(clamp(bounds.y, minY, Math.max(minY, maxY))) };
 }
+export function fitSurface(bounds, visible, workArea) {
+  const scale=bounds.width/PET_SIZE.width;
+  const available=Math.min(scale,(workArea.width-16)/Math.max(1,visible.right-visible.left),(workArea.height-16)/Math.max(1,visible.bottom-visible.top));
+  const size={width:Math.max(1,Math.floor(PET_SIZE.width*available)),height:Math.max(1,Math.floor(PET_SIZE.height*available))};
+  return fitVisibleWindow({...bounds,...size},visible,workArea);
+}
 export function migratePosition(saved, workArea, demo = false) {
   if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
     const width = Number.isFinite(saved.width) ? saved.width : 252;
@@ -43,8 +49,9 @@ export function migratePosition(saved, workArea, demo = false) {
 }
 export function restorePosition(saved, workArea, scale = 1, demo = false) {
   const fresh=migratePosition(null,workArea,demo);
+  const effective=Number.isFinite(saved?.width)&&saved.width>60&&saved.width<=PET_SIZE.width*1.4?saved.width/PET_SIZE.width:scale;
   return {x:Number.isFinite(saved?.x)?saved.x:fresh.x,y:Number.isFinite(saved?.y)?saved.y:fresh.y,
-    width:Math.round(PET_SIZE.width*scale),height:Math.round(PET_SIZE.height*scale)};
+    width:Math.round(PET_SIZE.width*effective),height:Math.round(PET_SIZE.height*effective)};
 }
 export function maskHit(mask, x, y, padding = 1) {
   if (!mask || x < 0 || y < 0 || x >= mask.width || y >= mask.height) return false;

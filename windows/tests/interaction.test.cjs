@@ -78,3 +78,13 @@ test('La posición guardada no deriva al reiniciar con un tamaño personalizado'
     assert.equal(saved.x,-600);assert.equal(saved.y,300);assert.equal(saved.width,Math.round(620*scale));
   }
 });
+test('Con escalado alto, la figura, el menú y el timer caben incluso en una pantalla pequeña',async()=>{
+  const {fitSurface,visibleBounds,DEFAULT_BODY,restorePosition}=await geometry;
+  const visible=visibleBounds(DEFAULT_BODY,true,true);
+  for(const area of [{x:0,y:0,width:960,height:500},{x:-800,y:-100,width:800,height:340}]) {
+    const b=fitSurface({x:area.x+800,y:area.y+300,width:868,height:728},visible,area),sx=b.width/620,sy=b.height/520;
+    assert.ok(b.x+visible.left*sx>=area.x+7);assert.ok(b.x+visible.right*sx<=area.x+area.width-7);
+    assert.ok(b.y+visible.top*sy>=area.y+7);assert.ok(b.y+visible.bottom*sy<=area.y+area.height-7);
+    assert.equal(restorePosition(b,area,1.4).width,b.width);
+  }
+});

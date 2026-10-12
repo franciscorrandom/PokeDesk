@@ -49,7 +49,7 @@ function placeMenus() {
   const arc = { x: b.x + local.x*k, y: b.y + local.y*k, width: local.width*k, height: local.height*k };
   const detail = panelFull?null:windows.get('dashboard');
   if (detail) {
-    const height = 438, width = 370;
+    const height = Math.min(438,a.height-16), width = Math.min(370,a.width-16);
     let y = arc.y - height - 10, x = b.x + (body.left + body.right) / 2 - width / 2;
     if (y < a.y + 8) { y = Math.max(a.y + 8, b.y + body.top - 110); x = b.x + body.left - width - 12; if (x < a.x) x = b.x + body.right + 12; }
     detail.setBounds(clampWindow({ x, y, width, height }, { workArea: a }));
@@ -62,7 +62,7 @@ function fitPet(bounds = windows.get('pet').getBounds(), point = null) {
   const visible = geometry.visibleBounds(body, menuOpen, !!store.state.focus);
   const scale=bounds.width/geometry.PET_SIZE.width;
   const display = point ? screen.getDisplayNearestPoint(point) : screen.getDisplayNearestPoint({ x: Math.round(bounds.x + (body.left + body.right) / 2*scale), y: Math.round(bounds.y + body.bottom*scale) });
-  return geometry.fitVisibleWindow(bounds, visible, display.workArea);
+  return geometry.fitSurface(bounds, visible, display.workArea);
 }
 function resizePet() {
   interaction.end(true); const w=windows.get('pet'),b=w.getBounds(),scale=store.state.settings.petScale;
@@ -71,6 +71,10 @@ function resizePet() {
 }
 function setPetBounds(bounds) {
   const w = windows.get('pet'), old = w.getBounds();
+  if(bounds.width!==old.width||bounds.height!==old.height){
+    w.webContents.setZoomFactor(bounds.width/geometry.PET_SIZE.width);
+    if(interaction.gesture){interaction.gesture.bounds.width=bounds.width;interaction.gesture.bounds.height=bounds.height;}
+  }
   if (bounds.x !== old.x || bounds.y !== old.y || bounds.width !== old.width || bounds.height !== old.height) w.setBounds(bounds);
   placeMenus();
 }
@@ -112,7 +116,7 @@ function createWindow(view, width, height, { focusable = true } = {}) {
   win.setAlwaysOnTop(true, 'floating');
   win.webContents.setZoomFactor(view === 'pet' ? store.state.settings.petScale : 1);
   win.webContents.setVisualZoomLevelLimits(1, 1);
-  win.webContents.on('zoom-changed', () => win.webContents.setZoomFactor(view === 'pet' ? store.state.settings.petScale : 1));
+  win.webContents.on('zoom-changed', () => win.webContents.setZoomFactor(view === 'pet' ? win.getContentBounds().width/geometry.PET_SIZE.width : 1));
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('pokedesk://app/')) e.preventDefault(); });
   win.webContents.on('console-message', (details, level, message) => { if (details.level === 'error' || level === 3) record(view + ': ' + (details.message ?? message)); });
@@ -400,7 +404,7 @@ app.whenReady().then(async () => {
   const a = screen.getPrimaryDisplay().workArea;
   const initial = store.state.settings.petPosition;
   const initialBounds=geometry.restorePosition(initial,a,store.state.settings.petScale,smoke||interactiveDemo);
-  pet.setBounds(fitPet(initialBounds));
+  setPetBounds(fitPet(initialBounds));
   // The pet asks to show only after its initial GPU resources are prepared.
   tray = new Tray(nativeImage.createFromPath(path.join(root, 'assets/PokeDesk.png')).resize({ width: 22, height: 22 }));
   tray.setToolTip('PokeDesk · asistente de escritorio'); tray.on('click', () => showSection('home', true)); updateTray();
