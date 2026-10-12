@@ -29,6 +29,13 @@ jobs:
         run: npm run smoke
       - name: Build installer and portable ZIP
         run: npm run build:windows
+      - name: Verify packaged Windows executable
+        shell: pwsh
+        run: |
+          $appTest = Start-Process -FilePath ".\dist\win-unpacked\PokeDesk.exe" -ArgumentList "--smoke-test" -PassThru -Wait
+          $proofDir = Join-Path $env:TEMP "pokedesk-desktop-preview\verification"
+          if (Test-Path $proofDir) { Copy-Item $proofDir ".build\packaged" -Recurse -Force }
+          if ($appTest.ExitCode -ne 0) { throw "Packaged app smoke test failed with exit code $($appTest.ExitCode)" }
       - uses: actions/upload-artifact@v7
         with:
           name: PokeDesk-Windows-beta
