@@ -19,6 +19,7 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   const appearance=new THREE.Group();appearance.position.y=1.1;orientation.add(appearance);
   const effect=createPokeball();scene.add(effect.root);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  let initialized=false;
   let current=null,pendingId='',switching=false,motionEnabled=settings.motion!==false,visible=!document.hidden,disposed=false,contextLost=false;
   const phaseHistory=[];
   let frameHandle=0,lastTime=0,lastShapeTime=-Infinity,currentClip='reposo',phase=null,dirty=true,frames=0,shapeReads=0;
@@ -96,7 +97,7 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
       if(current){play('reposo',true);await animate('recall');appearance.remove(current.placement);current.mixer.stopAllAction();current.mixer.uncacheRoot(current.model);disposeModel(current.model);}
       appearance.visible=false;appearance.scale.setScalar(.001);current=incoming;appearance.add(current.placement);cameraFor(id,'reposo');play('reposo',true);
       await animate('release');settle();draw(true);
-      onReady({ok:true,character:id,clips:current.actions.size,bones:current.bones.length,phases:phaseHistory.slice(),reducedMotion:reduced.matches});
+      if(initialized)onReady({ok:true,character:id,clips:current.actions.size,bones:current.bones.length,phases:phaseHistory.slice(),reducedMotion:reduced.matches});
     } catch(e){settle();onReady({ok:false,character:current?.id,error:'No pude cargar el modelo 3D. Reabre PokéDesk o vuelve a descargar la app completa.'});throw e;}
     finally{pendingId='';switching=false;}
   }
@@ -136,13 +137,14 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
     sample(id){play(id,true);const a=current.actions.get(id);current.mixer.update(.02);scene.updateMatrixWorld(true);const before=current.bones.flatMap(n=>n.matrixWorld.elements);current.mixer.update(a.getClip().duration*.4);scene.updateMatrixWorld(true);const after=current.bones.flatMap(n=>n.matrixWorld.elements);draw(true);return {finite:after.every(Number.isFinite),changes:after.filter((v,i)=>Math.abs(v-before[i])>1e-6).length,duration:a.getClip().duration};},
     rotation(){play('reposo',true);current.mixer.update(.1);setYaw(Math.PI/2);draw(true);const r=container.getBoundingClientRect();let found=false;for(let y=r.top+20;y<r.bottom-20;y+=15)for(let x=r.left+20;x<r.right-20;x+=15)if(hit(x,y))found=true;const gl=renderer.getContext(),px=new Uint8Array(4);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);const result={horizontalOnly:orientation.rotation.x===0&&orientation.rotation.z===0,hit:found,emptyMiss:!hit(2,2),alpha:px[3]===0};setYaw(0);draw(true);return result;},
     profiles(){const results=[];for(const [id,a]of current.actions)for(const fraction of [0,.25,.5,.75,.99])for(let turn=0;turn<12;turn++){play(id,true);current.mixer.update(a.getClip().duration*fraction);setYaw(turn*Math.PI/6);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);const b={left:Infinity,top:Infinity,right:-Infinity,bottom:-Infinity};for(const mesh of current.meshes)for(let i=0;i<mesh.geometry.attributes.position.count;i++){mesh.getVertexPosition(i,temp);temp.applyMatrix4(mesh.matrixWorld).project(camera);b.left=Math.min(b.left,(temp.x+1)*width/2);b.right=Math.max(b.right,(temp.x+1)*width/2);b.top=Math.min(b.top,(1-temp.y)*height/2);b.bottom=Math.max(b.bottom,(1-temp.y)*height/2);}results.push({id,fraction,turn,...b,fits:b.left>=6&&b.top>=6&&b.right<=width-6&&b.bottom<=height-6});}play('reposo',true);setYaw(0);draw(true);return {cases:results.length,clipped:results.filter(r=>!r.fits),minMargin:Math.min(...results.flatMap(b=>[b.left,b.top,width-b.right,height-b.bottom]))};},
-    info(){return {character:current?.id,switching,appearanceVisible:appearance.visible,amount:appearance.scale.x,effectVisible:effect.root.visible,frames,shapeReads,memory:renderer.info.memory,programs:renderer.info.programs?.length,pixelRatio:renderer.getPixelRatio(),phases:phaseHistory.slice(),activeActions:current?[...current.actions.values()].filter(a=>a.isRunning()).length:0};},
+    info(){return {character:current?.id,visible,contextLost,switching,appearanceVisible:appearance.visible,amount:appearance.scale.x,effectVisible:effect.root.visible,frames,shapeReads,memory:renderer.info.memory,programs:renderer.info.programs?.length,pixelRatio:renderer.getPixelRatio(),phases:phaseHistory.slice(),activeActions:current?[...current.actions.values()].filter(a=>a.isRunning()).length:0};},
     setCharacter,
     async repeatedSwitch(count=12){for(let i=0;i<count;i++)await setCharacter(characters[i%4].id);return diagnostic.info();}
   };
   window.petDiagnostics=diagnostic;
+  initialized=true;
   return {hit,play,setYaw,setMotion,setCharacter,refresh:()=>invalidate(),repeatSummon:async()=>{if(switching)return;switching=true;play('reposo',true);await animate('release');settle();switching=false;},
-    get info(){return {ok:true,character:current.id,clips:current.actions.size,bones:current.bones.length};},
+    get info(){return {ok:true,character:current.id,clips:current.actions.size,bones:current.bones.length,phases:phaseHistory.slice(),reducedMotion:reduced.matches};},
     dispose(){disposed=true;cancelAnimationFrame(frameHandle);finishPhase();window.removeEventListener('resize',resize);document.removeEventListener('visibilitychange',visibility);if(current){current.mixer.stopAllAction();current.mixer.uncacheRoot(current.model);disposeModel(current.model);}effect.dispose();hitTarget.dispose();renderer.dispose();}
   };
 }

@@ -47,5 +47,6 @@ jobs:
         if: always()
         with:
           name: PokeDesk-Windows-verification
+          include-hidden-files: true
           path: windows/.build/
           if-no-files-found: warn
