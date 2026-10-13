@@ -15,6 +15,7 @@ private func event(_ uid: String, start: String = "20261009T150000Z", extra: Str
 private final class CalendarHTTP: URLProtocol {
     static var answers: [(Int, String, [String:String])] = []
     static var requests: [URLRequest] = []
+    static var nextData: Data?
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
@@ -22,7 +23,8 @@ private final class CalendarHTTP: URLProtocol {
         let next = Self.answers.removeFirst()
         let response = HTTPURLResponse(url: request.url!, statusCode: next.0, httpVersion: "HTTP/1.1", headerFields: next.2)!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: Data(next.1.utf8)); client?.urlProtocolDidFinishLoading(self)
+        let payload = Self.nextData ?? Data(next.1.utf8); Self.nextData = nil
+        client?.urlProtocol(self, didLoad: payload); client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}
 }
@@ -86,6 +88,17 @@ private final class SlowVault: CalendarVault {
         let unfolding = try parser.parse(ics(folded), now: now, feedID: id)
         check(unfolding.meetings[0].title == "Revisión de equipo" && unfolding.meetings[0].joinURL != nil, "Desplegar líneas y escapes iCal")
 
+        let big = ics(event("large"), extra: "X-ARCHIVE-NOTE:" + String(repeating: "x", count: 11 * 1024 * 1024) + "\n")
+        check(try parser.parse(big, now: now, feedID: id).meetings.count == 1, "Leer un calendario de trabajo mayor al antiguo límite de 10 MB")
+        check(try CalendarPayload.decode(Data([0xef,0xbb,0xbf]) + Data(single.utf8)) == single, "Aceptar UTF-8 con BOM")
+        check(try CalendarPayload.decode(single.data(using: .utf16)!) == single, "Aceptar un calendario UTF-16 identificado por BOM")
+        let splitCharacter = Data("BEGIN:VCALENDAR\r\nSUMMARY:Caf".utf8) + Data([0xc3,13,10,32,0xa9]) + Data("\r\nEND:VCALENDAR\r\n".utf8)
+        check(try CalendarPayload.decode(splitCharacter).contains("Café"), "Desplegar una línea que divide un carácter UTF-8")
+        do { _ = try CalendarPayload.decode(Data([0xff,0x80])); preconditionFailure("Texto binario aceptado") }
+        catch { check(error.localizedDescription.contains("codificación"), "Distinguir codificación de tamaño") }
+        do { _ = try CalendarPayload.decode(Data("<html>Google Workspace</html>".utf8)); preconditionFailure("HTML aceptado") }
+        catch { check(error.localizedDescription.contains("organización"), "Explicar cuando se recibe una página de acceso") }
+
         let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [CalendarHTTP.self]
         let vault = CalendarMemoryVault(), service = CalendarService(vault: vault, parser: parser, session: URLSession(configuration: config))
         CalendarHTTP.answers = [(200, ics(daily), ["ETag":"test-v1"]),(304,"",[:]),(403,"",[:])]
@@ -97,6 +110,17 @@ private final class SlowVault: CalendarVault {
         do { _ = try await service.fetch(CalendarFeed(id: id, name: "Equipo"), now: now); preconditionFailure("403 aceptado") }
         catch { check(!error.localizedDescription.contains(address) && vault.links[id] == address, "Error no revela enlace ni borra conexión") }
         try await service.remove(id); check(vault.links[id] == nil, "Desconectar elimina enlace guardado")
+        CalendarHTTP.answers = [(200,big,[:])]
+        var largeResponsive = false
+        let largeHeartbeat = Task { @MainActor in try await Task.sleep(nanoseconds: 30_000_000); largeResponsive = true }
+        let largeSnapshot = try await service.connect(address, id: id, name: "Equipo grande", now: now)
+        check(largeSnapshot.meetings.count == 1 && largeResponsive, "Descargar y leer 11 MB sin bloquear el hilo de la mascota")
+        _ = try await largeHeartbeat.value
+        CalendarHTTP.answers = [(200,single,["Content-Length":String(CalendarPayload.maximumBytes + 1)])]
+        do { _ = try await service.fetch(CalendarFeed(id: id, name: "Equipo"), now: now); preconditionFailure("Límite de cabecera ignorado") }
+        catch { check(error.localizedDescription.contains("50 MB") && vault.links[id] == address, "Limitar una descarga excesiva sin borrar la conexión") }
+        CalendarHTTP.answers = [(304,"",[:])]
+        check(try await service.fetch(CalendarFeed(id: id, name: "Equipo"), now: now).meetings.count == 1, "Una descarga rechazada conserva la caché y el ETag anteriores")
         let failing = CalendarService(vault: FailingVault(), parser: parser, session: URLSession(configuration: config))
         CalendarHTTP.answers = [(200,single,["ETag":"failed"]),(200,single,[:])]
         do { _ = try await failing.connect(address, id: id, name: "Equipo", now: now); preconditionFailure("Llavero fallido aceptado") }

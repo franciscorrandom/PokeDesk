@@ -1,0 +1,52 @@
+name: Windows beta
+on:
+  pull_request:
+    paths: ['windows/**', 'Assets/**', 'docs/CREDITOS.md', '.github/workflows/windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: windows
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: windows/package-lock.json
+      - run: npm ci
+      - name: Calendar, timers, storage and interaction tests
+        run: npm test
+      - name: Native Windows rendering and interaction smoke test
+        run: npm run smoke
+      - name: Build installer and portable ZIP
+        run: npm run build:windows
+      - name: Verify packaged Windows executable
+        shell: pwsh
+        run: |
+          $appTest = Start-Process -FilePath ".\dist\win-unpacked\PokeDesk.exe" -ArgumentList "--smoke-test" -PassThru -Wait
+          $proofDir = Join-Path $env:TEMP "pokedesk-desktop-preview\verification"
+          if (Test-Path $proofDir) { Copy-Item $proofDir ".build\packaged" -Recurse -Force }
+          if ($appTest.ExitCode -ne 0) { throw "Packaged app smoke test failed with exit code $($appTest.ExitCode)" }
+      - uses: actions/upload-artifact@v7
+        with:
+          name: PokeDesk-Windows-beta
+          path: |
+            windows/dist/PokeDesk-*-Windows-x64.exe
+            windows/dist/PokeDesk-*-Windows-x64.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: PokeDesk-Windows-verification
+          include-hidden-files: true
+          path: windows/.build/
+          if-no-files-found: warn

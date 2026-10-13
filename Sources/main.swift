@@ -269,7 +269,7 @@ final class BubblePanel: NSPanel {
 
     private func positionDashboard() {
         guard let dashboard else { return }
-        positionFloatingPanel(dashboard, width: 430, height: model.dashboardTab == -1 ? 620 : model.dashboardTab == 5 ? 760 : 640)
+        positionFloatingPanel(dashboard, width: 500, height: model.dashboardTab == 5 ? 760 : 710)
     }
 
     private func positionQuickMenu() {
@@ -279,6 +279,8 @@ final class BubblePanel: NSPanel {
         let rect = QuickMenuLayout.place(anchorX: petPanel.frame.midX,
             anchorY: petPanel.frame.minY + 28 + (petPanel.frame.height - 28) * 0.82, screen: bounds)
         quickMenu.setFrame(NSRect(x: rect.x, y: rect.y, width: rect.width, height: rect.height), display: true)
+        quickState.origin = CGPoint(x: petPanel.frame.midX - rect.x,
+            y: rect.maxY - (petPanel.frame.minY + 28 + (petPanel.frame.height - 28) * 0.5))
         if let quickDetail, let action = quickState.selected {
             let detail = QuickMenuLayout.detail(width: 350, height: action.detailHeight, menu: rect, screen: bounds)
             quickDetail.setFrame(NSRect(x: detail.x, y: detail.y, width: detail.width, height: detail.height), display: true)
@@ -408,11 +410,24 @@ final class BubblePanel: NSPanel {
             panel.contentView = host; quickMenu = panel; quickHostingView = host
         }
         quickState.selected = nil
+        quickState.presentation += 1
+        quickState.expanded = false
+        quickState.interactionReady = false
         quickDetail?.orderOut(nil)
         positionQuickMenu()
         bubblePanel.orderOut(nil)
         quickMenu?.ignoresMouseEvents = false
         quickMenu?.makeKeyAndOrderFront(nil)
+        let presentation = quickState.presentation
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.quickState.presentation == presentation, self.quickMenu?.isVisible == true else { return }
+            self.quickState.expanded = true
+            let delay = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? 0 : 0.5
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.quickState.presentation == presentation, self.quickMenu?.isVisible == true else { return }
+                self.quickState.interactionReady = true
+            }
+        }
     }
     private func selectQuickAction(_ action: PetQuickAction) {
         if action == .petting {
@@ -449,6 +464,9 @@ final class BubblePanel: NSPanel {
     }
     private func closeQuickMenu(restoreAlert: Bool = true) {
         let wasVisible = quickMenu?.isVisible == true || quickDetail?.isVisible == true
+        quickState.presentation += 1
+        quickState.expanded = false
+        quickState.interactionReady = false
         quickMenu?.orderOut(nil); quickDetail?.orderOut(nil); quickState.selected = nil
         if wasVisible && restoreAlert && dashboard?.isVisible != true && model.currentAlert != nil {
             positionBubble(); bubblePanel.orderFrontRegardless()
@@ -1030,7 +1048,7 @@ final class BubblePanel: NSPanel {
             let p = QuickMenuLayout.buttonCenter(index)
             return host.containsControl(NSPoint(x: p.x, y: host.isFlipped ? p.y : QuickMenuLayout.height - p.y))
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             checks["quickMenuNativeHitTests"] = (0..<PetQuickAction.allCases.count).allSatisfy { index in
                 let point = QuickMenuLayout.buttonCenter(index)
                 let local = NSPoint(x: point.x, y: host.isFlipped ? point.y : QuickMenuLayout.height - point.y)

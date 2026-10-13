@@ -81,7 +81,7 @@ struct PetNotesView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("Tu cuaderno", systemImage: "note.text")
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .font(.system(size: 19, weight: .semibold))
                 Spacer()
                 Button { model.newNote() } label: { Label("Nueva", systemImage: "plus") }.help("Escribir una nueva nota")
             }
@@ -106,7 +106,7 @@ struct PetNotesView: View {
                     .background(theme.line.opacity(0.18)).clipShape(RoundedRectangle(cornerRadius: 10))
             }
             HStack {
-                Text("HISTORIAL").font(.system(size: 11, weight: .bold, design: .monospaced)).tracking(1)
+                Text("HISTORIAL").font(.system(size: 11, weight: .semibold, design: .monospaced)).tracking(1)
                 Spacer()
                 Text("\(filtered.count) \(filtered.count == 1 ? "nota" : "notas")")
                     .font(.system(size: 10)).foregroundStyle(theme.muted)
@@ -139,7 +139,7 @@ struct PetNotesView: View {
             ForEach(filtered) { note in
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .top) {
-                        Text(note.displayTitle).font(.system(size: 13, weight: .bold, design: .rounded)).lineLimit(2)
+                        Text(note.displayTitle).font(.system(size: 13, weight: .semibold)).lineLimit(2)
                         Spacer(minLength: 4)
                         if note.archivedAt == nil {
                             Button { model.setNoteArchived(note.id, archived: true) } label: { Image(systemName: "archivebox") }
@@ -186,7 +186,7 @@ struct PetNotesQuickView: View {
             PetNoteEditor(model: model, compact: true)
             let recent = Array(NoteRules.filtered(model.notes).prefix(2))
             if !recent.isEmpty {
-                Text("NOTAS RECIENTES").font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(theme.muted)
+                Text("NOTAS RECIENTES").font(.system(size: 9, weight: .semibold, design: .monospaced)).foregroundStyle(theme.muted)
                 ForEach(recent) { note in
                     Button { model.editNote(note.id) } label: {
                         HStack {

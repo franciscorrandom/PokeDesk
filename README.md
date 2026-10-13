@@ -6,7 +6,7 @@ Mascota 3D flotante con Arcanine, Mewtwo, Pikachu y Charizard, animaciones artic
 
 Requiere **macOS 14 Sonoma o posterior**, en Mac Intel o Apple Silicon. La descarga es universal e incluye todos los recursos; no hay que instalar herramientas de programación.
 
-1. Descarga `PokeDesk-1.3.2-macOS.zip` desde [Releases](https://github.com/franciscorrandom/PokeDesk/releases).
+1. Descarga `PokeDesk-1.4.0-macOS.zip` desde [Releases](https://github.com/franciscorrandom/PokeDesk/releases).
 2. Descomprime el ZIP y arrastra `PokeDesk.app` a Aplicaciones.
 3. Abre la app. Esta edición gratuita está firmada de forma local, **sin Developer ID ni notarización**. Si macOS bloquea la apertura, después de intentarla ve a **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente** y confirma. Sigue las [instrucciones de Apple](https://support.apple.com/es-cl/102445); no hace falta desactivar la seguridad del Mac.
 4. En la bienvenida pega tu enlace iCal de Google Calendar y pulsa **Conectar calendario**. Puedes usar tareas, notas, animaciones y concentración aunque no conectes un calendario.
@@ -52,6 +52,10 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ## Compilar y verificar
 
+### Primera beta de Windows
+
+La edición **PokéDesk 1.4.0-beta.2 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos cuatro modelos y animaciones, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
 Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior. Desde la carpeta del proyecto:
@@ -61,7 +65,7 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.3.2-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.4.0-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 
@@ -70,3 +74,7 @@ Las pruebas cubren avisos, timers, datos persistentes, notas, movimiento, secuen
 ## Créditos
 
 Proyecto de fans independiente, sin afiliación con Pokémon, Nintendo, Game Freak ni Creatures. El código propio está disponible bajo MIT; los recursos de terceros mantienen sus licencias y derechos respectivos. Véase [Créditos y licencias](docs/CREDITOS.md).
+
+## Órbita · 1.4.0
+
+Interfaz clara con acentos por Pokémon, selector rápido, menú con salida desde el cuerpo y respuesta al pasar el cursor. Respeta Reducir movimiento. La lectura iCal admite hasta 50 MB, cancela transferencias mayores y diferencia problemas de tamaño, codificación y permisos. El procesamiento de calendarios se realiza fuera del hilo de la interfaz.
