@@ -3,6 +3,7 @@ const {parentPort,workerData}=require('node:worker_threads');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
+const {MAX_CALENDAR_BYTES,sizeError}=require('./calendar-payload.cjs');
 const formats=new Map();
 function nativeTimestamp(json,zone) {
   try {
@@ -16,7 +17,8 @@ function nativeTimestamp(json,zone) {
   } catch {return NaN;}
 }
 function parse(text,now,timezone) {
-  if(Buffer.byteLength(text)>10*1024*1024 || !text.includes('BEGIN:VCALENDAR')) throw new Error('INVALID_CALENDAR');
+  if(Buffer.byteLength(text)>MAX_CALENDAR_BYTES)throw sizeError();
+  if(!text.includes('BEGIN:VCALENDAR'))throw new Error('INVALID_CALENDAR');
   const context=vm.createContext({nativeTimestamp});
   for(const file of ['ical.js','reader.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/calendar',file),'utf8'),context,{timeout:5000});
   context.input=text;context.begin=now/1000;context.end=(now+7*86400000)/1000;context.zone=timezone;

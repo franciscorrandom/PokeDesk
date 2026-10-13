@@ -56,7 +56,8 @@ enum FloatingLayout {
 }
 
 enum QuickMenuLayout {
-    static let width = 548.0, height = 190.0
+    // Extra transparent space lets shortcuts travel from the Pokémon's body.
+    static let width = 548.0, height = 330.0
     static let buttonCount = 7
     static let arcButtonCount = 6
     static let radiusX = width / 2 - 52
@@ -77,7 +78,7 @@ enum QuickMenuLayout {
     static func place(anchorX: Double, anchorY: Double, screen: FloatingRect) -> FloatingRect {
         let margin = 8.0
         return FloatingRect(x: min(max(anchorX - width / 2, screen.x + margin), screen.maxX - width - margin),
-            y: min(max(anchorY - 34, screen.y + margin), screen.maxY - height - margin), width: width, height: height)
+            y: min(max(anchorY - 174, screen.y + margin), screen.maxY - height - margin), width: width, height: height)
     }
     static func detail(width: Double, height: Double, menu: FloatingRect, screen: FloatingRect) -> FloatingRect {
         let margin = 12.0, gap = 8.0

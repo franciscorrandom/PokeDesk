@@ -2,6 +2,7 @@
 const {Worker}=require('node:worker_threads');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
+const {MAX_CALENDAR_BYTES,sizeError,readCalendarResponse}=require('./calendar-payload.cjs');
 function calendarAddress(value) {
   try {
     const text=String(value).trim().replace(/^webcal:\/\//,'https://'), u=new URL(text);
@@ -18,19 +19,24 @@ function meetingLink(text) {
 }
 function parseCalendarWorker(text,now=Date.now(),timezone=Intl.DateTimeFormat().resolvedOptions().timeZone) {
   return new Promise((resolve,reject)=>{
-    const worker=new Worker(path.join(__dirname,'calendar-worker.cjs'),{workerData:{text,now,timezone},resourceLimits:{maxOldGenerationSizeMb:96}});
+    if(Buffer.byteLength(text)>MAX_CALENDAR_BYTES){reject(sizeError());return;}
+    const worker=new Worker(path.join(__dirname,'calendar-worker.cjs'),{workerData:{text,now,timezone},resourceLimits:{maxOldGenerationSizeMb:Buffer.byteLength(text)>10*1024*1024?256:96}});
     const timer=setTimeout(()=>{worker.terminate();reject(new Error('El calendario tardó demasiado en procesarse.'));},12000);
     worker.once('message',v=>{clearTimeout(timer);worker.terminate();v.error?reject(new Error(v.error)):resolve(v.value);});
     worker.once('error',()=>{clearTimeout(timer);reject(new Error('No pude leer el calendario.'));});
     worker.once('exit',code=>{clearTimeout(timer);if(code) reject(new Error('No pude terminar de leer el calendario.'));});
   });
 }
-const parseQueue=[];let activeParsers=0;
+const parseQueue=[];let activeParsers=0,largeParser=false;
 function parseCalendar(text,now=Date.now(),timezone=Intl.DateTimeFormat().resolvedOptions().timeZone) {
   return new Promise((resolve,reject)=>{parseQueue.push({text,now,timezone,resolve,reject});drainParsers();});
 }
 function drainParsers() {
-  while(activeParsers<2&&parseQueue.length){const item=parseQueue.shift();activeParsers++;parseCalendarWorker(item.text,item.now,item.timezone).then(item.resolve,item.reject).finally(()=>{activeParsers--;drainParsers();});}
+  while(activeParsers<2&&parseQueue.length&&!largeParser){
+    const large=Buffer.byteLength(parseQueue[0].text)>10*1024*1024;if(large&&activeParsers)break;
+    const item=parseQueue.shift();activeParsers++;if(large)largeParser=true;
+    parseCalendarWorker(item.text,item.now,item.timezone).then(item.resolve,item.reject).finally(()=>{activeParsers--;if(large)largeParser=false;drainParsers();});
+  }
 }
 
 class Calendars {
@@ -53,9 +59,7 @@ class Calendars {
       if(response.status===304 && this.raw.has(id)) text=this.raw.get(id);
       else {
         if(response.status!==200)throw new Error([401,403,404].includes(response.status)?'Google no permitió leer el calendario. Comprueba si cambió el enlace iCal.':'Google Calendar no está disponible. Volveré a intentarlo.');
-        const reader=response.body.getReader(),chunks=[];let size=0;
-        for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>10*1024*1024){await reader.cancel();throw new Error('El calendario es demasiado grande.');}chunks.push(value);}
-        text=new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks));
+        text=await readCalendarResponse(response);
       }
       parsed=await parseCalendar(text,now);
       if((this.epoch.get(id)??0)!==epoch)throw new Error('La conexión cambió durante la actualización.');

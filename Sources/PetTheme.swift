@@ -6,15 +6,16 @@ struct PetTheme {
     private var electric: Bool { character == .pikachu }
     private var dragon: Bool { character == .charizard }
     private var psychic: Bool { character == .mewtwo }
-    var red: Color { electric ? Color(red: 0.57, green: 0.39, blue: 0.03) : dragon ? Color(red: 0.12, green: 0.40, blue: 0.44) : psychic ? Color(red: 0.43, green: 0.25, blue: 0.64) : ArcanineTheme.red }
-    var deepRed: Color { electric ? Color(red: 0.38, green: 0.25, blue: 0.03) : dragon ? Color(red: 0.06, green: 0.26, blue: 0.30) : psychic ? Color(red: 0.29, green: 0.15, blue: 0.45) : ArcanineTheme.deepRed }
+    var red: Color { electric ? Color(red: 0.55, green: 0.41, blue: 0.04) : dragon ? Color(red: 0.15, green: 0.42, blue: 0.46) : psychic ? Color(red: 0.50, green: 0.35, blue: 0.70) : Color(red: 0.66, green: 0.36, blue: 0.16) }
+    var deepRed: Color { red }
     var fire: Color { psychic ? Color(red: 0.53, green: 0.30, blue: 0.68) : ArcanineTheme.fire }
     var gold: Color { electric ? Color(red: 0.98, green: 0.79, blue: 0.20) : dragon ? Color(red: 0.96, green: 0.57, blue: 0.26) : psychic ? Color(red: 0.76, green: 0.65, blue: 0.91) : ArcanineTheme.gold }
-    var ink: Color { psychic ? Color(red: 0.20, green: 0.15, blue: 0.26) : ArcanineTheme.ink }
-    var muted: Color { psychic ? Color(red: 0.41, green: 0.36, blue: 0.47) : ArcanineTheme.muted }
-    var paper: Color { electric ? Color(red: 1, green: 0.97, blue: 0.86) : dragon ? Color(red: 0.92, green: 0.97, blue: 0.96) : psychic ? Color(red: 0.95, green: 0.93, blue: 0.99) : ArcanineTheme.paper }
-    var card: Color { psychic ? Color(red: 0.99, green: 0.98, blue: 1.0) : ArcanineTheme.card }
-    var line: Color { electric ? Color(red: 0.85, green: 0.77, blue: 0.56) : dragon ? Color(red: 0.64, green: 0.79, blue: 0.78) : psychic ? Color(red: 0.77, green: 0.70, blue: 0.85) : ArcanineTheme.line }
+    var ink: Color { Color(red: 0.15, green: 0.17, blue: 0.21) }
+    var muted: Color { Color(red: 0.43, green: 0.47, blue: 0.53) }
+    var paper: Color { .white }
+    var card: Color { Color(red: 0.965, green: 0.970, blue: 0.980) }
+    var line: Color { Color(red: 0.90, green: 0.92, blue: 0.95) }
+    var accentSoft: Color { electric ? Color(red: 1, green: 0.97, blue: 0.85) : dragon ? Color(red: 0.90, green: 0.97, blue: 0.97) : psychic ? Color(red: 0.95, green: 0.93, blue: 0.98) : Color(red: 1, green: 0.955, blue: 0.90) }
     var blue: Color { psychic ? Color(red: 0.31, green: 0.39, blue: 0.68) : ArcanineTheme.blue }
     var green: Color { ArcanineTheme.green }
 }

@@ -58,20 +58,9 @@ struct PokedexLens: View {
 struct PokedexBackground: View {
     @Environment(\.petTheme) private var theme
     var body: some View {
-        ZStack {
-            theme.paper
-            Canvas { context, size in
-                for x in stride(from: 12.0, to: size.width, by: 16) {
-                    for y in stride(from: 12.0, to: size.height, by: 16) {
-                        let dot = Path(ellipseIn: CGRect(x: x, y: y, width: 1, height: 1))
-                        context.fill(dot, with: .color(theme.ink.opacity(0.055)))
-                    }
-                }
-            }.allowsHitTesting(false)
-        }
+        theme.paper
         .clipShape(PokedexShape())
-        .overlay(PokedexShape().stroke(theme.ink.opacity(0.8), lineWidth: 2).padding(1))
-        .overlay(PokedexShape().stroke(.white.opacity(0.55), lineWidth: 1).padding(3))
+        .overlay(PokedexShape().stroke(theme.line, lineWidth: 1).padding(0.5))
     }
 }
 
@@ -80,16 +69,29 @@ struct PokedexButtonStyle: ButtonStyle {
     var prominent = false
     @Environment(\.isEnabled) private var enabled
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .padding(.horizontal, 12).padding(.vertical, 9)
+        OrbitButtonBody(label: configuration.label, pressed: configuration.isPressed, prominent: prominent, enabled: enabled)
+    }
+}
+
+private struct OrbitButtonBody: View {
+    @Environment(\.petTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let label: ButtonStyleConfiguration.Label
+    let pressed: Bool
+    let prominent: Bool
+    let enabled: Bool
+    @State private var hovering = false
+    var body: some View {
+        label.font(.system(size: 12, weight: .medium))
+            .padding(.horizontal, 13).padding(.vertical, 10)
             .foregroundStyle(prominent ? .white : theme.ink)
-            .background(prominent ? theme.red : theme.card)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(prominent ? theme.deepRed : theme.line, lineWidth: 1.5))
-            .shadow(color: (prominent ? theme.deepRed : theme.line).opacity(0.5), radius: 0, y: configuration.isPressed ? 0 : 2)
-            .offset(y: configuration.isPressed ? 2 : 0)
-            .opacity(enabled ? 1 : 0.4)
+            .background(prominent ? theme.red : hovering ? theme.accentSoft : theme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .scaleEffect(reduceMotion || !enabled ? 1 : pressed ? 0.97 : hovering ? 1.025 : 1)
+            .opacity(enabled ? 1 : 0.45)
+            .onHover { hovering = $0 }
+            .animation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.82), value: hovering)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.1), value: pressed)
     }
 }
 
@@ -101,9 +103,9 @@ struct PokedexIconButton: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            Image(systemName: symbol).font(.system(size: 12, weight: .bold)).frame(width: 28, height: 28)
+            Image(systemName: symbol).font(.system(size: 13, weight: .medium)).frame(width: 32, height: 32)
                 .background(onRed ? Color.white.opacity(0.14) : theme.ink.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain).foregroundStyle(onRed ? .white : theme.muted)
         .help(label).accessibilityLabel(label)
@@ -118,9 +120,7 @@ struct PokedexCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 12) { content }
             .padding(16).frame(maxWidth: .infinity, alignment: .leading)
             .background(theme.card)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 1))
-            .shadow(color: theme.line.opacity(0.25), radius: 0, y: 3)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -134,11 +134,7 @@ struct PokedexHomeView: View {
                     Image(nsImage: art).resizable().interpolation(.high).scaledToFit().frame(width: 78, height: 78).accessibilityHidden(true)
                 }
                 VStack(alignment: .leading, spacing: 7) {
-                    HStack(spacing: 6) {
-                        Text("N.º \(model.settings.character.number)").foregroundStyle(theme.muted)
-                        Label(model.settings.character.typeName, systemImage: model.settings.character.symbol).foregroundStyle(theme.fire)
-                    }.font(.system(size: 9, weight: .bold, design: .monospaced))
-                    Text("Tu fiel compañero").font(.system(size: 17, weight: .bold, design: .rounded))
+                    Text("Tu día, en orden.").font(.system(size: 23, weight: .semibold))
                     HStack(spacing: 5) {
                         Circle().fill(model.calendarConnected ? theme.green : theme.gold).frame(width: 6, height: 6)
                         Text(model.calendarConnected ? "Calendario iCal conectado" : "Listo para acompañarte")
@@ -148,13 +144,12 @@ struct PokedexHomeView: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 12).padding(.vertical, 6)
-            .background(theme.card).clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 1))
+            .background(theme.paper)
 
             VStack(alignment: .leading, spacing: 9) {
                 HStack {
                     Label("Un momento juntos", systemImage: "pawprint.fill")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .font(.system(size: 12, weight: .semibold))
                     Spacer()
                     Button("Animaciones") { model.dashboardTab = 4 }
                         .help("Elegir cualquiera de los movimientos")
@@ -166,21 +161,20 @@ struct PokedexHomeView: View {
                 }
                 Text("También puedes acariciarlo con ⇧ Mayús + arrastrar.")
                     .font(.system(size: 10)).foregroundStyle(theme.muted)
-            }.padding(12).background(theme.gold.opacity(0.14))
+            }.padding(16).background(theme.accentSoft)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.gold.opacity(0.4), lineWidth: 1))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 tile("Agenda", detail: "Próximas reuniones", symbol: "calendar", tab: 0, color: theme.red)
-                tile("Tareas", detail: "Tus misiones del día", symbol: "checklist", tab: 1, color: theme.green)
-                tile("Concentración", detail: "Entrena tu foco", symbol: "timer", tab: 2, color: theme.fire)
+                tile("Tareas", detail: "Tus pendientes del día", symbol: "checklist", tab: 1, color: theme.red)
+                tile("Concentración", detail: "Una cosa a la vez", symbol: "timer", tab: 2, color: theme.red)
                 tile("Ajustes", detail: "A tu medida", symbol: "slider.horizontal.3", tab: 3, color: theme.blue)
                 tile("Notas", detail: "Ideas e historial", symbol: "note.text", tab: 5, color: theme.red)
                 tile("Gestos", detail: "\(model.settings.character.clips.count) movimientos", symbol: "pawprint.fill", tab: 4, color: theme.fire)
             }
             HStack(spacing: 8) {
                 Image(systemName: model.settings.character.symbol).foregroundStyle(theme.fire)
-                Text("FOCO").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(theme.muted)
+                Text("FOCO").font(.system(size: 10, weight: .semibold, design: .monospaced)).foregroundStyle(theme.muted)
                 Spacer(minLength: 0)
                 ForEach([5, 10, 30], id: \.self) { minutes in
                     Button("\(minutes) min") { model.startFocus(minutes: minutes); model.dashboardTab = 2 }
@@ -190,7 +184,7 @@ struct PokedexHomeView: View {
                 HStack {
                     Image(systemName: focus.phase == .finished ? "checkmark.circle.fill" : "timer").foregroundStyle(theme.fire)
                     Text(focus.phase == .finished ? "Foco completado · \(focus.durationSeconds / 60) min" : focus.display(at: model.clockNow))
-                        .font(.system(size: focus.phase == .finished ? 12 : 22, weight: .bold, design: .rounded)).monospacedDigit()
+                        .font(.system(size: focus.phase == .finished ? 12 : 22, weight: .semibold)).monospacedDigit()
                     Spacer()
                     if focus.phase != .finished {
                         Button(focus.phase == .paused ? "Reanudar" : "Pausar") { model.pauseOrResumeFocus() }
@@ -201,7 +195,7 @@ struct PokedexHomeView: View {
             } else if let meeting = model.meetings.first(where: { !$0.allDay && $0.end > model.clockNow }) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("PRÓXIMA REUNIÓN · \(ReminderRules.time(meeting.start))").font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(theme.red)
+                        Text("PRÓXIMA REUNIÓN · \(ReminderRules.time(meeting.start))").font(.system(size: 9, weight: .semibold, design: .monospaced)).foregroundStyle(theme.red)
                         Text(meeting.title).font(.system(size: 12, weight: .semibold)).lineLimit(2)
                     }
                     Spacer()
@@ -221,17 +215,13 @@ struct PokedexHomeView: View {
                     Image(systemName: symbol).font(.system(size: 17, weight: .semibold)).foregroundStyle(color)
                         .frame(width: 32, height: 30).background(color.opacity(0.10)).clipShape(RoundedRectangle(cornerRadius: 8))
                     Spacer()
-                    Text("0\(tab + 1)").font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(theme.muted.opacity(0.8))
                 }
-                Text(title).font(.system(size: 13, weight: .bold, design: .rounded))
+                Text(title).font(.system(size: 13, weight: .semibold))
                 Text(detail).font(.system(size: 10)).foregroundStyle(theme.muted)
             }
             .padding(13).frame(maxWidth: .infinity, alignment: .leading)
             .foregroundStyle(theme.ink).background(theme.card)
             .clipShape(RoundedRectangle(cornerRadius: 13))
-            .overlay(RoundedRectangle(cornerRadius: 13).stroke(theme.line, lineWidth: 1))
-            .overlay(alignment: .leading) { Capsule().fill(color).frame(width: 3, height: 30).padding(.leading, 1) }
-            .shadow(color: theme.line.opacity(0.35), radius: 0, y: 3)
             .contentShape(RoundedRectangle(cornerRadius: 13))
         }.buttonStyle(.plain).accessibilityLabel(title)
     }
@@ -243,7 +233,7 @@ struct PokedexAnimationsView: View {
     private var clips: [ArcanineClip] { [.petting, .sit] + model.settings.character.clips.filter { $0 != .petting && $0 != .sit } }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Los gestos de tu compañero").font(.system(size: 19, weight: .semibold, design: .rounded))
+            Text("Los gestos de tu compañero").font(.system(size: 19, weight: .semibold))
             Text("Elige un movimiento para verlo ahora. \(model.settings.character.name) vuelve a descansar al terminar.")
                 .font(.system(size: 12)).foregroundStyle(theme.muted)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -255,7 +245,7 @@ struct PokedexAnimationsView: View {
                                 Spacer()
                                 Image(systemName: "play.fill").font(.system(size: 10)).foregroundStyle(theme.red)
                             }
-                            Text(model.settings.character.title(for: clip)).font(.system(size: 12, weight: .bold, design: .rounded))
+                            Text(model.settings.character.title(for: clip)).font(.system(size: 12, weight: .semibold))
                                 .lineLimit(2).frame(height: 30, alignment: .topLeading)
                             Text(clip == .idle ? "Reposo continuo" : String(format: "%.1f segundos", clip.duration))
                                 .font(.system(size: 10)).foregroundStyle(theme.muted)

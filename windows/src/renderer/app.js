@@ -1,7 +1,9 @@
 import { attachments, DEFAULT_BODY, PET_SIZE } from './geometry.mjs';
+import { icon } from './icons.js';
 const api = window.arcanine, root = document.getElementById('app'), view = new URLSearchParams(location.search).get('view');
 let state, pet, currentRevision = -1, renderKey = '', gesture = null, petMenu, petShape;
 let panelSection='', panelDrafts=new Map();
+let menuAnimations=[],menuAnimationFrame=0,menuAnimationRevision=0;
 let noteDraft = { title: '', body: '', category: '' }, noteSearch = '', noteCategory = '', showArchived = false;
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const time = value => new Date(value).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
@@ -25,16 +27,15 @@ function toast(text) {
 const tabs = [['home', 'Inicio'], ['agenda', 'Agenda'], ['tasks', 'Tareas'], ['focus', 'Foco'], ['animations', 'Gestos'], ['notes', 'Notas'], ['characters', 'Pokémon'], ['settings', 'Ajustes']];
 const titles = Object.fromEntries(tabs);
 function renderArc(target = root) {
-  const items = [['♥', 'Acariciar', 'pet'], ['◷', 'Agenda', 'agenda'], ['◉', 'Concentración', 'focus'], ['✧', 'Animaciones', 'animations'], ['✎', 'Notas', 'notes'], ['▣', 'Abrir panel', 'home']];
-  const point = deg => { const angle = deg * Math.PI / 180; return [274 + 222 * Math.cos(angle), 143 - 104 * Math.sin(angle)]; };
-  const points = Array.from({ length: 90 }, (_, i) => point(166 - i * 152 / 89));
-  const path = points.map((p, i) => (i ? 'L' : 'M') + p.join(',')).join(' ');
-  target.innerHTML = '<div class="arc"><svg aria-hidden="true"><path d="' + path + '" fill="none" stroke="var(--line)" stroke-width="58" stroke-linecap="round"/><path d="' + path + '" fill="none" stroke="var(--cream)" stroke-width="54" stroke-linecap="round"/></svg>' +
-    items.map(([icon, label, target], i) => {
+  const items = [['heart', 'Cariño', 'pet'], ['calendar', 'Agenda', 'agenda'], ['timer', 'Foco', 'focus'], ['sparkles', 'Gestos', 'animations'], ['notes', 'Notas', 'notes'], ['panel', 'Panel', 'home']];
+  target.innerHTML = '<div class="arc">' +
+    items.map(([symbol, label, target], i) => {
       const a = (166 - i * 152 / 5) * Math.PI / 180, x = 274 + 222 * Math.cos(a), y = 151 - 104 * Math.sin(a);
-      return '<button class="arc-button" style="left:' + (x - 47) + 'px;top:' + (y - 38) + 'px" data-action="' + (target === 'pet' ? 'pet' : 'section') + '" data-section="' + target + '" data-full="' + (target === 'home') + '" aria-label="' + label + '"><span class="arc-symbol">' + icon + '</span><span class="arc-label">' + label + '</span></button>';
-    }).join('') + button('×', 'close', 'aria-label="Cerrar accesos"', 'arc-close') + button('◉ Cambiar Pokémon','section','data-section="characters"','arc-switch') + '</div>';
+      return '<button class="arc-button" style="left:' + (x - 47) + 'px;top:' + (y - 38) + 'px" data-action="' + (target === 'pet' ? 'pet' : 'section') + '" data-section="' + target + '" data-full="' + (target === 'home') + '" aria-label="' + (target==='pet'?'Acariciar':label) + '"><span class="arc-symbol">' + icon(symbol) + '</span><span class="arc-label">' + label + '</span></button>';
+    }).join('') + button(icon('close'), 'close', 'aria-label="Cerrar accesos"', 'arc-close') + button(icon('switch')+'Cambiar Pokémon','section','data-section="characters"','arc-switch') + '</div>';
 }
+
+function companionBar(){return '<div class="companion-bar"><div class="companion-name"><img src="/assets/preview-'+state.settings.character+'.png" alt=""><div><strong>'+esc(companion().name)+'</strong><small>Tu compañero de escritorio</small></div></div><div class="companion-picker" aria-label="Cambiar de Pokémon">'+state.characters.map(c=>button('<img src="/assets/preview-'+c.id+'.png" alt="">','character','data-id="'+c.id+'" aria-label="Elegir a '+esc(c.name)+'" aria-pressed="'+(c.id===state.settings.character)+'" '+(state.characterLoading?'disabled':''),'companion-choice')).join('')+'</div></div>';}
 function home() {
   const events = state.cache.events.filter(e => !e.allDay && e.start >= state.now), notes = state.notes.filter(n => !n.archived);
   return '<div class="section"><div class="intro"><img src="/assets/preview-' + state.settings.character + '.png" alt="' + esc(companion().name) + '"><div><p class="eyebrow">Tu compañero de escritorio</p><h2>Hola' + (state.settings.name ? ', ' + esc(state.settings.name) : '') + '</h2><p class="muted">Agenda, foco e ideas, siempre a mano.</p></div></div>' +
@@ -117,10 +118,10 @@ function renderPanel(force = false) {
   const scroll = document.querySelector('.content')?.scrollTop ?? 0;
   const focusId = document.activeElement?.id, selection = document.activeElement?.selectionStart;
   const section = state.section;
-  root.innerHTML = '<div class="panel ' + (!state.fullPanel ? 'detail' : '') + '"><header class="header"><div class="identity"><span class="lens" aria-hidden="true"></span><div><h1>PokéDesk</h1><p class="eyebrow">' + (!state.fullPanel ? esc(titles[section]) : 'Asistente de escritorio') + '</p></div></div>' + button('×', 'close', 'aria-label="Cerrar panel"', 'icon') + '</header>' +
+  root.innerHTML = '<div class="panel ' + (!state.fullPanel ? 'detail' : '') + '"><header class="header"><div class="identity"><span class="lens" aria-hidden="true">'+icon('pokeball')+'</span><div><h1>PokéDesk</h1>' + (!state.fullPanel ? '<p class="eyebrow">'+esc(titles[section])+'</p>' : '') + '</div></div><div class="header-actions">'+(state.fullPanel&&section!=='home'?button(icon('home'),'section','data-section="home" data-full="true" aria-label="Inicio"','icon'):'')+(state.fullPanel?button(icon('settings'),'section','data-section="settings" data-full="true" aria-label="Ajustes"','icon'):'')+button(icon('close'), 'close', 'aria-label="Cerrar panel"', 'icon') + '</div></header>' +
     (state.error ? '<div class="error" role="alert">' + esc(state.error) + '</div>' : '') +
-    (state.fullPanel ? '<nav class="tabs" aria-label="Secciones">' + tabs.map(([id, label]) => button(label, 'section', 'data-section="' + id + '" data-full="true"', section === id ? 'active' : '')).join('') + '</nav>' : '') +
-    '<div class="content">' + ({ home, agenda, tasks, focus, animations, notes, settings, characters }[section] ?? home)() + '</div><footer class="foot"><span>PD · ' + esc(state.version) + '</span><span>' + (state.feeds.length ? '● Calendario conectado' : '● En tu escritorio') + '</span></footer></div>';
+    (state.fullPanel ? companionBar()+'<nav class="tabs" aria-label="Secciones">' + tabs.filter(([id])=>!['home','characters','settings'].includes(id)).map(([id, label]) => button(icon({agenda:'calendar',tasks:'tasks',focus:'timer',animations:'sparkles',notes:'notes'}[id])+label, 'section', 'data-section="' + id + '" data-full="true" aria-pressed="'+(section===id)+'"', section === id ? 'active' : '')).join('') + '</nav>' : '') +
+    '<div class="content">' + ({ home, agenda, tasks, focus, animations, notes, settings, characters }[section] ?? home)() + '</div><footer class="foot"><span>PokéDesk · ' + esc(state.version) + '</span><span>' + (state.feeds.length ? 'Calendario configurado' : 'Tu compañero está aquí') + '</span></footer></div>';
   for(const [id,draft]of panelDrafts){const field=document.getElementById(id);if(field){if(field.type==='checkbox')field.checked=draft.checked;else field.value=draft.value;}}
   document.querySelector('.content').scrollTop = scroll;
   if (focusId) { const field = document.getElementById(focusId); if (field) { field.focus(); try { field.setSelectionRange(selection, selection); } catch {} } }
@@ -144,7 +145,25 @@ function positionPetControls() {
     const badge = root.querySelector('.pet-badge');
     if (badge) { badge.style.left = a.timer.x + 'px'; badge.style.top = a.timer.y + 'px'; }
   }
+  const opening=petMenu.hidden&&state?.menuOpen;
+  if(!state?.menuOpen&&(!petMenu.hidden||menuAnimations.length))stopMenuAnimation();
   petMenu.hidden = !state?.menuOpen;
+  if(opening)animateMenuOpen(a);
+}
+function stopMenuAnimation(){menuAnimationRevision++;cancelAnimationFrame(menuAnimationFrame);menuAnimationFrame=0;menuAnimations.forEach(a=>a.cancel());menuAnimations=[];}
+function animateMenuOpen(a){
+  stopMenuAnimation();if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const token=menuAnimationRevision,body=petShape?.body??DEFAULT_BODY;
+  const origin={x:(body.left+body.right)/2-a.arc.x,y:(body.top+body.bottom)/2-a.arc.y};
+  menuAnimations=[...petMenu.querySelectorAll('.arc-button,.arc-switch')].map((button,i)=>{
+    const x=parseFloat(button.style.left)||190,y=parseFloat(button.style.top)||135;
+    const dx=origin.x-x-button.offsetWidth/2,dy=origin.y-y-button.offsetHeight/2;
+    const animation=button.animate([{transform:`translate(${dx}px,${dy}px) scale(.18)`,opacity:0},{transform:'translate(0,0) scale(1)',opacity:1}],{duration:400,delay:i*18,easing:'cubic-bezier(.18,.76,.21,1)',fill:'backwards'});
+    animation.finished.catch(()=>{});return animation;
+  });
+  const end=performance.now()+550;
+  function refreshHits(){if(token!==menuAnimationRevision||petMenu.hidden)return;publishPetShape();if(performance.now()<end)menuAnimationFrame=requestAnimationFrame(refreshHits);else{menuAnimationFrame=0;menuAnimations=[];}}
+  menuAnimationFrame=requestAnimationFrame(refreshHits);
 }
 function publishPetShape(value = petShape) {
   if (!value) return;

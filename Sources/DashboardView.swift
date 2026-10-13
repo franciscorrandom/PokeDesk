@@ -16,42 +16,32 @@ struct DashboardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 12) {
-                PokedexLens()
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("POKÉDESK").font(.system(size: 20, weight: .heavy, design: .rounded)).tracking(1.4)
-                    Text(model.dashboardTab == -1 ? "Tu compañero de escritorio · \(model.settings.character.name)" : ["Tu agenda", "Tus tareas", "Tu tiempo de foco", "Tus ajustes", "Tus animaciones", "Tus notas e ideas"][max(0, min(5, model.dashboardTab))])
-                        .font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.8))
-                }
+                PokeballMark().frame(width: 27, height: 27).padding(5)
+                    .background(theme.accentSoft).clipShape(RoundedRectangle(cornerRadius: 12))
+                Text("PokéDesk").font(.system(size: 17, weight: .semibold))
                 Spacer()
-                if model.speaking { PokedexIconButton(symbol: "speaker.slash", label: "Silenciar voz", onRed: true) { model.voiceSpeaker.stop() } }
-                if model.dashboardTab != -1 { PokedexIconButton(symbol: "square.grid.2x2", label: "Menú principal", onRed: true) { model.dashboardTab = -1 } }
-                PokedexIconButton(symbol: "xmark", label: "Cerrar menú", onRed: true) { onClose() }
+                if model.speaking { PokedexIconButton(symbol: "speaker.slash", label: "Silenciar voz") { model.voiceSpeaker.stop() } }
+                if model.dashboardTab != -1 { PokedexIconButton(symbol: "house", label: "Inicio") { model.dashboardTab = -1 } }
+                PokedexIconButton(symbol: "slider.horizontal.3", label: "Ajustes") { model.dashboardTab = 3 }
+                PokedexIconButton(symbol: "xmark", label: "Cerrar menú") { onClose() }
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 22).padding(.top, 22).padding(.bottom, 18)
-            .background(LinearGradient(colors: [theme.red, theme.deepRed], startPoint: .topLeading, endPoint: .bottomTrailing))
-            HStack(spacing: 4) {
-                Circle().fill(theme.red).frame(width: 5, height: 5)
-                Circle().fill(theme.gold).frame(width: 5, height: 5)
-                Circle().fill(theme.green).frame(width: 5, height: 5)
-                Rectangle().fill(theme.line).frame(height: 1).padding(.horizontal, 9)
-                PokeballMark().frame(width: 19, height: 19)
-            }.padding(.horizontal, 22).padding(.vertical, 10)
-            if model.dashboardTab != -1 {
-                HStack(spacing: 5) {
-                    ForEach(0..<6) { tab in
+            .padding(.horizontal, 21).padding(.vertical, 16)
+            Rectangle().fill(theme.line).frame(height: 1)
+            OrbitCompanionBar(model: model)
+                HStack(spacing: 3) {
+                    ForEach([0, 1, 2, 5, 4], id: \.self) { tab in
                         Button { model.dashboardTab = tab } label: {
-                            Text(["Agenda", "Tareas", "Foco", "Ajustes", "Gestos", "Notas"][tab])
-                                .font(.system(size: 11, weight: .semibold))
+                            Label(["Agenda", "Tareas", "Foco", "Ajustes", "Gestos", "Notas"][tab], systemImage: ["calendar", "checkmark.circle", "timer", "slider.horizontal.3", "sparkles", "note.text"][tab])
+                                .font(.system(size: 11, weight: .medium))
                                 .frame(maxWidth: .infinity).padding(.vertical, 9)
-                                .foregroundStyle(model.dashboardTab == tab ? .white : theme.muted)
-                                .background(model.dashboardTab == tab ? theme.red : .clear)
-                                .clipShape(RoundedRectangle(cornerRadius: 7))
+                                .foregroundStyle(model.dashboardTab == tab ? theme.red : theme.muted)
+                                .background(model.dashboardTab == tab ? theme.paper : .clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .shadow(color: theme.ink.opacity(model.dashboardTab == tab ? 0.06 : 0), radius: 3, y: 1)
                         }.buttonStyle(.plain)
                     }
-                }.padding(5).background(theme.line.opacity(0.22)).clipShape(RoundedRectangle(cornerRadius: 10))
+                }.padding(4).background(theme.card).clipShape(RoundedRectangle(cornerRadius: 13))
                     .padding(.horizontal, 20).padding(.bottom, 16)
-            }
             ScrollViewReader { scroll in
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
@@ -80,10 +70,11 @@ struct DashboardView: View {
             }
             Rectangle().fill(theme.line).frame(height: 1).padding(.horizontal, 20)
             HStack {
-                Text("ARRASTRA A \(model.settings.character.name.uppercased()) PARA MOVERLO").font(.system(size: 8, weight: .medium, design: .monospaced)).tracking(0.4).foregroundStyle(theme.muted)
+                Label(model.calendarConnected ? "Calendario conectado" : "Tu compañero está aquí", systemImage: model.calendarConnected ? "calendar.badge.checkmark" : "pawprint")
+                    .font(.system(size: 11)).foregroundStyle(theme.muted)
                 Spacer()
                 Button("Probar aviso") { model.testAlert() }.buttonStyle(.plain).font(.system(size: 10, weight: .semibold)).foregroundStyle(theme.red)
-            }.padding(.horizontal, 20).padding(.vertical, 15)
+            }.padding(.horizontal, 20).padding(.vertical, 13)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .foregroundStyle(theme.ink)
@@ -100,7 +91,7 @@ struct DashboardView: View {
     private var agenda: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Próximas reuniones").font(.system(size: 19, weight: .semibold, design: .rounded))
+                Text("Próximas reuniones").font(.system(size: 19, weight: .semibold))
                 Spacer()
                 Button { model.refreshCalendar(force: true) } label: { Image(systemName: "arrow.clockwise") }.help("Actualizar agenda")
             }
@@ -137,7 +128,7 @@ struct DashboardView: View {
 
     private var tasks: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Pequeños pendientes, a tiempo").font(.system(size: 19, weight: .semibold, design: .rounded))
+            Text("Pequeños pendientes, a tiempo").font(.system(size: 19, weight: .semibold))
             card {
                 TextField("Por ejemplo: revisar los pendientes del día", text: $taskTitle).textFieldStyle(.plain).padding(10).background(theme.paper).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.red.opacity(0.18), lineWidth: 1))
                     .onSubmit { addTask() }
@@ -178,7 +169,7 @@ struct DashboardView: View {
 
     private var preferences: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("A tu ritmo").font(.system(size: 19, weight: .semibold, design: .rounded))
+            Text("A tu ritmo").font(.system(size: 19, weight: .semibold))
             characterPreferences
             CalendarSettingsView(model: model)
             voicePreferences
@@ -254,13 +245,13 @@ struct DashboardView: View {
 
     private var concentration: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Un rato para concentrarte").font(.system(size: 19, weight: .semibold, design: .rounded))
+            Text("Un rato para concentrarte").font(.system(size: 19, weight: .semibold))
             if let focus = model.settings.focusTimer {
                 card {
                     HStack {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(focus.phase == .paused ? "En pausa" : (focus.phase == .finished ? "¡Tiempo completado!" : "Tiempo de concentración")).font(.headline)
-                            Text(focus.phase == .finished ? "\(focus.durationSeconds / 60) min completados" : focus.display(at: model.clockNow)).font(.system(size: focus.phase == .finished ? 23 : 46, weight: .medium, design: .rounded)).monospacedDigit().foregroundStyle(theme.red)
+                            Text(focus.phase == .finished ? "\(focus.durationSeconds / 60) min completados" : focus.display(at: model.clockNow)).font(.system(size: focus.phase == .finished ? 23 : 46, weight: .medium)).monospacedDigit().foregroundStyle(theme.red)
                         }
                         Spacer()
                         Image(systemName: focus.phase == .finished ? "checkmark.seal" : "timer").font(.system(size: 34)).foregroundStyle(theme.red.opacity(0.7))
@@ -316,12 +307,12 @@ struct AlertBubbleView: View {
                 HStack {
                     PokeballMark().frame(width: 22, height: 22)
                     Label(alert.focusTimerID != nil ? "TU TIEMPO" : ((alert.taskID != nil) ? "TU TAREA" : "POKÉDESK TE AVISA"), systemImage: alert.focusTimerID != nil ? "timer" : ((alert.taskID != nil) ? "checklist" : "calendar"))
-                        .font(.system(size: 9, weight: .bold, design: .rounded)).tracking(0.5).foregroundStyle(.white)
+                        .font(.system(size: 9, weight: .semibold)).tracking(0.5).foregroundStyle(.white)
                     Spacer()
                     if model.speaking { PokedexIconButton(symbol: "speaker.slash", label: "Silenciar voz", onRed: true) { model.voiceSpeaker.stop() } }
                     PokedexIconButton(symbol: "xmark", label: "Cerrar aviso", onRed: true) { model.dismissAlert() }
                 }.padding(10).background(theme.red).clipShape(RoundedRectangle(cornerRadius: 12))
-                Text(alert.title).font(.system(size: 17, weight: .semibold, design: .rounded)).lineLimit(2)
+                Text(alert.title).font(.system(size: 17, weight: .semibold)).lineLimit(2)
                 Text(alert.message).font(.system(size: 12)).foregroundStyle(theme.muted).lineLimit(2)
                 if let url = alert.joinURL, alert.meetingID != nil {
                     Button { model.openMeeting(url) } label: {

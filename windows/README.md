@@ -1,10 +1,10 @@
-# PokéDesk para Windows · 1.4.0-beta.1
+# PokéDesk para Windows · 1.4.0-beta.2
 
 Primera edición Windows del producto con iCal. Electron y Three.js utilizan los mismos cuatro modelos, miniaturas, grabaciones y bibliotecas de animación de la edición Mac. No utiliza el cliente OAuth ni Google Tasks del prototipo anterior de Arcanine.
 
 ## Instalar y usar
 
-Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.4.0-beta.1-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
+Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.4.0-beta.2-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
 
 Cerrar la antigua app Arcanine desde la bandeja antes de abrir PokéDesk. Esta edición usa un perfil propio y no importa la conexión OAuth ni los datos de la app anterior. Tampoco sincroniza datos con la edición Mac.
 
@@ -53,3 +53,7 @@ La beta debe probarse en un equipo Windows real con su GPU y escalado, antes de 
 ## Créditos
 
 Código propio MIT. Proyecto de fans independiente. Los recursos mantienen sus derechos y licencias: [créditos completos](../docs/CREDITOS.md). ICAL.js MPL 2.0; Three.js MIT; Electron MIT. Las atribuciones se incluyen en el paquete.
+
+## Órbita y calendarios grandes
+
+El menú aparece desde el centro del compañero; sus áreas de clic se actualizan durante la microinteracción. El movimiento reducido elimina las animaciones del menú. El panel usa superficies claras y una paleta por Pokémon, y permite cambiar directamente de compañero. El lector iCal admite hasta 50 MB y mantiene la conexión y los últimos eventos si falla una actualización. Los calendarios grandes se procesan de uno en uno, en un worker separado.

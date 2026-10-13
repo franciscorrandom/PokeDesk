@@ -109,8 +109,9 @@ private final class CalendarRedirects: NSObject, URLSessionTaskDelegate {
             request.setValue(v.0, forHTTPHeaderField: "If-None-Match"); request.setValue(v.1, forHTTPHeaderField: "If-Modified-Since")
         }
         let data: Data, response: URLResponse
-        do { (data, response) = try await session.data(for: request) }
+        do { (data, response) = try await CalendarPayload.receive(session: session, request: request) }
         catch is CancellationError { throw CancellationError() }
+        catch let issue as CalendarIssue { throw issue }
         catch { throw CalendarIssue.message("No pude contactar con Google Calendar. Revisa tu conexión; volveré a intentarlo automáticamente.") }
         try Task.checkCancellation()
         guard let http = response as? HTTPURLResponse else { throw CalendarIssue.message("Google no entregó una respuesta de calendario válida.") }
@@ -121,7 +122,7 @@ private final class CalendarRedirects: NSObject, URLSessionTaskDelegate {
         guard http.statusCode == 200 else {
             throw CalendarIssue.message([401,403,404].contains(http.statusCode) ? "Google no permitió leer el calendario. Comprueba si el enlace fue cambiado o si tu organización restringe iCal." : "Google Calendar no está disponible en este momento. Volveré a intentarlo automáticamente.")
         }
-        guard data.count <= 10 * 1024 * 1024, let text = String(data: data, encoding: .utf8) else { throw CalendarIssue.message("El calendario es demasiado grande o no tiene formato de texto válido.") }
+        let text = try CalendarPayload.decode(data, contentType: http.value(forHTTPHeaderField: "Content-Type"))
         let parser = self.parser
         let result = try await work { try parser.parse(text, now: now, feedID: id, name: name) }
         try Task.checkCancellation()
