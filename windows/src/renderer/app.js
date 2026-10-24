@@ -101,7 +101,7 @@ function settings() {
     '<label class="check-row"><input name="sound" type="checkbox" '+(s.sound?'checked':'')+'>Sonido en los avisos</label><label class="check-row"><input name="motion" type="checkbox" '+(s.motion?'checked':'')+'>Gestos y movimiento</label>'+
     (state.platform==='win32'?'<label class="check-row"><input name="autoStart" type="checkbox" '+(s.autoStart?'checked':'')+'>Iniciar al entrar a Windows</label>':'')+'<button type="submit" class="primary">Guardar ajustes</button></form>'+
     button(s.pausedUntil>state.now?'Reanudar avisos':'Pausar avisos por una hora','pauseNotices','data-paused="'+!(s.pausedUntil>state.now)+'"','small')+
-    '<details class="card"><summary>Créditos y privacidad</summary><p>Proyecto de fans independiente. Arcanine, Mewtwo y Charizard: nguyenlouis32. Pikachu: jacobjksn42. Modelos bajo CC BY 4.0, adaptados con animaciones y parpadeos. Personajes Pokémon: sus respectivos titulares.</p><p class="muted">Tareas y notas permanecen en tu equipo. No hay cuenta de PokéDesk, analítica ni sincronización entre equipos.</p></details>'+button('Cerrar PokéDesk','quit','','small')+'</div>';
+    '<details class="card"><summary>Créditos y privacidad</summary><p>Proyecto de fans independiente. Arcanine, Mewtwo, Charizard, Lucario y Gengar: nguyenlouis32. Pikachu: jacobjksn42. Modelos bajo CC BY 4.0, adaptados con animaciones y parpadeos. Personajes Pokémon: sus respectivos titulares.</p><p class="muted">Tareas y notas permanecen en tu equipo. No hay cuenta de PokéDesk, analítica ni sincronización entre equipos.</p></details>'+button('Cerrar PokéDesk','quit','','small')+'</div>';
 }
 
 function renderNotice() {

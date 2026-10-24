@@ -326,7 +326,7 @@ async function runSmoke() {
   smokeResults.roster=[];
   for(const c of CHARACTERS) {
     if(c.id!==store.state.settings.character) {await execute('character',{id:c.id});await sleep(1000);await capture(c.id+'-pokeball');}
-    const info=await waitReady(c.id);if(c.id==='arcanine'&&!info.reducedMotion&&!info.phases?.some(p=>p.id==='release'&&p.animated))throw new Error('No se reprodujo la Pokébola inicial.');if(info.clips!==c.clips.length)throw new Error('Clips incompletos de '+c.id);
+    const info=await waitReady(c.id);if(c.id==='arcanine'&&!info.reducedMotion&&!info.phases?.some(p=>p.id==='release'&&p.animated))throw new Error('No se reprodujo la Pokébola inicial: '+JSON.stringify({info,renderer:await js('window.petDiagnostics?.info()'),document:await js('({hidden:document.hidden,visibility:document.visibilityState})'),settings:store.state.settings,motion:{enabled:motion.enabled},shown:pet.isVisible()}));if(info.clips!==c.clips.length)throw new Error('Clips incompletos de '+c.id);
     for(const clip of c.clips){const sample=await js('window.petDiagnostics.sample('+JSON.stringify(clip.id)+')');if(!sample.finite||!sample.changes)throw new Error('Animación inválida '+c.id+'/'+clip.id);}
     const rotation=await js('window.petDiagnostics.rotation()');if(!rotation.hit||!rotation.emptyMiss||!rotation.alpha||!rotation.horizontalOnly)throw new Error('Falló el perfil/transparencia de '+c.id+': '+JSON.stringify({rotation,info:await js('window.petDiagnostics.info()')}));
     const profiles=await js('window.petDiagnostics.profiles()');if(profiles.clipped.length)throw new Error('Recorte '+c.id+': '+JSON.stringify(profiles.clipped.slice(0,8)));

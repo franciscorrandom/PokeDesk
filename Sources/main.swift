@@ -138,12 +138,13 @@ final class BubblePanel: NSPanel {
         tabSubscription = model.$dashboardTab.sink { [weak self] _ in DispatchQueue.main.async { self?.positionDashboard() } }
         outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             DispatchQueue.main.async {
-                guard let self, !self.rosterTest else { return }
+                // Desktop clicks from the operator must not interrupt isolated UI captures.
+                guard let self, !self.smokeTest else { return }
                 self.closeDashboard(); self.closeQuickMenu()
             }
         }
         localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            if let self, !self.rosterTest, event.window != self.dashboard, event.window != self.quickMenu,
+            if let self, !self.smokeTest, event.window != self.dashboard, event.window != self.quickMenu,
                event.window != self.quickDetail, event.window != self.petPanel, event.window != self.bubblePanel {
                 self.closeDashboard(); self.closeQuickMenu()
             }
