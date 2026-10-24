@@ -2,7 +2,7 @@
 
 Mascota 3D flotante con Arcanine, Mewtwo, Pikachu, Charizard, Lucario y Gengar, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
 
-La revisión 1.5.0 se prepara para pruebas. Las descargas publicadas en Releases y en Guía Estudio conservan su versión hasta que se apruebe su publicación.
+La revisión 1.5.1 se prepara para pruebas. Las descargas publicadas en Releases y en Guía Estudio conservan su versión hasta que se apruebe su publicación.
 
 ## Instalar
 
@@ -56,7 +56,7 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ### Primera beta de Windows
 
-La edición **PokéDesk 1.5.0-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+La edición **PokéDesk 1.5.1-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
 
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
@@ -67,7 +67,7 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.0-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.1-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 
@@ -110,3 +110,10 @@ lengua, sin las variantes superpuestas del original.
 Para regenerar sus recursos: `python3 scripts/animate-aura-ghost.py lucario` y
 `python3 scripts/animate-aura-ghost.py gengar`, con NumPy durante el desarrollo.
 Los modelos, texturas y clips están incluidos en la aplicación descargable.
+
+## Lucario en reposo · 1.5.1
+
+Las cuatro prolongaciones negras de la cabeza ahora caen hacia abajo y atrás,
+con una curva suave y un balanceo discreto. Se mantienen sus uniones y longitudes
+y los nueve gestos parten de esa postura, sin volver a la extensión horizontal
+de la pose de origen. Se actualiza también su miniatura 3D.

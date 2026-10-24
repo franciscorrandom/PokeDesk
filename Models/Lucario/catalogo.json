@@ -4,7 +4,7 @@
     "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
     "source": "https://sketchfab.com/3d-models/lucario-98c5d0459a434ff2ac6058be1db192b6",
     "title": "Lucario",
-    "modifications": "Relaxed arms with chest attachments preserved, original rig and weights, rebuilt inverse binds and normals; head-attached blink expressions from original atlas; nine articulated PokéDesk clips. Curved tail, ears and aura sensors; standing focus pose."
+    "modifications": "Relaxed arms with chest attachments preserved, original rig and weights, rebuilt inverse binds and normals; head-attached blink expressions from original atlas; nine articulated PokéDesk clips. Curved tail, ears and four relaxed downward/backward aura appendages with gentle delayed sway; standing focus pose."
   },
   "joints": 86,
   "clips": [

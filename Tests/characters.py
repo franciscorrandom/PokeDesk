@@ -59,6 +59,17 @@ def validate(character, joint_count, author):
             upper,paw=world(names[arm]),world(names[hand])
             assert paw[1][3] < upper[1][3]-25*unit, 'Lucario should rest his hands below the chest'
             assert 4*unit < paw[2][3]-upper[2][3] < 25*unit, 'Lucario hands should rest gently forward'
+        # A relaxed silhouette must not regress to the horizontal source T-pose.
+        shoulder_y=world(names['LArm_041'])[1][3]
+        for side,label,start in [('L','A',54),('L','B',59),('R','A',66),('R','B',71)]:
+            chain=[names[f'{side}Feeler{label}{k}_{start+k-1:03}'] for k in range(1,5)]
+            chain.append(doc['nodes'][chain[-1]]['children'][0])
+            points=[world(i) for i in chain]
+            assert parents[chain[0]]==names['Head_047'], 'Aura appendages must remain attached to the head'
+            assert all(a[1][3]>b[1][3] for a,b in zip(points,points[1:])), 'Resting appendages must fall downward'
+            assert points[-1][1][3] < points[0][1][3]-18*unit, 'Aura appendages should hang below the cheeks'
+            assert points[-1][2][3] < points[0][2][3]-10*unit, 'Aura appendages must hang behind the neck'
+            assert abs(points[-1][1][3]-shoulder_y)<10*unit, 'Resting tips should sit near shoulder height'
     if character=='gengar':
         names={n.get('name'):i for i,n in enumerate(doc['nodes'])}
         assert all(doc['nodes'][names[n]].get('scale')==[0,0,0] for n in ['GengarTongue','GengarMouthMask'])

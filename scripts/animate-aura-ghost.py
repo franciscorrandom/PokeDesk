@@ -104,6 +104,17 @@ if lucario:
         aim_child(hand,finger,[-sign*.05,-.94,.33])
     for i,angle in zip(tail,[.05,.07,.10,.12,.10,.07,.04]):
         nodes[i]['rotation']=world_rotation(i,[0,1,0],angle,worlds())
+    # The source T-pose holds all four head appendages horizontally. Official
+    # Lucario artwork shows a relaxed downward/backward fall. Preserve their
+    # scalp attachments and segment lengths, adding a gentle gravity curve.
+    for chain in feelers:
+        label=nodes[chain[0]]['name'];sign=1 if label.startswith('L') else -1
+        directions=([( .28,-.64,-.72),(.25,-.78,-.56),(.18,-.88,-.44),(.10,-.94,-.32)]
+                    if 'FeelerA' in label else
+                    [(.12,-.60,-.79),(.10,-.77,-.63),(.07,-.89,-.45),(.04,-.96,-.27)])
+        for i,(x,y,z) in zip(chain,directions):
+            child=nodes[i]['children'][0]
+            aim_child(nodes[i]['name'],nodes[child]['name'],[sign*x,y,z])
     eye_mesh=2;eye_offsets={'Open':0,'Half':-.50,'Closed':-.75}
 else:
     head=names['Head_020'];neck=head;spine=names['Spine_019'];origin=names['Origin_02']
@@ -203,7 +214,8 @@ def pose(clip,t,duration):
         turn(i,[0,0,1],sign*e*.035*math.sin(t*2.2+sign*.4))
         if tip is not None: turn(tip,[1,0,0],e*.035*math.sin(t*2.2-.5))
     for chain in feelers:
-        for k,i in enumerate(chain): turn(i,[1,0,0],e*.018*math.sin(t*2.2-k*.5))
+        # More movement at the tips, with a small lag along the hanging chain.
+        for k,i in enumerate(chain): turn(i,[1,0,0],e*(.006+k*.0025)*math.sin(t*2.2-k*.5))
     for arm,elbow,hand,sign in arms:
         turn(arm,[0,0,1],sign*e*(.012 if lucario else .045)*math.sin(t*1.8+.4))
     if not lucario:
@@ -296,7 +308,7 @@ for clip,duration in catalog:
     doc['animations'].append(animation);manifest.append({'id':clip,'duration':duration,'channels':len(animation['channels'])})
 extras=doc['asset'].setdefault('extras',{})
 extras['modifications']=('Relaxed arms with chest attachments preserved, original rig and weights, rebuilt inverse binds and normals; head-attached blink expressions from original atlas; nine articulated PokéDesk clips. '+
-                        ('Curved tail, ears and aura sensors; standing focus pose.' if lucario else 'Hovering, staggered hand gestures, hidden duplicate tongue/mask meshes; short controlled tongue tease and floating rest.'))
+                        ('Curved tail, ears and four relaxed downward/backward aura appendages with gentle delayed sway; standing focus pose.' if lucario else 'Hovering, staggered hand gestures, hidden duplicate tongue/mask meshes; short controlled tongue tease and floating rest.'))
 doc['buffers'][0]['byteLength']=len(binary)
 encoded=json.dumps(doc,separators=(',',':'),ensure_ascii=False).encode();encoded+=b' '*(-len(encoded)%4);binary.extend(b'\0'*(-len(binary)%4))
 result=struct.pack('<4sII',b'glTF',2,28+len(encoded)+len(binary))+struct.pack('<II',len(encoded),0x4E4F534A)+encoded+struct.pack('<II',len(binary),0x004E4942)+binary

@@ -1,4 +1,4 @@
-PokéDesk 1.5.0 para macOS 14 o posterior, Intel y Apple Silicon.
+PokéDesk 1.5.1 para macOS 14 o posterior, Intel y Apple Silicon.
 
 - Lucario y Gengar se suman a Arcanine, Mewtwo, Pikachu y Charizard.
 - Nueve gestos articulados para cada compañero nuevo, con parpadeo, saludo, caricias y descanso.
@@ -14,3 +14,7 @@ Esta edición está firmada localmente, sin Developer ID ni notarización. Si ma
 Código propio MIT. Modelos y demás recursos: consulta docs/CREDITOS.md. Proyecto de fans independiente, sin afiliación con Pokémon, Nintendo, Game Freak ni Creatures.
 
 Notas preparadas para la revisión; no autorizan publicar cambios en Guía Estudio.
+
+Corrección 1.5.1: las cuatro prolongaciones negras de Lucario descansan hacia
+abajo y atrás, con balanceo leve y nueva miniatura. Se conservan los nueve gestos
+y el resto de los compañeros.

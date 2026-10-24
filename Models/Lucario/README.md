@@ -17,5 +17,12 @@ Para regenerarla: `python3 scripts/animate-aura-ghost.py lucario` con NumPy.
 El catálogo de cambios y clips está en `catalogo.json`; el original se conserva
 sin modificar. Las miniaturas se renderizan con el visor nativo de la app.
 
+La revisión 1.5.1 baja las cuatro prolongaciones negras detrás de la cabeza:
+caen hacia abajo y atrás, con curva suave y un balanceo leve en reposo. Se
+conservan sus uniones y longitudes; se reconstruyen geometría, normales e
+inverse binds para que los nueve gestos partan de la postura corregida.
+Referencia visual: [ilustración oficial de Lucario](https://www.pokemon.com/us/pokedex/lucario),
+consultada el 24 de octubre de 2026. La referencia no se redistribuye con la app.
+
 Pokémon y sus personajes conservan sus derechos respectivos; este recurso no
 está cubierto por la licencia MIT del código de PokéDesk.

@@ -529,11 +529,15 @@ final class BubblePanel: NSPanel {
                 self.petView.preview(.idle, at: 0)
                 DispatchQueue.main.asyncAfter(deadline: .now()+0.25) {
                     self.capturePreview(self.petView, name: "thumbnail-source-"+character.rawValue)
-                    if character == .pikachu {
-                        for (name, angle) in [("frente", atan2(3.2,5.4)), ("perfil", atan2(3.2,5.4)+Double.pi/2)] {
+                    if character == .pikachu || character == .lucario {
+                        let front = atan2(3.2,5.4)
+                        let profiles: [(String,Double)] = character == .lucario
+                            ? [("frente",front),("perfil",front+Double.pi/2),("espalda",front+Double.pi),("tres-cuartos",front+Double.pi*1.25)]
+                            : [("frente",front),("perfil",front+Double.pi/2)]
+                        for (name, angle) in profiles {
                             self.petView.setYaw(angle)
                             self.petView.preview(.idle, at: 0)
-                            self.capturePreview(self.petView, name: "pikachu-postura-"+name)
+                            self.capturePreview(self.petView, name: character.rawValue+"-postura-"+name)
                         }
                         self.petView.setYaw(0)
                     }
@@ -617,6 +621,7 @@ final class BubblePanel: NSPanel {
                 report[character.rawValue+"RotationFits"] = clipped.isEmpty
                 report[character.rawValue+"ClippedSamples"] = clipped
                 self.captureCharacterAnimation(character == .charizard || character == .gengar ? .happyTail : .greeting, name: character.rawValue+"-demo")
+                if character == .lucario { self.captureCharacterAnimation(.idle, name: "lucario-reposo") }
                 self.characterReady = nil
                 self.petView.engine.cancelSummoning()
                 self.petView.summoningEnabled = true
