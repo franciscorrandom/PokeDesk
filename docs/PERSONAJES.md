@@ -60,3 +60,27 @@ Las pruebas incluyen contraste rojo/azul sobre fondo blanco, preparación gráfi
 El hombro mantiene su unión anterior con el pecho. El brazo se baja desde su propia articulación y el codo se dobla ligeramente hacia dentro, dejando las manos delante del abdomen. Esto evita que la rotación de toda la cadena desde el hombro deforme la salida del brazo. La cabeza se inclina 9,7 grados hacia delante junto con los ojos y las orejas. Se reconstruyen la malla y sus enlaces antes de generar los nueve gestos.
 
 La miniatura se actualiza desde el visor nativo. El modo `--thumbnail-test` captura además frente y perfil de Pikachu para revisar la postura; `--roster-smoke-test` comprueba sus nueve clips desde ocho orientaciones en tres instantes por clip.
+
+## PokéDesk 1.5.0: Lucario y Gengar
+
+El catálogo pasa a seis compañeros y 56 clips. Lucario y Gengar se descargaron
+por el botón oficial de Sketchfab el 23 de octubre de 2026, con licencia CC BY
+4.0 de nguyenlouis32. Los originales, hashes e inspecciones se conservan en
+`Models/Lucario` y `Models/Gengar`.
+
+Lucario mantiene sus 86 articulaciones, relaja los brazos desde sus propias
+articulaciones y curva la cola. Sus nueve gestos incluyen orejas, sensores de
+aura, saludo, curiosidad, celebración, caricias y concentración de pie. Gengar
+mantiene 65 articulaciones, oculta las variantes duplicadas del original y
+prepara levitación, saludo, curiosidad, celebración, caricias, descanso flotante
+y una broma de lengua corta. La máscara de boca adaptada solo aparece en ese
+gesto. Ambos parpadean reutilizando sus atlas originales.
+
+`scripts/animate-aura-ghost.py` reconstruye geometría, normales e inverse binds
+para que las nuevas poses se reproduzcan igual en SceneKit y Three.js. La app
+reproduce los clips horneados, sin cálculos de cinemática en cada fotograma.
+El selector ocupa tres columnas y dos filas; las paletas son azul y violeta.
+Agenda, tareas, notas, timer, voz y orientación se conservan al cambiar.
+
+La revisión se prepara en el repositorio y sus artefactos de prueba. Actualizar
+Guía Estudio requiere una petición explícita de Francisco.

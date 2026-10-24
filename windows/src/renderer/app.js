@@ -55,7 +55,7 @@ function calendarWarning() {
 }
 function companion() {return state.characters.find(c=>c.id===state.settings.character);}
 function characters() {
-  return '<div class="section"><h2>Elige a tu compañero</h2><p class="muted">Tus reuniones, tareas, notas y timer continúan contigo.</p><div class="tile-grid roster">'+state.characters.map(c=>button('<img src="/assets/preview-'+c.id+'.png" alt="'+esc(c.name)+'"><b>'+esc(c.name)+'</b><span>#'+c.number+' · '+esc(c.type)+'</span>','character','data-id="'+c.id+'" '+(state.characterLoading?'disabled':''),'tile '+(c.id===state.settings.character?'selected':''))).join('')+'</div>'+button('Repetir salida de la Pokébola','repeatSummon','', 'small')+'</div>';
+  return '<div class="section roster-section"><h2 class="roster-title">Elige a tu compañero</h2><p class="muted roster-description">Tus reuniones, tareas, notas y timer continúan contigo.</p><div class="tile-grid roster">'+state.characters.map(c=>button('<img src="/assets/preview-'+c.id+'.png" alt="'+esc(c.name)+'"><b>'+esc(c.name)+'</b><span>#'+c.number+' · '+esc(c.type)+'</span>','character','data-id="'+c.id+'" '+(state.characterLoading?'disabled':''),'tile '+(c.id===state.settings.character?'selected':''))).join('')+'</div>'+button('Repetir salida de la Pokébola','repeatSummon','', 'small')+'</div>';
 }
 
 function focus() {

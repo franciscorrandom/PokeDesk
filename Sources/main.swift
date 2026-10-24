@@ -137,10 +137,13 @@ final class BubblePanel: NSPanel {
         }
         tabSubscription = model.$dashboardTab.sink { [weak self] _ in DispatchQueue.main.async { self?.positionDashboard() } }
         outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            DispatchQueue.main.async { self?.closeDashboard(); self?.closeQuickMenu() }
+            DispatchQueue.main.async {
+                guard let self, !self.rosterTest else { return }
+                self.closeDashboard(); self.closeQuickMenu()
+            }
         }
         localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            if let self, event.window != self.dashboard, event.window != self.quickMenu,
+            if let self, !self.rosterTest, event.window != self.dashboard, event.window != self.quickMenu,
                event.window != self.quickDetail, event.window != self.petPanel, event.window != self.bubblePanel {
                 self.closeDashboard(); self.closeQuickMenu()
             }
@@ -547,11 +550,11 @@ final class BubblePanel: NSPanel {
         model.settings.soundEnabled = false
         model.settings.petSize = 230
         model.settings.tasks = [DailyTask(title: "Tarea conservada", hour: 10, minute: 0)]
-        model.settings.notes = [PetNote(title: "Nota conservada", body: "Cuatro compañeros", createdAt: Date(), updatedAt: Date())]
+        model.settings.notes = [PetNote(title: "Nota conservada", body: "Seis compañeros", createdAt: Date(), updatedAt: Date())]
         model.startFocus(minutes: 10); model.pauseOrResumeFocus()
         let tasks = model.settings.tasks, notes = model.settings.notes, timerID = model.settings.focusTimer?.id
         var report: [String: Any] = [:]
-        var remaining: [PetCharacter] = [.pikachu, .charizard]
+        var remaining = Array(PetCharacter.allCases.dropFirst())
         func fits(_ image: NSImage) -> Bool {
             guard let data = image.tiffRepresentation, let b = NSBitmapImageRep(data: data) else { return false }
             for x in 0..<b.pixelsWide { for y in [0,1,b.pixelsHigh-2,b.pixelsHigh-1] {
@@ -566,14 +569,16 @@ final class BubblePanel: NSPanel {
             guard !remaining.isEmpty else {
                 self.characterReady = nil
                 report["dataPreserved"] = self.model.settings.tasks == tasks && self.model.settings.notes == notes && self.model.settings.focusTimer?.id == timerID
-                report["fourModelsBundled"] = PetCharacter.allCases.count == 4 && PetCharacter.allCases.allSatisfy { $0.isAvailable() }
+                report["sixModelsBundled"] = PetCharacter.allCases.count == 6 && PetCharacter.allCases.allSatisfy { $0.isAvailable() }
                 self.petView.focusTimer = nil
                 self.showQuickMenu(); self.selectQuickAction(.companions)
                 DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
                     if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "pokedesk-quick-menu") }
                     if let view = self.quickDetail?.contentView { self.capturePreview(view, name: "pokedesk-companions") }
-                    report["four3DThumbnailsBundled"] = PetCharacter.allCases.allSatisfy { Bundle.main.url(forResource: $0.thumbnailResource, withExtension: "png") != nil }
+                    report["six3DThumbnailsBundled"] = PetCharacter.allCases.allSatisfy { Bundle.main.url(forResource: $0.thumbnailResource, withExtension: "png") != nil }
                     report["quickSelectorVisible"] = self.quickState.selected == .companions && self.quickDetail?.isVisible == true
+                    report["quickSelectorSelection"] = self.quickState.selected?.rawValue ?? "none"
+                    report["quickSelectorPanelVisible"] = self.quickDetail?.isVisible == true
                     report["versionVisible"] = self.menu.items.first?.title.contains(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "missing") == true
                     let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("roster-smoke-test.json")
                     try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted,.sortedKeys]).write(to: url)
@@ -589,12 +594,15 @@ final class BubblePanel: NSPanel {
                 self.petView.preview(.idle, at: 3)
                 self.capturePreview(self.petView, name: character.rawValue+"-blink-preview")
                 report[character.rawValue+"Blink"] = (self.petView.node(character.name+"EyesClosed")?.presentation.scale.x ?? 0) > 0.9
-                report[character.rawValue+"Joints"] = self.petView.engine.jointCount == (character == .pikachu ? 49 : 87)
+                report[character.rawValue+"Joints"] = self.petView.engine.jointCount == character.expectedJoints
                 var clipped = [String](), moving = [String]()
                 for clip in character.clips {
                     self.petView.preview(clip, at: 0); let before = self.petView.snapshot().tiffRepresentation
                     self.petView.preview(clip, at: clip.duration*0.4)
                     if before != self.petView.snapshot().tiffRepresentation { moving.append(clip.rawValue) }
+                    if character == .lucario || character == .gengar {
+                        self.capturePreview(self.petView, name: character.rawValue+"-3d-"+clip.rawValue)
+                    }
                     for angle in stride(from: 0.0, to: .pi*2, by: .pi/4) {
                         self.petView.setYaw(angle)
                         for fraction in [0.0,0.4,0.75] {
@@ -604,10 +612,10 @@ final class BubblePanel: NSPanel {
                     }
                     self.petView.setYaw(0)
                 }
-                report[character.rawValue+"AllClipsMove"] = moving.count == 9
+                report[character.rawValue+"AllClipsMove"] = moving.count == character.clips.count
                 report[character.rawValue+"RotationFits"] = clipped.isEmpty
                 report[character.rawValue+"ClippedSamples"] = clipped
-                self.captureCharacterAnimation(character == .charizard ? .happyTail : .greeting, name: character.rawValue+"-demo")
+                self.captureCharacterAnimation(character == .charizard || character == .gengar ? .happyTail : .greeting, name: character.rawValue+"-demo")
                 self.characterReady = nil
                 self.petView.engine.cancelSummoning()
                 self.petView.summoningEnabled = true

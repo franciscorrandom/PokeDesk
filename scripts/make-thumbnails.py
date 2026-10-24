@@ -3,7 +3,7 @@
 from pathlib import Path
 from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
-for character in ['arcanine', 'mewtwo', 'pikachu', 'charizard']:
+for character in ['arcanine', 'mewtwo', 'pikachu', 'charizard', 'lucario', 'gengar']:
     image = Image.open(ROOT/f'dist/thumbnail-source-{character}.png').convert('RGBA')
     bounds = image.getchannel('A').point(lambda a: 255 if a > 8 else 0).getbbox()
     assert bounds and bounds[3]-bounds[1] > 100, 'Native model must be visible'

@@ -335,6 +335,12 @@ async function runSmoke() {
     await capture(c.id+'-menu');closeMenus();
     smokeResults.roster.push({info,rotation,profiles,anchor,memory:await js('window.petDiagnostics.info()')});
   }
+  await showSection('characters',false);await sleep(400);
+  const chooser=windows.get('dashboard');
+  const compact=await chooser.webContents.executeJavaScript(`(()=>{const viewport=document.querySelector('.content').getBoundingClientRect();return [...document.querySelectorAll('.roster [data-action="character"]')].map(n=>{const r=n.getBoundingClientRect();return {id:n.dataset.id,visible:r.width>0&&r.height>0&&r.top>=viewport.top&&r.bottom<=viewport.bottom&&r.left>=viewport.left&&r.right<=viewport.right};});})()`);
+  if(compact.length!==CHARACTERS.length||compact.some(c=>!c.visible))throw new Error('El selector rápido recorta algún compañero: '+JSON.stringify(compact));
+  smokeResults.compactChooser=compact;
+  await fs.writeFile(path.join(diagnosticsRoot,'previews/selector-rapido.png'),(await chooser.webContents.capturePage()).toPNG());chooser.hide();
   await execute('notesSave',{title:'Primera nota',body:'Preparar la reunión.',category:'Trabajo'});const note=store.state.notes[0];
   await execute('notesSave',{id:note.id,title:'Primera nota',body:'Preparar la reunión. Versión actualizada.',category:'trabajo'});
   if(store.state.notes[0].revisions.length!==1)throw new Error('Historial de notas perdido.');
@@ -353,7 +359,7 @@ async function runSmoke() {
   await execute('settings',{petScale:1,motion:false});closeMenus();
   const before=await js('window.petDiagnostics.info()');await sleep(300);
   const stationary=await js('window.petDiagnostics.info()');if(stationary.frames-before.frames>3)throw new Error('Se siguen dibujando frames sin movimiento.');smokeResults.stationaryFrames=stationary.frames-before.frames;
-  for(let i=0;i<12;i++){await execute('character',{id:CHARACTERS[i%4].id});await waitReady(CHARACTERS[i%4].id);}
+  for(let i=0;i<CHARACTERS.length*2;i++){const c=CHARACTERS[i%CHARACTERS.length];await execute('character',{id:c.id});await waitReady(c.id);}
   const after=await js('window.petDiagnostics.info()');smokeResults.resourcesAfter12Switches=after;
   if(after.memory.geometries>100||after.memory.textures>50||after.switching||!after.appearanceVisible||after.amount!==1||after.effectVisible)throw new Error('Recursos o estado visual no se liberaron al cambiar.');
   await mutate(s=>{s.focus.deadline=Date.now()-1;});await tick();await tick();if(store.state.focus||notices.filter(n=>n.type==='focusFinished').length!==1)throw new Error('Timer no finalizó una sola vez.');
@@ -372,7 +378,7 @@ async function runSmoke() {
   smokeResults.hostPlatform=process.platform;smokeResults.electron=process.versions.electron;smokeResults.gpu=await app.getGPUInfo('basic');smokeResults.metrics=app.getAppMetrics();
   await fs.writeFile(path.join(diagnosticsRoot,'smoke-results.json'),JSON.stringify({...smokeResults,logs},null,2));
   if(logs.some(l=>/error|failed|not found|refused/i.test(l)))throw new Error('Errores del visor: '+logs.join('\n'));
-  console.log('SMOKE OK: cuatro modelos, 38 clips, perfiles completos, menú y timer unidos, interacción, escalas, recursos, notas y avisos.');app.quit();
+  console.log('SMOKE OK: '+CHARACTERS.length+' modelos, '+CHARACTERS.reduce((n,c)=>n+c.clips.length,0)+' clips, perfiles completos, menú y timer unidos, interacción, escalas, recursos, notas y avisos.');app.quit();
 }
 
 app.whenReady().then(async () => {

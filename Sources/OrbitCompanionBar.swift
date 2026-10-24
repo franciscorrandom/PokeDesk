@@ -32,7 +32,7 @@ struct OrbitCompanionBar: View {
                 Text("Tu compañero de escritorio").font(.system(size: 11)).foregroundStyle(theme.muted)
             }
             Spacer(minLength: 6)
-            HStack(spacing: 5) {
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(35), spacing: 5), count: 3), spacing: 5) {
                 ForEach(PetCharacter.allCases) { character in
                     Button { model.selectCharacter(character) } label: {
                         OrbitThumbnail(character: character).frame(width: 29, height: 31).padding(3)
@@ -43,7 +43,7 @@ struct OrbitCompanionBar: View {
                         .help("Elegir a \(character.name)")
                         .accessibilityLabel("Elegir a \(character.name)")
                 }
-            }
+            }.frame(width: 115)
         }.padding(.horizontal, 21).padding(.vertical, 14)
     }
 }

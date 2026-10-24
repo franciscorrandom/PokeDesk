@@ -1,10 +1,10 @@
-# PokéDesk para Windows · 1.4.0-beta.2
+# PokéDesk para Windows · 1.5.0-beta.1
 
-Primera edición Windows del producto con iCal. Electron y Three.js utilizan los mismos cuatro modelos, miniaturas, grabaciones y bibliotecas de animación de la edición Mac. No utiliza el cliente OAuth ni Google Tasks del prototipo anterior de Arcanine.
+Primera edición Windows del producto con iCal. Electron y Three.js utilizan los mismos seis modelos, miniaturas, grabaciones y bibliotecas de animación de la edición Mac. No utiliza el cliente OAuth ni Google Tasks del prototipo anterior de Arcanine.
 
 ## Instalar y usar
 
-Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.4.0-beta.2-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
+Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.5.0-beta.1-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
 
 Cerrar la antigua app Arcanine desde la bandeja antes de abrir PokéDesk. Esta edición usa un perfil propio y no importa la conexión OAuth ni los datos de la app anterior. Tampoco sincroniza datos con la edición Mac.
 
@@ -12,7 +12,7 @@ En Ajustes → Google Calendar por iCal, pegar la **dirección secreta en format
 
 - Clic: menú semicircular, con acceso rápido a cambiar Pokémon.
 - Arrastrar: mover. Alt + arrastrar: girar horizontalmente. Mayús + arrastrar: acariciar.
-- Arcanine, Mewtwo, Pikachu y Charizard, con sus colores, 38 clips en total y miniaturas 3D.
+- Arcanine, Mewtwo, Pikachu, Charizard, Lucario y Gengar, con sus colores, 56 clips en total y miniaturas 3D.
 - Pokébola articulada, halo azul al aparecer y rojo al recoger. Se omite al desactivar movimiento o usar Reducir movimiento.
 - Agenda y avisos con acceso a enlaces de Meet, Zoom, Teams o Webex.
 - Tareas propias, de una vez o repetidas por días, completado y eliminación.
@@ -40,7 +40,7 @@ npm run build:windows
 
 El paso `vendor` copia recursos públicos de `../Assets`, incluidos ICAL.js y su licencia, y las utilidades oficiales de Three.js. Las copias en `assets/` y `src/renderer/vendor/` se generan; la fuente de modelos y animaciones se mantiene única para Mac y Windows. Para explorar sin datos reales: `npm start -- --demo`.
 
-La prueba `smoke` usa un perfil ficticio separado. Comprueba los cuatro modelos, clips, transparencia, perfiles en 360 grados, anclaje de menú/timer, clics repetidos, escalas, memoria GPU al cambiar y datos locales. Guarda resultados y capturas en `.build/`. La compilación de vista previa en Mac sirve para comprobar empaquetado; no sustituye a la prueba nativa de Windows. GitHub Actions ejecuta las pruebas y genera artefactos en Windows mediante `.github/workflows/windows.yml`.
+La prueba `smoke` usa un perfil ficticio separado. Comprueba los seis modelos, clips, transparencia, perfiles en 360 grados, anclaje de menú/timer, clics repetidos, escalas, memoria GPU al cambiar y datos locales. Guarda resultados y capturas en `.build/`. La compilación de vista previa en Mac sirve para comprobar empaquetado; no sustituye a la prueba nativa de Windows. GitHub Actions ejecuta las pruebas y genera artefactos en Windows mediante `.github/workflows/windows.yml`.
 
 ## Rendimiento y verificación
 

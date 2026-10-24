@@ -1,0 +1,28 @@
+{
+  "nombre": "Gengar",
+  "fecha_verificacion": "2026-10-23",
+  "archivo_original": "gengar-original.glb",
+  "sha256": "bd584fea8fe57a7b093c529ae7d15f372ff4580884deb290ad56d101f325ddb9",
+  "bytes": 323768,
+  "triangulos": 5272,
+  "vertices_exportados": 3222,
+  "articulaciones": 65,
+  "mallas": 5,
+  "materiales": 2,
+  "texturas_embebidas": 2,
+  "animaciones_originales": 0,
+  "extensiones_requeridas": [],
+  "fuente": "https://sketchfab.com/3d-models/gengar-ce4497cd5687437cbf1b2fd2a4539fd1",
+  "autor": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+  "licencia": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+  "licencia_url": "https://creativecommons.org/licenses/by/4.0/",
+  "descarga": "Botón oficial de Sketchfab, GLB convertido",
+  "estado": "Original intacto; biblioteca de nueve clips integrada en PokéDesk 1.5.0",
+  "validaciones": [
+    "GLB 2.0, longitud y buffers correctos",
+    "texturas embebidas, sin dependencias externas",
+    "valores numéricos finitos",
+    "índices de vértices y articulaciones válidos",
+    "pesos de skinning normalizados"
+  ]
+}

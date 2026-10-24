@@ -2,12 +2,13 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
+const characters = require('../src/renderer/characters.json');
 async function main() {
   for (const [source, target] of [['Assets','assets'],['docs','assets/credits']]) {
     const from = path.resolve(root, '..', source), to = path.join(root, target);
     await fs.mkdir(to, {recursive:true});
     if (source === 'Assets') {
-      for (const name of ['arcanine','mewtwo','pikachu','charizard']) {
+      for (const {id: name} of characters) {
         await fs.copyFile(path.join(from,name+'-biblioteca.glb'),path.join(to,name+'.glb'));
         await fs.copyFile(path.join(from,'preview-'+name+'.png'),path.join(to,'preview-'+name+'.png'));
       }
@@ -34,6 +35,6 @@ async function main() {
     await fs.copyFile(path.join(root,'node_modules/three/examples/jsm',name),out);
   }
   await fs.copyFile(path.join(root,'node_modules/three/LICENSE'),path.join(root,'src/renderer/vendor/three-addons/LICENSE'));
-  console.log('PokéDesk: cuatro modelos, voces, lector iCal y licencias incluidos.');
+  console.log('PokéDesk: '+characters.length+' modelos, voces, lector iCal y licencias incluidos.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

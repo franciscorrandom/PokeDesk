@@ -220,5 +220,111 @@
         "duration": 7.199999809265137
       }
     ]
+  },
+  {
+    "id": "lucario",
+    "name": "Lucario",
+    "number": "448",
+    "type": "Lucha / Acero",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Orejas y parpadeo",
+        "duration": 8
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola y sensores de aura",
+        "duration": 4.8
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso de aura",
+        "duration": 4
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.6
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.6
+      },
+      {
+        "id": "sentarse",
+        "title": "Concentración",
+        "duration": 7.2
+      }
+    ]
+  },
+  {
+    "id": "gengar",
+    "name": "Gengar",
+    "number": "094",
+    "type": "Fantasma / Veneno",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Levitación y parpadeo",
+        "duration": 8
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Broma con la lengua",
+        "duration": 4.8
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.6
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.6
+      },
+      {
+        "id": "sentarse",
+        "title": "Descanso flotante",
+        "duration": 7.2
+      }
+    ]
   }
 ]

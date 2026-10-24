@@ -6,7 +6,7 @@ struct PetCharacterChooser: View {
     let selected: PetCharacter
     let onSelect: (PetCharacter) -> Void
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 10) {
             ForEach(PetCharacter.allCases) { character in
                 let chosen = character == selected
                 Button { onSelect(character) } label: {
@@ -14,7 +14,7 @@ struct PetCharacterChooser: View {
                         if let url = Bundle.main.url(forResource: character.thumbnailResource, withExtension: "png"), let art = NSImage(contentsOf: url) {
                             Image(nsImage: art).resizable().scaledToFit().frame(height: 64)
                         } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: 64) }
-                        Text(character.name).font(.system(size: 13, weight: .semibold))
+                        Text(character.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.85)
                         Text(chosen ? "Tu compañero" : "Elegir").font(.system(size: 10, weight: .semibold))
                     }.frame(maxWidth: .infinity).padding(10)
                         .foregroundStyle(chosen ? theme.red : theme.ink)

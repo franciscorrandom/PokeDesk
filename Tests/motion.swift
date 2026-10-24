@@ -99,6 +99,20 @@ for index in 0..<8 {
 psychic.request(.alert, at: 30_000)
 psychic.click(at: 30_001)
 check(psychic.clip == .alert, "Los avisos de reunión conservan prioridad con Mewtwo")
+for character in [PetCharacter.lucario, .gengar] {
+    var newcomer = Arcanine3DMotion(character: character)
+    for clip in character.clips {
+        newcomer.request(clip, at: 0, manual: true)
+        check(newcomer.clip == clip, "Los nuevos compañeros aceptan todo su repertorio")
+        newcomer.tick(at: clip.duration + 0.01)
+        check(newcomer.clip == .idle, "Cada gesto nuevo vuelve al reposo")
+    }
+    newcomer.request(.chaseTail, at: 20, manual: true)
+    check(newcomer.clip == .idle, "Los nuevos compañeros no reciben el giro canino")
+    newcomer.request(.alert, at: 21)
+    newcomer.click(at: 22)
+    check(newcomer.clip == .alert, "Los avisos mantienen prioridad con los nuevos compañeros")
+}
 print("\(checks) comprobaciones 3D correctas")
 let screens = [FloatingRect(x: 0, y: 0, width: 1440, height: 900),
                FloatingRect(x: -1440, y: 24, width: 1440, height: 876),

@@ -13,3 +13,13 @@ Fecha: 12 de octubre de 2026. Host local: Mac con Apple Silicon; Electron 44.7.0
 - Sin contactos, cuentas, calendarios reales ni envío de datos privados durante las pruebas.
 
 La prueba de código nativa pasó en el runner Windows de GitHub Actions (run 38203264538), incluidos visor, controles y cifrado de enlaces ficticios. El workflow también verifica el ejecutable empaquetado antes de entregar los artefactos. El informe final debe distinguir su resultado del resultado local. La prueba manual pendiente debe cubrir clics/arrastres prolongados, escalado entre monitores, GPU, reanudación, autoarranque y apertura del instalador. No se ha cambiado «Windows · Próximamente» en el sitio.
+
+## Revisión 1.5.0 · 23 de octubre de 2026
+
+El catálogo incluye seis modelos y 56 clips. Las pruebas de lógica pasan con
+el catálogo ampliado y el visor Electron en Mac verifica 3.360 perfiles,
+anclajes de menú/timer, selector rápido, 300 ciclos de interacción y liberación
+de recursos tras recorrer dos veces los seis compañeros. La prueba nativa
+Windows y la del ejecutable empaquetado se ejecutan en GitHub Actions; sus
+resultados se conservan como artefactos de esta revisión. Las nuevas descargas
+no actualizan automáticamente la página de Guía Estudio.

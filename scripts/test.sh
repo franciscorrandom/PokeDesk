@@ -16,6 +16,7 @@ cp Tests/notes.swift .build/tests/notes/main.swift
 swiftc "${ARCANINE_FLAGS[@]}" Sources/ReminderCore.swift Sources/PetCharacter.swift Sources/Arcanine3DMotion.swift Sources/PetAnimationSupport.swift Sources/CalendarParser.swift Sources/CalendarPayload.swift Sources/CalendarService.swift Sources/CalendarIntegration.swift Sources/MigaVoice.swift Sources/PetModel.swift .build/tests/notes/main.swift -o .build/tests/notes-test
 .build/tests/notes-test
 python3 Tests/characters.py
+python3 Tests/arcanine-gait.py Assets/arcanine-biblioteca.glb
 mkdir -p .build/tests/summoning
 cp Tests/summoning.swift .build/tests/summoning/main.swift
 swiftc "${ARCANINE_FLAGS[@]}" Sources/PetSummonTimeline.swift .build/tests/summoning/main.swift -o .build/tests/summoning-test
