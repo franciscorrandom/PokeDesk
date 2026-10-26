@@ -228,6 +228,7 @@ final class BubblePanel: NSPanel {
         quickState.character = model.settings.character
         petView.character = model.settings.character
         petView.animate = model.settings.motionEnabled && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        petView.ambientRotationEnabled = !smokeTest && (model.settings.ambientRotationEnabled ?? true)
         petView.loadModel(character: model.settings.character)
         petPanel.title = "\(model.settings.character.name) — mascota"
         petPanel.setContentSize(panelSize())
@@ -243,6 +244,7 @@ final class BubblePanel: NSPanel {
     }
 
     private func renderTick() {
+        petView.menuOpen = dashboard?.isVisible == true || quickMenu?.isVisible == true || quickDetail?.isVisible == true
         petView.focusing = model.settings.focusTimer?.phase == .running
         petView.focusTimer = model.settings.focusTimer.flatMap { $0.showsOnFace(at: Date()) ? $0 : nil }
         if petView.speaking != model.speaking { petView.speaking = model.speaking; petView.needsDisplay = true }
@@ -860,508 +862,909 @@ final class BubblePanel: NSPanel {
                 petView.setYaw(angle)
                 for fraction in [0.0, 0.4, 0.75] {
                     petView.preview(clip, at: clip.duration*fraction)
-                    if !fits(petView.snapshot()) { clipped.append("\(clip.rawValue):\(angle):\(fraction)") }
-                }
-            }
-            petView.setYaw(0)
-        }
-        report["allClipsMove"] = moving.count == 9
-        report["allClipsArticulated"] = articulated.count == 9
-        report["movingClips"] = moving
-        report["rotationWithoutClipping"] = clipped.isEmpty
-        report["clippedSamples"] = clipped
-        petView.preview(.idle, at: 0)
-        _ = petView.snapshot()
-        report["petClickable"] = stride(from: 20.0, to: petView.bounds.width, by: 20).contains { x in
-            stride(from: 35.0, to: petView.bounds.height, by: 20).contains { y in petView.containsPet(NSPoint(x: x, y: y)) }
-        }
-        model.dashboardTab = 3; showDashboard()
-        DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
-            if let view = self.dashboard?.contentView { self.capturePreview(view, name: "mewtwo-settings-preview") }
-            self.closeDashboard(); self.toggleQuickMenu()
-            if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "mewtwo-quick-menu-preview") }
-            report["quickMenuCharacterTheme"] = self.quickState.character == .mewtwo
-            report["quickMenuVisible"] = self.quickMenu?.isVisible == true
-            self.captureCharacterAnimation(.greeting, name: "mewtwo-saludo")
-            let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("characters-smoke-test.json")
-            if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: url) }
-            NSApp.terminate(nil)
-        }
+                    if !…39383 tokens truncated…: "3.1.1",
+      "resolved": "https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz",
+      "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/pe-library": {
+      "version": "0.4.1",
+      "resolved": "https://registry.npmjs.org/pe-library/-/pe-library-0.4.1.tgz",
+      "integrity": "sha512-eRWB5LBz7PpDu4PUlwT0PhnQfTQJlDDdPa35urV4Osrm0t0AqQFGn+UIkU3klZvwJ8KPO3VbBFsXquA6p6kqZw==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=12",
+        "npm": ">=6"
+      },
+      "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/jet2jet"
+      }
+    },
+    "node_modules/picocolors": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
+      "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==",
+      "dev": true,
+      "license": "ISC"
+    },
+    "node_modules/picomatch": {
+      "version": "4.0.7",
+      "resolved": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz",
+      "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=12"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/jonschlinkert"
+      }
+    },
+    "node_modules/pkijs": {
+      "version": "3.4.1",
+      "resolved": "https://registry.npmjs.org/pkijs/-/pkijs-3.4.1.tgz",
+      "integrity": "sha512-Oo/NZcSWccq8KyoG7gLE9fnltgHns+pNCjCAp/WmjsUySi+sX7y4z4Xqu4fVb42CDHzRPl33fjzT15V1wvcyhA==",
+      "dev": true,
+      "license": "BSD-3-Clause",
+      "workspaces": [
+        "website"
+      ],
+      "dependencies": {
+        "@noble/hashes": "1.8.0",
+        "asn1js": "^3.0.6",
+        "bytestreamjs": "^2.0.1",
+        "pvtsutils": "^1.3.6",
+        "pvutils": "^1.1.3",
+        "tslib": "^2.8.1"
+      },
+      "engines": {
+        "node": ">=16.0.0"
+      }
+    },
+    "node_modules/pkijs/node_modules/@noble/hashes": {
+      "version": "1.8.0",
+      "resolved": "https://registry.npmjs.org/@noble/hashes/-/hashes-1.8.0.tgz",
+      "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": "^14.21.3 || >=16"
+      },
+      "funding": {
+        "url": "https://paulmillr.com/funding/"
+      }
+    },
+    "node_modules/plist": {
+      "version": "3.1.0",
+      "resolved": "https://registry.npmjs.org/plist/-/plist-3.1.0.tgz",
+      "integrity": "sha512-uysumyrvkUX0rX/dEVqt8gC3sTBzd4zoWfLeS29nb53imdaXVvLINYXTI2GNqzaMuvacNx4uJQ8+b3zXR0pkgQ==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "@xmldom/xmldom": "^0.8.8",
+        "base64-js": "^1.5.1",
+        "xmlbuilder": "^15.1.1"
+      },
+      "engines": {
+        "node": ">=10.4.0"
+      }
+    },
+    "node_modules/postject": {
+      "version": "1.0.0-alpha.6",
+      "resolved": "https://registry.npmjs.org/postject/-/postject-1.0.0-alpha.6.tgz",
+      "integrity": "sha512-b9Eb8h2eVqNE8edvKdwqkrY6O7kAwmI8kcnBv1NScolYJbo59XUF0noFq+lxbC1yN20bmC0WBEbDC5H/7ASb0A==",
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "peer": true,
+      "dependencies": {
+        "commander": "^9.4.0"
+      },
+      "bin": {
+        "postject": "dist/cli.js"
+      },
+      "engines": {
+        "node": ">=14.0.0"
+      }
+    },
+    "node_modules/postject/node_modules/commander": {
+      "version": "9.5.0",
+      "resolved": "https://registry.npmjs.org/commander/-/commander-9.5.0.tgz",
+      "integrity": "sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==",
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "peer": true,
+      "engines": {
+        "node": "^12.20.0 || >=14"
+      }
+    },
+    "node_modules/proc-log": {
+      "version": "6.1.0",
+      "resolved": "https://registry.npmjs.org/proc-log/-/proc-log-6.1.0.tgz",
+      "integrity": "sha512-iG+GYldRf2BQ0UDUAd6JQ/RwzaQy6mXmsk/IzlYyal4A4SNFw54MeH4/tLkF4I5WoWG9SQwuqWzS99jaFQHBuQ==",
+      "dev": true,
+      "license": "ISC",
+      "engines": {
+        "node": "^20.17.0 || >=22.9.0"
+      }
+    },
+    "node_modules/process-nextick-args": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/process-nextick-args/-/process-nextick-args-2.0.1.tgz",
+      "integrity": "sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/progress": {
+      "version": "2.0.3",
+      "resolved": "https://registry.npmjs.org/progress/-/progress-2.0.3.tgz",
+      "integrity": "sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.4.0"
+      }
+    },
+    "node_modules/promise-retry": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/promise-retry/-/promise-retry-2.0.1.tgz",
+      "integrity": "sha512-y+WKFlBR8BGXnsNlIHFGPZmyDf3DFMoLhaflAnyZgV6rG6xu+JwesTo2Q9R6XwYmtmwAFCkAk3e35jEdoeh/3g==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "err-code": "^2.0.2",
+        "retry": "^0.12.0"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/proper-lockfile": {
+      "version": "4.1.2",
+      "resolved": "https://registry.npmjs.org/proper-lockfile/-/proper-lockfile-4.1.2.tgz",
+      "integrity": "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "graceful-fs": "^4.2.4",
+        "retry": "^0.12.0",
+        "signal-exit": "^3.0.2"
+      }
+    },
+    "node_modules/pump": {
+      "version": "3.0.4",
+      "resolved": "https://registry.npmjs.org/pump/-/pump-3.0.4.tgz",
+      "integrity": "sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "end-of-stream": "^1.1.0",
+        "once": "^1.3.1"
+      }
+    },
+    "node_modules/pvtsutils": {
+      "version": "1.3.6",
+      "resolved": "https://registry.npmjs.org/pvtsutils/-/pvtsutils-1.3.6.tgz",
+      "integrity": "sha512-PLgQXQ6H2FWCaeRak8vvk1GW462lMxB5s3Jm673N82zI4vqtVUPuZdffdZbPDFRoU8kAhItWFtPCWiPpp4/EDg==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "tslib": "^2.8.1"
+      }
+    },
+    "node_modules/pvutils": {
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/pvutils/-/pvutils-1.2.0.tgz",
+      "integrity": "sha512-BbubeCEyTuQjVMakvJQ/Sxbc93F2pwmbsxONT/ZRrwU7Ua38d8unYTwXpTVLAKJ4BDuH9IGztCjQcd/N/39Dvg==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=16.0.0"
+      }
+    },
+    "node_modules/quick-lru": {
+      "version": "5.1.1",
+      "resolved": "https://registry.npmjs.org/quick-lru/-/quick-lru-5.1.1.tgz",
+      "integrity": "sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/read-binary-file-arch": {
+      "version": "1.0.6",
+      "resolved": "https://registry.npmjs.org/read-binary-file-arch/-/read-binary-file-arch-1.0.6.tgz",
+      "integrity": "sha512-BNg9EN3DD3GsDXX7Aa8O4p92sryjkmzYYgmgTAc6CA4uGLEDzFfxOxugu21akOxpcXHiEgsYkC6nPsQvLLLmEg==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "debug": "^4.3.4"
+      },
+      "bin": {
+        "read-binary-file-arch": "cli.js"
+      }
+    },
+    "node_modules/readable-stream": {
+      "version": "2.3.8",
+      "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.8.tgz",
+      "integrity": "sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "core-util-is": "~1.0.0",
+        "inherits": "~2.0.3",
+        "isarray": "~1.0.0",
+        "process-nextick-args": "~2.0.0",
+        "safe-buffer": "~5.1.1",
+        "string_decoder": "~1.1.1",
+        "util-deprecate": "~1.0.1"
+      }
+    },
+    "node_modules/require-directory": {
+      "version": "2.1.1",
+      "resolved": "https://registry.npmjs.org/require-directory/-/require-directory-2.1.1.tgz",
+      "integrity": "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/require-from-string": {
+      "version": "2.0.2",
+      "resolved": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+      "integrity": "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/resedit": {
+      "version": "1.7.2",
+      "resolved": "https://registry.npmjs.org/resedit/-/resedit-1.7.2.tgz",
+      "integrity": "sha512-vHjcY2MlAITJhC0eRD/Vv8Vlgmu9Sd3LX9zZvtGzU5ZImdTN3+d6e/4mnTyV8vEbyf1sgNIrWxhWlrys52OkEA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "pe-library": "^0.4.1"
+      },
+      "engines": {
+        "node": ">=12",
+        "npm": ">=6"
+      },
+      "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/jet2jet"
+      }
+    },
+    "node_modules/resolve-alpn": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/resolve-alpn/-/resolve-alpn-1.2.1.tgz",
+      "integrity": "sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/responselike": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/responselike/-/responselike-2.0.1.tgz",
+      "integrity": "sha512-4gl03wn3hj1HP3yzgdI7d3lCkF95F21Pz4BPGvKHinyQzALR5CapwC8yIi0Rh58DEMQ/SguC03wFj2k0M/mHhw==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "lowercase-keys": "^2.0.0"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/retry": {
+      "version": "0.12.0",
+      "resolved": "https://registry.npmjs.org/retry/-/retry-0.12.0.tgz",
+      "integrity": "sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">= 4"
+      }
+    },
+    "node_modules/rimraf": {
+      "version": "2.6.3",
+      "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.6.3.tgz",
+      "integrity": "sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==",
+      "deprecated": "Rimraf versions prior to v4 are no longer supported",
+      "dev": true,
+      "license": "ISC",
+      "peer": true,
+      "dependencies": {
+        "glob": "^7.1.3"
+      },
+      "bin": {
+        "rimraf": "bin.js"
+      }
+    },
+    "node_modules/roarr": {
+      "version": "2.15.4",
+      "resolved": "https://registry.npmjs.org/roarr/-/roarr-2.15.4.tgz",
+      "integrity": "sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==",
+      "dev": true,
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "dependencies": {
+        "boolean": "^3.0.1",
+        "detect-node": "^2.0.4",
+        "globalthis": "^1.0.1",
+        "json-stringify-safe": "^5.0.1",
+        "semver-compare": "^1.0.0",
+        "sprintf-js": "^1.1.2"
+      },
+      "engines": {
+        "node": ">=8.0"
+      }
+    },
+    "node_modules/safe-buffer": {
+      "version": "5.1.2",
+      "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz",
+      "integrity": "sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/sanitize-filename": {
+      "version": "1.6.4",
+      "resolved": "https://registry.npmjs.org/sanitize-filename/-/sanitize-filename-1.6.4.tgz",
+      "integrity": "sha512-9ZyI08PsvdQl2r/bBIGubpVdR3RR9sY6RDiWFPreA21C/EFlQhmgo20UZlNjZMMZNubusLhAQozkA0Od5J21Eg==",
+      "dev": true,
+      "license": "WTFPL OR ISC",
+      "dependencies": {
+        "truncate-utf8-bytes": "^1.0.0"
+      }
+    },
+    "node_modules/sax": {
+      "version": "1.6.1",
+      "resolved": "https://registry.npmjs.org/sax/-/sax-1.6.1.tgz",
+      "integrity": "sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==",
+      "dev": true,
+      "license": "BlueOak-1.0.0",
+      "engines": {
+        "node": ">=11.0.0"
+      }
+    },
+    "node_modules/semver": {
+      "version": "7.8.5",
+      "resolved": "https://registry.npmjs.org/semver/-/semver-7.8.5.tgz",
+      "integrity": "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==",
+      "dev": true,
+      "license": "ISC",
+      "bin": {
+        "semver": "bin/semver.js"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/semver-compare": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/semver-compare/-/semver-compare-1.0.0.tgz",
+      "integrity": "sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==",
+      "dev": true,
+      "license": "MIT",
+      "optional": true
+    },
+    "node_modules/serialize-error": {
+      "version": "7.0.1",
+      "resolved": "https://registry.npmjs.org/serialize-error/-/serialize-error-7.0.1.tgz",
+      "integrity": "sha512-8I8TjW5KMOKsZQTvoxjuSIa7foAwPWGOts+6o7sgjz41/qMD9VQHEDxi6PBvK2l0MXUmqZyNpUK+T2tQaaElvw==",
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "dependencies": {
+        "type-fest": "^0.13.1"
+      },
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/shebang-command": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz",
+      "integrity": "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "shebang-regex": "^3.0.0"
+      },
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/shebang-regex": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz",
+      "integrity": "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/signal-exit": {
+      "version": "3.0.7",
+      "resolved": "https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.7.tgz",
+      "integrity": "sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==",
+      "dev": true,
+      "license": "ISC"
+    },
+    "node_modules/simple-update-notifier": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/simple-update-notifier/-/simple-update-notifier-2.0.0.tgz",
+      "integrity": "sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "semver": "^7.5.3"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/source-map": {
+      "version": "0.6.1",
+      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz",
+      "integrity": "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==",
+      "dev": true,
+      "license": "BSD-3-Clause",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/source-map-support": {
+      "version": "0.5.21",
+      "resolved": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz",
+      "integrity": "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "buffer-from": "^1.0.0",
+        "source-map": "^0.6.0"
+      }
+    },
+    "node_modules/sprintf-js": {
+      "version": "1.1.3",
+      "resolved": "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.1.3.tgz",
+      "integrity": "sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==",
+      "dev": true,
+      "license": "BSD-3-Clause",
+      "optional": true
+    },
+    "node_modules/stat-mode": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/stat-mode/-/stat-mode-1.0.0.tgz",
+      "integrity": "sha512-jH9EhtKIjuXZ2cWxmXS8ZP80XyC3iasQxMDV8jzhNJpfDb7VbQLVW4Wvsxz9QZvzV+G4YoSfBUVKDOyxLzi/sg==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">= 6"
+      }
+    },
+    "node_modules/string_decoder": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz",
+      "integrity": "sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "safe-buffer": "~5.1.0"
+      }
+    },
+    "node_modules/string-width": {
+      "version": "4.2.3",
+      "resolved": "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz",
+      "integrity": "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "emoji-regex": "^8.0.0",
+        "is-fullwidth-code-point": "^3.0.0",
+        "strip-ansi": "^6.0.1"
+      },
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/strip-ansi": {
+      "version": "6.0.1",
+      "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz",
+      "integrity": "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "ansi-regex": "^5.0.1"
+      },
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/sumchecker": {
+      "version": "3.0.1",
+      "resolved": "https://registry.npmjs.org/sumchecker/-/sumchecker-3.0.1.tgz",
+      "integrity": "sha512-MvjXzkz/BOfyVDkG0oFOtBxHX2u3gKbMHIF/dXblZsgD3BWOFLmHovIpZY7BykJdAjcqRCBi1WYBNdEC9yI7vg==",
+      "dev": true,
+      "license": "Apache-2.0",
+      "dependencies": {
+        "debug": "^4.1.0"
+      },
+      "engines": {
+        "node": ">= 8.0"
+      }
+    },
+    "node_modules/supports-color": {
+      "version": "7.2.0",
+      "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-7.2.0.tgz",
+      "integrity": "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "has-flag": "^4.0.0"
+      },
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/tar": {
+      "version": "7.5.22",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-7.5.22.tgz",
+      "integrity": "sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==",
+      "dev": true,
+      "license": "BlueOak-1.0.0",
+      "dependencies": {
+        "@isaacs/fs-minipass": "^4.0.0",
+        "chownr": "^3.0.0",
+        "minipass": "^7.1.2",
+        "minizlib": "^3.1.0",
+        "yallist": "^5.0.0"
+      },
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/tar/node_modules/yallist": {
+      "version": "5.0.0",
+      "resolved": "https://registry.npmjs.org/yallist/-/yallist-5.0.0.tgz",
+      "integrity": "sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==",
+      "dev": true,
+      "license": "BlueOak-1.0.0",
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/temp": {
+      "version": "0.9.4",
+      "resolved": "https://registry.npmjs.org/temp/-/temp-0.9.4.tgz",
+      "integrity": "sha512-yYrrsWnrXMcdsnu/7YMYAofM1ktpL5By7vZhf15CrXijWWrEYZks5AXBudalfSWJLlnen/QUJUB5aoB0kqZUGA==",
+      "dev": true,
+      "license": "MIT",
+      "peer": true,
+      "dependencies": {
+        "mkdirp": "^0.5.1",
+        "rimraf": "~2.6.2"
+      },
+      "engines": {
+        "node": ">=6.0.0"
+      }
+    },
+    "node_modules/temp-file": {
+      "version": "3.4.0",
+      "resolved": "https://registry.npmjs.org/temp-file/-/temp-file-3.4.0.tgz",
+      "integrity": "sha512-C5tjlC/HCtVUOi3KWVokd4vHVViOmGjtLwIh4MuzPo/nMYTV/p1urt3RnMz2IWXDdKEGJH3k5+KPxtqRsUYGtg==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "async-exit-hook": "^2.0.1",
+        "fs-extra": "^10.0.0"
+      }
+    },
+    "node_modules/three": {
+      "version": "0.186.1",
+      "resolved": "https://registry.npmjs.org/three/-/three-0.186.1.tgz",
+      "integrity": "sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==",
+      "license": "MIT"
+    },
+    "node_modules/tiny-async-pool": {
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/tiny-async-pool/-/tiny-async-pool-1.3.0.tgz",
+      "integrity": "sha512-01EAw5EDrcVrdgyCLgoSPvqznC0sVxDSVeiOz09FUpjh71G79VCqneOr+xvt7T1r76CF6ZZfPjHorN2+d+3mqA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "semver": "^5.5.0"
+      }
+    },
+    "node_modules/tiny-async-pool/node_modules/semver": {
+      "version": "5.7.2",
+      "resolved": "https://registry.npmjs.org/semver/-/semver-5.7.2.tgz",
+      "integrity": "sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==",
+      "dev": true,
+      "license": "ISC",
+      "bin": {
+        "semver": "bin/semver"
+      }
+    },
+    "node_modules/tinyglobby": {
+      "version": "0.2.17",
+      "resolved": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz",
+      "integrity": "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "fdir": "^6.5.0",
+        "picomatch": "^4.0.4"
+      },
+      "engines": {
+        "node": ">=12.0.0"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/SuperchupuDev"
+      }
+    },
+    "node_modules/tmp": {
+      "version": "0.2.7",
+      "resolved": "https://registry.npmjs.org/tmp/-/tmp-0.2.7.tgz",
+      "integrity": "sha512-e0votIpp4Uo2AJYSzVHV6xCcawuiez3DzqDAbrTc3YxBkplN6e+dM13ZeIcZnDg/QpSuU2zfZ3rzwY8ukEnaXw==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=14.14"
+      }
+    },
+    "node_modules/tmp-promise": {
+      "version": "3.0.3",
+      "resolved": "https://registry.npmjs.org/tmp-promise/-/tmp-promise-3.0.3.tgz",
+      "integrity": "sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "tmp": "^0.2.0"
+      }
+    },
+    "node_modules/truncate-utf8-bytes": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/truncate-utf8-bytes/-/truncate-utf8-bytes-1.0.2.tgz",
+      "integrity": "sha512-95Pu1QXQvruGEhv62XCMO3Mm90GscOCClvrIUwCM0PYOXK3kaF3l3sIHxx71ThJfcbM2O5Au6SO3AWCSEfW4mQ==",
+      "dev": true,
+      "license": "WTFPL",
+      "dependencies": {
+        "utf8-byte-length": "^1.0.1"
+      }
+    },
+    "node_modules/tslib": {
+      "version": "2.8.1",
+      "resolved": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==",
+      "dev": true,
+      "license": "0BSD"
+    },
+    "node_modules/type-fest": {
+      "version": "0.13.1",
+      "resolved": "https://registry.npmjs.org/type-fest/-/type-fest-0.13.1.tgz",
+      "integrity": "sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==",
+      "dev": true,
+      "license": "(MIT OR CC0-1.0)",
+      "optional": true,
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/undici": {
+      "version": "7.30.0",
+      "resolved": "https://registry.npmjs.org/undici/-/undici-7.30.0.tgz",
+      "integrity": "sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==",
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "engines": {
+        "node": ">=20.18.1"
+      }
+    },
+    "node_modules/undici-types": {
+      "version": "7.24.6",
+      "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-7.24.6.tgz",
+      "integrity": "sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/universalify": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/universalify/-/universalify-2.0.1.tgz",
+      "integrity": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">= 10.0.0"
+      }
+    },
+    "node_modules/unzipper": {
+      "version": "0.12.5",
+      "resolved": "https://registry.npmjs.org/unzipper/-/unzipper-0.12.5.tgz",
+      "integrity": "sha512-tXYOi9R57Uj/2Z25SOs5RRSzq886MBQj2gY8dPL+xl/kv6s6SvByoKfAtvfVeEuhntWDgjd2o9p2lb4TVPAz0A==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "bluebird": "~3.7.2",
+        "duplexer2": "~0.1.4",
+        "fs-extra": "11.3.1",
+        "graceful-fs": "^4.2.2",
+        "node-int64": "^0.4.0"
+      }
+    },
+    "node_modules/unzipper/node_modules/fs-extra": {
+      "version": "11.3.1",
+      "resolved": "https://registry.npmjs.org/fs-extra/-/fs-extra-11.3.1.tgz",
+      "integrity": "sha512-eXvGGwZ5CL17ZSwHWd3bbgk7UUpF6IFHtP57NYYakPvHOs8GDgDe5KJI36jIJzDkJ6eJjuzRA8eBQb6SkKue0g==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "graceful-fs": "^4.2.0",
+        "jsonfile": "^6.0.1",
+        "universalify": "^2.0.0"
+      },
+      "engines": {
+        "node": ">=14.14"
+      }
+    },
+    "node_modules/utf8-byte-length": {
+      "version": "1.0.5",
+      "resolved": "https://registry.npmjs.org/utf8-byte-length/-/utf8-byte-length-1.0.5.tgz",
+      "integrity": "sha512-Xn0w3MtiQ6zoz2vFyUVruaCL53O/DwUvkEeOvj+uulMm0BkUGYWmBYVyElqZaSLhY6ZD0ulfU3aBra2aVT4xfA==",
+      "dev": true,
+      "license": "(WTFPL OR MIT)"
+    },
+    "node_modules/util-deprecate": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz",
+      "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/webcrypto-core": {
+      "version": "1.9.2",
+      "resolved": "https://registry.npmjs.org/webcrypto-core/-/webcrypto-core-1.9.2.tgz",
+      "integrity": "sha512-gsXecm82UQNlTBURJGuqOWy1Ww08S3kZUcr3aOJS02Pk0xLtkfeUAVC0u0xhgdonFme80edSJUIJyuvL/7250Q==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "@peculiar/asn1-schema": "^2.7.0",
+        "@peculiar/json-schema": "^1.1.12",
+        "@peculiar/utils": "^2.0.2",
+        "asn1js": "^3.0.10",
+        "tslib": "^2.8.1"
+      }
+    },
+    "node_modules/which": {
+      "version": "5.0.0",
+      "resolved": "https://registry.npmjs.org/which/-/which-5.0.0.tgz",
+      "integrity": "sha512-JEdGzHwwkrbWoGOlIHqQ5gtprKGOenpDHpxE9zVR1bWbOtYRyPPHMe9FaP6x61CmNaTThSkb0DAJte5jD+DmzQ==",
+      "dev": true,
+      "license": "ISC",
+      "dependencies": {
+        "isexe": "^3.1.1"
+      },
+      "bin": {
+        "node-which": "bin/which.js"
+      },
+      "engines": {
+        "node": "^18.17.0 || >=20.5.0"
+      }
+    },
+    "node_modules/wrap-ansi": {
+      "version": "7.0.0",
+      "resolved": "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz",
+      "integrity": "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "ansi-styles": "^4.0.0",
+        "string-width": "^4.1.0",
+        "strip-ansi": "^6.0.0"
+      },
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/chalk/wrap-ansi?sponsor=1"
+      }
+    },
+    "node_modules/wrappy": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz",
+      "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==",
+      "dev": true,
+      "license": "ISC"
+    },
+    "node_modules/xmlbuilder": {
+      "version": "15.1.1",
+      "resolved": "https://registry.npmjs.org/xmlbuilder/-/xmlbuilder-15.1.1.tgz",
+      "integrity": "sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=8.0"
+      }
+    },
+    "node_modules/y18n": {
+      "version": "5.0.8",
+      "resolved": "https://registry.npmjs.org/y18n/-/y18n-5.0.8.tgz",
+      "integrity": "sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==",
+      "dev": true,
+      "license": "ISC",
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/yallist": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/yallist/-/yallist-4.0.0.tgz",
+      "integrity": "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==",
+      "dev": true,
+      "license": "ISC"
+    },
+    "node_modules/yargs": {
+      "version": "17.7.3",
+      "resolved": "https://registry.npmjs.org/yargs/-/yargs-17.7.3.tgz",
+      "integrity": "sha512-GZtjxm/J/4TSxuL3FNYjCmLktBTnIw/rVmKSIyKeYAZpmJB2ig9VauCC5xsa82GNKVKDAqpOn3KVzNt0zmrU0g==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "cliui": "^8.0.1",
+        "escalade": "^3.1.1",
+        "get-caller-file": "^2.0.5",
+        "require-directory": "^2.1.1",
+        "string-width": "^4.2.3",
+        "y18n": "^5.0.5",
+        "yargs-parser": "^21.1.1"
+      },
+      "engines": {
+        "node": ">=12"
+      }
+    },
+    "node_modules/yargs-parser": {
+      "version": "21.1.1",
+      "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-21.1.1.tgz",
+      "integrity": "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==",
+      "dev": true,
+      "license": "ISC",
+      "engines": {
+        "node": ">=12"
+      }
+    },
+    "node_modules/yocto-queue": {
+      "version": "0.1.0",
+      "resolved": "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz",
+      "integrity": "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
     }
-
-    private func captureCharacterAnimation(_ clip: ArcanineClip, name: String) {
-        let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent(name+".gif")
-        let frames = 60
-        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames, nil) else { return }
-        CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
-        petView.setYaw(0)
-        for frame in 0..<frames {
-            autoreleasepool {
-                petView.preview(clip, at: Double(frame)/Double(frames)*clip.duration)
-                if let data = petView.snapshot().tiffRepresentation, let bitmap = NSBitmapImageRep(data: data), let cg = bitmap.cgImage {
-                    CGImageDestinationAddImage(destination, cg, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: clip.duration/Double(frames)]] as CFDictionary)
-                }
-            }
-        }
-        CGImageDestinationFinalize(destination)
-    }
-
-    private func performSmokeTest() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.model.settings.soundEnabled = false
-            self.model.settings.petSize = 230
-            self.model.calendarConnected = true
-            self.model.settings.calendarFeeds = [CalendarFeed(name: "Ejemplo")]
-            self.model.calendarMessage = "Agenda de ejemplo · solo para esta vista previa."
-            self.model.settings.tasks = [DailyTask(title: "Preparar la reunión de equipo", hour: 10, minute: 0)]
-            self.applySettings()
-            self.model.meetings = [Meeting(id: "preview-meeting", title: "Reunión de equipo", start: Date().addingTimeInterval(300), end: Date().addingTimeInterval(3900), calendarName: "Trabajo · ejemplo", joinURL: URL(string: "https://meet.google.com/abc-defg-hij"), allDay: false)]
-            self.model.startFocus(minutes: 5)
-            self.model.pauseOrResumeFocus()
-            self.model.testAlert()
-            let head = self.petView.node("Head_054")?.presentation.simdOrientation.vector
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.writeSmokeReport(nativePlaybackAdvances: head != self.petView.node("Head_054")?.presentation.simdOrientation.vector)
-            }
-        }
-    }
-
-    private func writeSmokeReport(nativePlaybackAdvances: Bool) {
-            var report: [String: Any] = [
-                "viewWidth": petView.bounds.width,
-                "viewHeight": petView.bounds.height,
-                "nativePlaybackAdvances": nativePlaybackAdvances,
-                "petVisible": self.petPanel.isVisible,
-                "borderless": !self.petPanel.styleMask.contains(.titled) && !self.petPanel.styleMask.contains(.resizable),
-                "opaque": self.petPanel.isOpaque,
-                "backgroundAlpha": self.petPanel.backgroundColor.alphaComponent,
-                "windowShadow": self.petPanel.hasShadow,
-                "floatingLevel": self.petPanel.level.rawValue,
-                "allSpaces": self.petPanel.collectionBehavior.contains(.canJoinAllSpaces),
-                "fullscreenAuxiliary": self.petPanel.collectionBehavior.contains(.fullScreenAuxiliary),
-                "noPermanentDashboard": self.dashboard == nil,
-                "cornerPassesClicks": !self.petView.containsPet(NSPoint(x: 1, y: 1)),
-                "centerIsClickable": self.petView.containsPet(NSPoint(x: self.petView.bounds.midX, y: self.petView.bounds.midY)),
-                "menuAvailable": self.statusItem.menu != nil,
-                "pngLoaded": self.petView.image.size.width > 0,
-                "reminderVisible": self.bubblePanel.isVisible,
-                "reminderHasContent": self.model.currentAlert != nil,
-                "reminderTransparentPanel": !self.bubblePanel.isOpaque && self.bubblePanel.backgroundColor.alphaComponent == 0
-                ,"faceTimer": self.petView.focusTimer?.display(at: Date()) ?? ""
-                ,"faceTimerPaused": self.petView.focusTimer?.phase == .paused
-                ,"oldSettingsCompatible": self.model.settings.calendarFeeds != nil
-                ,"meetingAlertHasJoinURL": self.model.currentAlert?.joinURL?.host == "meet.google.com"
-                ,"character": "Arcanine"
-                ,"appDisplayName": Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
-                ,"appExecutable": Bundle.main.object(forInfoDictionaryKey: "CFBundleExecutable") as? String ?? ""
-                ,"separateDataIdentity": Bundle.main.bundleIdentifier == "io.github.franciscorrandom.arcanine.ical"
-                ,"statusMenuRenamed": self.menu.items.contains { $0.title == "Salir de PokéDesk" } && !self.menu.items.contains { $0.title.contains("Miga") }
-                ,"menuTheme": "Pokédex · rojo, crema y Fuego"
-                ,"model3DLoaded": self.petView.engine.ready
-                ,"jointCount": self.petView.engine.jointCount
-                ,"animationClipCount": self.petView.engine.clipCount
-                ,"alertAnimation": self.petView.currentClip == .alert
-                ,"englishVoiceChoices": EnglishVoice.allCases.map(\.name)
-                ,"recordedClipsReady": EnglishVoice.allCases.reduce(0) { $0 + VoiceClip.allCases.count - self.model.voiceSpeaker.missingClips(voice: $1).count }
-                ,"recordedClipsPending": EnglishVoice.allCases.reduce(0) { $0 + self.model.voiceSpeaker.missingClips(voice: $1).count }
-                ,"meetingAudioReadyBothVoices": EnglishVoice.allCases.allSatisfy { voice in
-                    self.model.voiceSpeaker.audioURL(.meeting, voice: voice) != nil && self.model.voiceSpeaker.audioURL(.meetingWithLink, voice: voice) != nil
-                }
-            ]
-            self.petView.display()
-            self.capturePreview(self.petView, name: "focus-preview")
-            if let view = self.bubblePanel.contentView { self.capturePreview(view, name: "meeting-preview") }
-            report.merge(self.testNotes()) { _, new in new }
-            self.testQuickMenu { quickChecks in
-            report.merge(quickChecks) { _, new in new }
-            self.showHome()
-            report["floatingMenuBorderless"] = self.dashboard?.styleMask.contains(.titled) == false
-            report["floatingMenuTransparent"] = self.dashboard?.isOpaque == false
-            report["floatingMenuVisible"] = self.dashboard?.isVisible == true
-            report["floatingMenuOnScreen"] = self.dashboard.map { ($0.screen?.visibleFrame ?? .zero).contains($0.frame) } ?? false
-            report["floatingMenuAllSpaces"] = self.dashboard?.collectionBehavior.contains(.canJoinAllSpaces) == true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                if let view = self.dashboard?.contentView { self.capturePreview(view, name: "menu-preview") }
-                self.captureDashboardPreviews([(0, "pokedex-agenda-preview"), (1, "pokedex-tasks-preview"), (2, "hud-focus-preview"), (3, "hud-voice-settings-preview"), (4, "pokedex-animations-preview"), (5, "pokedex-notes-preview")]) {
-                    for voice in EnglishVoice.allCases {
-                        self.model.selectEnglishVoice(voice.rawValue)
-                        let preview = NSHostingView(rootView: DashboardView(model: self.model).voicePreferences
-                            .padding(20).foregroundStyle(ArcanineTheme.ink).background(ArcanineTheme.paper)
-                            .tint(ArcanineTheme.red).toggleStyle(.switch).buttonStyle(PokedexButtonStyle()).preferredColorScheme(.light))
-                        preview.frame = NSRect(x: 0, y: 0, width: 430, height: 560)
-                        preview.appearance = NSAppearance(named: .aqua)
-                        self.capturePreview(preview, name: "\(voice.rawValue)-voice-settings-preview")
-                    }
-                    let savedVoice = PetModel(storageURL: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-ical-smoke/estado.json"))
-                    report["englishVoiceSelectionPersists"] = savedVoice.settings.voice?.selectedEnglishVoice == .holden
-                    self.closeDashboard()
-                    report["floatingMenuCloses"] = self.dashboard?.isVisible == false
-                    self.model.currentAlert = nil
-                    self.model.settings.focusTimer?.phase = .running
-                    self.model.settings.focusTimer?.deadline = Date().addingTimeInterval(-1)
-                    self.model.checkFocusTimer()
-                    let completionID = self.model.currentAlert?.id
-                    self.model.checkFocusTimer()
-                    self.renderTick()
-                    report["timerFinishesOnce"] = self.model.settings.focusTimer?.notified == true && self.model.currentAlert?.focusTimerID == self.model.settings.focusTimer?.id && completionID == self.model.currentAlert?.id
-                    report["faceRestoredAfterTimer"] = self.petView.focusTimer == nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    report["completionAnimation"] = self.petView.currentClip == .celebration
-                    self.petView.preview(.idle, at: 0)
-                    self.capturePreview(self.petView, name: "arcanine-preview")
-                    self.petView.preview(.idle, at: 3)
-                    self.capturePreview(self.petView, name: "arcanine-blink-preview")
-                    report["blinkClosesEyes"] = (self.petView.node("ArcanineEyesClosed")?.presentation.scale.x ?? 0) > 0.9
-                    report["blinkHidesOpenEyes"] = (self.petView.node("ArcanineEyesOpen")?.presentation.scale.x ?? 1) < 0.1
-                    var movingClips: [String] = []
-                    var hitSamples: [String: [[String: Any]]] = [:]
-                    for clip in ArcanineClip.allCases {
-                        self.petView.preview(clip, at: 0)
-                        let before = self.petView.snapshot().tiffRepresentation
-                        self.petView.preview(clip, at: clip.duration * 0.4)
-                        let after = self.petView.snapshot().tiffRepresentation
-                        if before != after { movingClips.append(clip.rawValue) }
-                        self.capturePreview(self.petView, name: "arcanine-3d-\(clip.rawValue)")
-                        var samples: [[String: Any]] = []
-                        for x in stride(from: 10.0, to: self.petView.bounds.width, by: 15) {
-                            for y in stride(from: 35.0, to: self.petView.bounds.height, by: 15) {
-                                samples.append(["x": x, "y": y, "hit": self.petView.containsPet(NSPoint(x: x, y: y))])
-                            }
-                        }
-                        hitSamples[clip.rawValue] = samples
-                    }
-                    report["hitSamples"] = hitSamples
-                    report["movingClips"] = movingClips
-                    report["allClipsMove"] = movingClips.count == ArcanineClip.allCases.count
-                    report.merge(self.testPetInteractions()) { _, new in new }
-                    report.merge(self.testRotation()) { _, new in new }
-                    self.capturePetAnimation()
-                    let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("smoke-test.json")
-                    if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: url) }
-                    NSApp.terminate(nil)
-                    }
-                }
-            }
-            }
-    }
-
-    private func testQuickMenu(completion: @escaping ([String: Any]) -> Void) {
-        var checks: [String: Any] = [:]
-        _ = petView.accessibilityPerformPress()
-        checks["petClickOpensQuickMenu"] = quickMenu?.isVisible == true && dashboard?.isVisible != true
-        checks["quickMenuTransparent"] = quickMenu?.isOpaque == false && quickMenu?.backgroundColor.alphaComponent == 0
-        checks["quickMenuBorderless"] = quickMenu?.styleMask.contains(.titled) == false
-        checks["quickMenuAllSpaces"] = quickMenu?.collectionBehavior.contains(.canJoinAllSpaces) == true
-        checks["quickMenuAbovePet"] = quickMenu!.frame.midY > petPanel.frame.midY
-        checks["quickMenuOnScreen"] = petPanel.screen!.visibleFrame.contains(quickMenu!.frame)
-        checks["quickMenuActions"] = PetQuickAction.allCases.map(\.title)
-        quickHostingView?.layoutSubtreeIfNeeded()
-        let host = quickHostingView!
-        checks["quickMenuEmptyCenterPassesClicks"] = !host.containsControl(NSPoint(x: QuickMenuLayout.width / 2, y: host.isFlipped ? 94 : 96))
-        checks["quickMenuButtonsClickable"] = (0..<PetQuickAction.allCases.count).allSatisfy { index in
-            let p = QuickMenuLayout.buttonCenter(index)
-            return host.containsControl(NSPoint(x: p.x, y: host.isFlipped ? p.y : QuickMenuLayout.height - p.y))
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            checks["quickMenuNativeHitTests"] = (0..<PetQuickAction.allCases.count).allSatisfy { index in
-                let point = QuickMenuLayout.buttonCenter(index)
-                let local = NSPoint(x: point.x, y: host.isFlipped ? point.y : QuickMenuLayout.height - point.y)
-                return host.hitTest(host.convert(local, to: host.superview)) != nil
-            }
-            self.capturePreview(host, name: "accesos-semicirculares-preview")
-            self.captureQuickContext()
-            self.captureQuickDetails([.agenda, .focus, .notes, .animations]) {
-                checks["quickDetailsStayCompact"] = self.dashboard?.isVisible != true && self.quickDetail!.frame.width == 350
-                checks["quickDetailOnScreen"] = self.petPanel.screen!.visibleFrame.contains(self.quickDetail!.frame)
-                self.selectQuickAction(.animations)
-                checks["quickSelectionTogglesClosed"] = self.quickDetail?.isVisible != true && self.quickMenu?.isVisible == true
-                self.selectQuickAction(.petting)
-                checks["quickPettingWorks"] = self.petView.currentClip == .petting && self.quickMenu?.isVisible != true && self.dashboard?.isVisible != true
-                let timer = self.model.settings.focusTimer
-                var timerChecks = true
-                for minutes in [5, 10, 30] {
-                    self.showQuickMenu(); self.selectQuickAction(.focus); self.runQuickTimer(minutes)
-                    timerChecks = timerChecks && self.model.settings.focusTimer?.durationSeconds == minutes * 60 && self.quickMenu?.isVisible != true && self.dashboard?.isVisible != true
-                }
-                checks["quickTimersStartWithoutDashboard"] = timerChecks
-                self.model.settings.focusTimer = timer; self.model.errorMessage = nil; self.model.save()
-                self.showQuickMenu(); self.selectQuickAction(.animations); self.runQuickAnimation(.sit)
-                checks["quickAnimationWorks"] = self.petView.currentClip == .sit && self.quickDetail?.isVisible != true
-                self.showQuickMenu(); self.selectQuickAction(.openPanel)
-                checks["quickOpenShowsFullPanel"] = self.dashboard?.isVisible == true && self.model.dashboardTab == -1 && self.quickMenu?.isVisible != true
-                self.closeDashboard(); self.showQuickMenu()
-                _ = self.petView.accessibilityPerformPress()
-                checks["secondPetClickClosesQuickMenu"] = self.quickMenu?.isVisible != true
-                self.showQuickMenu(); self.quickMenu?.cancelOperation(nil)
-                checks["escapeClosesQuickMenu"] = self.quickMenu?.isVisible != true
-                self.petView.play(.alert, manual: true)
-                completion(checks)
-            }
-        }
-    }
-
-    private func testNotes() -> [String: Any] {
-        // Sample notes are written only to the isolated --smoke-test store.
-        model.settings.notes = []
-        let now = Date()
-        model.noteDraft = NoteDraft(title: "Ideas para la reunión", body: "Revisar prioridades y próximos pasos del equipo.", category: "Trabajo")
-        let created = model.saveNote(now: now.addingTimeInterval(-3600))
-        let first = model.noteDraft.id
-        model.noteDraft.body += "\nPreparar un resumen después de la reunión."
-        let edited = model.saveNote(now: now)
-        let versions = model.editingNote?.revisions.count == 1
-        model.newNote()
-        model.noteDraft = NoteDraft(title: "Una idea para después", body: "Reservar un rato para leer y dar un paseo.")
-        let uncategorized = model.saveNote(now: now.addingTimeInterval(-1800))
-        let second = model.noteDraft.id!
-        let archived = model.setNoteArchived(second, archived: true) && NoteRules.filtered(model.notes).count == 1
-        let recovered = model.setNoteArchived(second, archived: false) && NoteRules.filtered(model.notes).count == 2
-        let restored = PetModel(storageURL: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-ical-smoke/estado.json"))
-        let persisted = restored.notes == model.notes
-        model.newNote()
-        return ["notesCreatedEdited": created && edited && uncategorized && first != nil,
-                "notesVersionsRetained": versions, "notesArchiveRestore": archived && recovered,
-                "notesPersist": persisted, "notesSearchAndCategory": NoteRules.filtered(model.notes, query: "reunion", category: "trabajo").count == 1,
-                "quickNotesAvailable": PetQuickAction.notes.tab == 5 && PetQuickAction.allCases.count == QuickMenuLayout.buttonCount]
-    }
-
-    private func captureQuickDetails(_ actions: [PetQuickAction], completion: @escaping () -> Void) {
-        guard let action = actions.first else { completion(); return }
-        selectQuickAction(action)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            if let view = self.quickDetail?.contentView { self.capturePreview(view, name: "quick-\(action.rawValue)-preview") }
-            self.captureQuickDetails(Array(actions.dropFirst()), completion: completion)
-        }
-    }
-
-    private func captureQuickContext() {
-        guard let quickMenu, let host = quickMenu.contentView,
-              let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
-        host.cacheDisplay(in: host.bounds, to: bitmap)
-        let bounds = petPanel.frame.union(quickMenu.frame)
-        let image = NSImage(size: bounds.size)
-        image.lockFocus()
-        NSColor(ArcanineTheme.paper).setFill()
-        NSRect(origin: .zero, size: bounds.size).fill()
-        petView.snapshot().draw(in: NSRect(x: petPanel.frame.minX - bounds.minX, y: petPanel.frame.minY - bounds.minY, width: petPanel.frame.width, height: petPanel.frame.height))
-        if let cg = bitmap.cgImage { NSImage(cgImage: cg, size: host.bounds.size).draw(in: NSRect(x: quickMenu.frame.minX - bounds.minX, y: quickMenu.frame.minY - bounds.minY, width: quickMenu.frame.width, height: quickMenu.frame.height)) }
-        image.unlockFocus()
-        if let data = image.tiffRepresentation, let out = NSBitmapImageRep(data: data)?.representation(using: .png, properties: [:]) {
-            try? out.write(to: Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("arcanine-accesos-contexto.png"))
-        }
-    }
-
-    private func testPetInteractions() -> [String: Any] {
-        var checks: [String: Any] = [:]
-        let origin = petPanel.frame.origin, yaw = petView.yaw
-        let point = NSPoint(x: petView.bounds.midX, y: petView.bounds.midY)
-        func event(_ type: NSEvent.EventType, _ x: Double, _ flags: NSEvent.ModifierFlags) -> NSEvent {
-            NSEvent.mouseEvent(with: type, location: NSPoint(x: point.x + x, y: point.y), modifierFlags: flags,
-                timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: petPanel.windowNumber,
-                context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
-        }
-        petView.mouseDown(with: event(.leftMouseDown, 0, .shift))
-        petView.mouseDragged(with: event(.leftMouseDragged, 15, .shift))
-        let revision = petView.animationRevision
-        checks["shiftDragPets"] = petView.currentClip == .petting
-        petView.mouseDragged(with: event(.leftMouseDragged, -20, []))
-        petView.mouseDragged(with: event(.leftMouseDragged, 25, []))
-        petView.mouseUp(with: event(.leftMouseUp, 25, []))
-        checks["pettingDoesNotRestartEveryMouseEvent"] = petView.animationRevision == revision
-        checks["pettingDoesNotMoveOrRotate"] = petPanel.frame.origin == origin && petView.yaw == yaw
-        checks["pettingDoesNotOpenMenu"] = dashboard?.isVisible != true
-        checks["pettingHintAvailable"] = petView.toolTip?.contains("Mayús") == true
-        var requested: [String] = []
-        for clip in ArcanineClip.allCases {
-            model.requestAnimation(clip)
-            if petView.currentClip == clip { requested.append(clip.rawValue) }
-        }
-        checks["manualAnimationChoices"] = requested
-        checks["allAnimationsCanBeRequested"] = requested.count == ArcanineClip.allCases.count
-        model.settings.motionEnabled = false
-        let before = petView.animationRevision
-        model.requestAnimation(.sit)
-        checks["manualAnimationsRespectDisabledMotion"] = petView.animationRevision == before && model.errorMessage != nil
-        model.settings.motionEnabled = true; model.errorMessage = nil
-        petView.setYaw(0)
-        func positions(_ clip: ArcanineClip, _ time: Double) -> [String: SIMD3<Float>] {
-            petView.preview(clip, at: time)
-            _ = petView.snapshot()
-            let names = ["Waist_03", "LHand_049", "RHand_078", "LFoot_08", "RFoot_019"]
-            return Dictionary(uniqueKeysWithValues: names.map { ($0, petView.node($0)!.presentation.simdWorldPosition) })
-        }
-        let standing = positions(.idle, 0)
-        var error: Float = 0
-        for time in stride(from: 0.0, through: ArcanineClip.sit.duration, by: 0.2) {
-            let posed = positions(.sit, time)
-            for name in ["LHand_049", "RHand_078"] {
-                error = max(error, simd_distance(posed[name]!, standing[name]!))
-            }
-        }
-        let seated = positions(.sit, 3.2)
-        checks["sitLowersHips"] = standing["Waist_03"]!.y - seated["Waist_03"]!.y > 0.4
-        checks["sitTucksBackPaws"] = seated["LFoot_08"]!.z - standing["LFoot_08"]!.z > 0.35
-        checks["sitFrontPawError"] = error
-        checks["sitKeepsFrontPawsPlanted"] = error < 0.003
-        let finished = positions(.sit, ArcanineClip.sit.duration)
-        checks["sitReturnsToStanding"] = simd_distance(finished["Waist_03"]!, standing["Waist_03"]!) < 0.001
-        petView.setYaw(.pi / 2)
-        petView.preview(.sit, at: 3.2)
-        capturePreview(petView, name: "arcanine-sentado-perfil")
-        petView.setYaw(0)
-        _ = positions(.petting, 2)
-        checks["pettingRelaxesEyes"] = petView.node("ArcanineEyesClosed")!.presentation.scale.x > 0.9
-        petView.preview(.petting, at: 2)
-        capturePreview(petView, name: "arcanine-caricias-preview")
-        petView.setYaw(yaw)
-        return checks
-    }
-
-    private func testRotation() -> [String: Any] {
-        var checks: [String: Any] = [:]
-        let originalOrigin = petPanel.frame.origin
-        let point = NSPoint(x: petView.bounds.midX, y: petView.bounds.midY)
-        func event(_ type: NSEvent.EventType, _ location: NSPoint, _ flags: NSEvent.ModifierFlags) -> NSEvent {
-            NSEvent.mouseEvent(with: type, location: location, modifierFlags: flags,
-                timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: petPanel.windowNumber,
-                context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
-        }
-        model.resetPetView()
-        petView.preview(.idle, at: 0)
-        petView.mouseDown(with: event(.leftMouseDown, point, .option))
-        petView.mouseDragged(with: event(.leftMouseDragged, NSPoint(x: point.x + 112.5, y: point.y + 80), []))
-        petView.mouseUp(with: event(.leftMouseUp, NSPoint(x: point.x + 112.5, y: point.y + 80), []))
-        _ = petView.snapshot()
-        checks["optionDragRotates"] = abs(petView.yaw - .pi / 2) < 0.00001
-        checks["rotationDoesNotMovePanel"] = petPanel.frame.origin == originalOrigin
-        checks["rotationDoesNotOpenMenu"] = dashboard?.isVisible != true
-        checks["rotationHasNoPitchOrRoll"] = petView.engine.orientationAngles.x == 0 && petView.engine.orientationAngles.z == 0
-        let restored = PetModel(storageURL: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-ical-smoke/estado.json"))
-        checks["rotationPersists"] = restored.settings.petYaw == petView.yaw
-        let angle = petView.yaw
-        petView.mouseDown(with: event(.leftMouseDown, point, .option))
-        petView.mouseDragged(with: event(.leftMouseDragged, NSPoint(x: point.x, y: point.y + 80), .option))
-        petView.mouseUp(with: event(.leftMouseUp, NSPoint(x: point.x, y: point.y + 80), .option))
-        checks["verticalRotationDragIgnored"] = petView.yaw == angle && petPanel.frame.origin == originalOrigin && dashboard?.isVisible != true
-        petView.mouseDown(with: event(.leftMouseDown, point, []))
-        petView.mouseDragged(with: event(.leftMouseDragged, NSPoint(x: point.x - 24, y: point.y + 15), .option))
-        petView.mouseUp(with: event(.leftMouseUp, point, .option))
-        checks["normalDragStillMoves"] = abs(petPanel.frame.minX - (originalOrigin.x - 24)) < 0.001 && abs(petPanel.frame.minY - (originalOrigin.y + 15)) < 0.001
-        checks["normalDragDoesNotRotate"] = petView.yaw == angle
-        petPanel.setFrameOrigin(originalOrigin)
-        savePosition()
-        var profiles: [String: [[String: Any]]] = [:]
-        for (name, yaw) in [("original", 0.0), ("perfil", Double.pi / 2), ("espalda", Double.pi), ("otro-perfil", -Double.pi / 2)] {
-            petView.setYaw(yaw)
-            petView.preview(.idle, at: 0)
-            capturePreview(petView, name: "arcanine-vista-\(name)")
-            var samples: [[String: Any]] = []
-            for x in stride(from: 10.0, to: petView.bounds.width, by: 15) {
-                for y in stride(from: 35.0, to: petView.bounds.height, by: 15) {
-                    samples.append(["x": x, "y": y, "hit": petView.containsPet(NSPoint(x: x, y: y))])
-                }
-            }
-            profiles[name] = samples
-        }
-        checks["rotationHitSamples"] = profiles
-        func fits(_ image: NSImage) -> Bool {
-            guard let data = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) else { return false }
-            for x in stride(from: 0, to: bitmap.pixelsWide, by: 2) {
-                if bitmap.colorAt(x: x, y: 0)!.alphaComponent > 0 || bitmap.colorAt(x: x, y: bitmap.pixelsHigh - 1)!.alphaComponent > 0 { return false }
-            }
-            for y in stride(from: 0, to: bitmap.pixelsHigh, by: 2) {
-                if bitmap.colorAt(x: 0, y: y)!.alphaComponent > 0 || bitmap.colorAt(x: bitmap.pixelsWide - 1, y: y)!.alphaComponent > 0 { return false }
-            }
-            return true
-        }
-        var fullCircleFits = true
-        var croppedAngles: [Int] = []
-        for degrees in stride(from: 0, to: 360, by: 15) {
-            petView.setYaw(Double(degrees) * .pi / 180)
-            petView.preview(.idle, at: 0)
-            let complete = autoreleasepool { fits(petView.snapshot()) }
-            if !complete {
-                fullCircleFits = false; croppedAngles.append(degrees)
-                if croppedAngles.count == 1 { capturePreview(petView, name: "perfil-recortado") }
-            }
-        }
-        var animationsFitAfterRotation = true
-        var croppedClips: [String] = []
-        for degrees in stride(from: 0, to: 360, by: 45) {
-            petView.setYaw(Double(degrees) * .pi / 180)
-            for clip in ArcanineClip.allCases {
-                for progress in [0.25, 0.5, 0.75] {
-                    petView.preview(clip, at: clip.duration * progress)
-                    let complete = autoreleasepool { fits(petView.snapshot()) }
-                    if !complete {
-                        animationsFitAfterRotation = false
-                        croppedClips.append("\(degrees)° \(clip.rawValue) \(progress)")
-                        if croppedClips.count == 1 { capturePreview(petView, name: "animacion-recortada") }
-                    }
-                }
-            }
-        }
-        checks["fullCircleFits"] = fullCircleFits
-        checks["animationsFitAfterRotation"] = animationsFitAfterRotation
-        checks["croppedAngles"] = croppedAngles
-        checks["croppedClips"] = croppedClips
-        petView.setYaw(angle)
-        resetView()
-        let savedReset = PetModel(storageURL: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("arcanine-ical-smoke/estado.json"))
-        checks["resetViewWorks"] = petView.yaw == 0 && savedReset.settings.petYaw == nil && petPanel.frame.origin == originalOrigin
-        checks["rotationHintAvailable"] = petView.toolTip?.contains("Option") == true
-        checks["resetViewMenuAvailable"] = menu.items.contains { $0.title == "Restablecer vista" }
-        return checks
-    }
-
-    private func captureDashboardPreviews(_ tabs: [(Int, String)], completion: @escaping () -> Void) {
-        guard let next = tabs.first else { completion(); return }
-        model.dashboardTab = next.0
-        positionDashboard()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            if let view = self.dashboard?.contentView { self.capturePreview(view, name: next.1) }
-            self.captureDashboardPreviews(Array(tabs.dropFirst()), completion: completion)
-        }
-    }
-
-    private func capturePetAnimation() {
-        let url = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("arcanine-animacion.gif")
-        let frames = 100
-        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames, nil) else { return }
-        CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
-        for frame in 0..<frames {
-            autoreleasepool {
-                petView.preview(.chaseTail, at: Double(frame) / 25)
-                let image = petView.snapshot()
-                if let data = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data), let cg = bitmap.cgImage {
-                    CGImageDestinationAddImage(destination, cg, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 1.0 / 25]] as CFDictionary)
-                }
-            }
-        }
-        CGImageDestinationFinalize(destination)
-    }
-
-    private func capturePreview(_ view: NSView, name: String) {
-        view.layoutSubtreeIfNeeded()
-        view.display()
-        if let pet = view as? PetView {
-            if let data = pet.snapshot().tiffRepresentation, let bitmap = NSBitmapImageRep(data: data), let png = bitmap.representation(using: .png, properties: [:]) {
-                try? png.write(to: Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent(name + ".png"))
-            }
-            return
-        }
-        if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
-            view.cacheDisplay(in: view.bounds, to: bitmap)
-            if let data = bitmap.representation(using: .png, properties: [:]) {
-                try? data.write(to: Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent(name + ".png"))
-            }
-        }
-    }
-}
-
-MainActor.assumeIsolated {
-    let application = NSApplication.shared
-    let delegate = AppDelegate()
-    application.delegate = delegate
-    application.run()
+  }
 }

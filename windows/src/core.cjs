@@ -14,7 +14,7 @@ const dayKey = time => {
 function defaults() {
   return {
     version: 1, notes: [], tasks: [], focus: null, reminders: {}, snoozes: [],
-    settings: { name: '', voice: 'Gracie', sound: true, volume: 0.8, motion: true, leadMinutes: 10, yaw: 0, petPosition: null, autoStart: false, character: 'arcanine', characterYaws: {}, petScale: 1, pausedUntil: null },
+    settings: { name: '', voice: 'Gracie', sound: true, volume: 0.8, motion: true, ambientRotation: true, leadMinutes: 10, yaw: 0, petPosition: null, autoStart: false, character: 'arcanine', characterYaws: {}, petScale: 1, pausedUntil: null },
     feeds: [],
     cache: { calendars: [], taskLists: [], events: [], tasks: [], updatedAt: null }
   };

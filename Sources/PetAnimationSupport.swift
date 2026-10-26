@@ -1,5 +1,26 @@
 import Foundation
 
+/// A presentation-only yaw: ±25°, one round trip in eight minutes of idle time.
+struct PetAmbientRotation {
+    static let amplitude = 25.0 * Double.pi / 180
+    static let period = 480.0
+    private(set) var angle = 0.0
+    private var phase = 0.0
+    private var lastTime: Double?
+    private var holdUntil = 0.0
+    mutating func hold(at now: Double) { holdUntil = now + 20 }
+    mutating func reset(at now: Double) { phase = 0; angle = 0; lastTime = now; hold(at: now) }
+    mutating func tick(at now: Double, allowed: Bool) -> Double {
+        guard now.isFinite else { return angle }
+        let delta = min(0.1, max(0, now - (lastTime ?? now)))
+        lastTime = now
+        guard allowed, now >= holdUntil else { return angle }
+        phase = (phase + delta * 2 * .pi / Self.period).truncatingRemainder(dividingBy: 2 * .pi)
+        angle = Self.amplitude * sin(phase)
+        return angle
+    }
+}
+
 enum PetRotation {
     static func normalized(_ angle: Double) -> Double {
         guard angle.isFinite else { return 0 }

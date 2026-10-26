@@ -1,8 +1,8 @@
 {
   "name": "pokedesk",
-  "productName": "PokéDesk",
-  "version": "1.5.1-beta.1",
-  "description": "Compañeros 3D de escritorio con calendario iCal, tareas, notas y concentración",
+  "productName": "Pok\u00e9Desk",
+  "version": "1.5.2-beta.1",
+  "description": "Compa\u00f1eros 3D de escritorio con calendario iCal, tareas, notas y concentraci\u00f3n",
   "author": "Francisco Opazo",
   "private": true,
   "main": "src/main.cjs",

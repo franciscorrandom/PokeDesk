@@ -65,6 +65,7 @@ struct PetSettings: Codable {
     var petSize: Double = 166
     var soundEnabled = true
     var motionEnabled = true
+    var ambientRotationEnabled: Bool?
     var positionX: Double?
     var positionY: Double?
     var petYaw: Double?

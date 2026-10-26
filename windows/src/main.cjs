@@ -223,7 +223,7 @@ async function execute(name, p = {}, view = 'dashboard') {
     }
     case 'section': await showSection(p.section, !!p.full); break;
     case 'close': { if (view === 'dashboard') windows.get('dashboard')?.hide(); else if (view === 'notice') { notices.shift(); advanceNotice(); } else closeMenus(); broadcast(); break; }
-    case 'gestureStart': if (view === 'pet') { interaction.begin(p.mode, screen.getCursorScreenPoint(), windows.get('pet').getBounds(), store.state.settings.yaw); setInputEnabled(true); } break;
+    case 'gestureStart': if (view === 'pet') { if(p.mode==='rotate'&&Number.isFinite(p.yaw)&&Math.abs(p.yaw)<32*Math.PI){yaw=p.yaw;store.state.settings.yaw=yaw;} interaction.begin(p.mode, screen.getCursorScreenPoint(), windows.get('pet').getBounds(), store.state.settings.yaw); setInputEnabled(true); } break;
     case 'gestureEnd': if (view === 'pet') await finishNativeGesture(!!p.cancelled); break;
     case 'resetView': yaw = 0; await mutate(s => { s.settings.yaw = 0; s.settings.characterYaws[s.settings.character]=0; }); break;
     case 'pet': if(characterLoading) break; motion.request('caricias', Date.now(), true); broadcast(); break;
@@ -240,7 +240,7 @@ async function execute(name, p = {}, view = 'dashboard') {
       const allowed = {};
       if (typeof p.name === 'string') allowed.name = p.name.trim().slice(0, 100);
       if (['Gracie', 'Holden'].includes(p.voice)) allowed.voice = p.voice;
-      for (const key of ['motion', 'sound', 'autoStart']) if (typeof p[key] === 'boolean') allowed[key] = p[key];
+      for (const key of ['motion', 'ambientRotation', 'sound', 'autoStart']) if (typeof p[key] === 'boolean') allowed[key] = p[key];
       if (Number.isFinite(p.volume)) allowed.volume = Math.max(0, Math.min(1, p.volume));
       if (Number.isFinite(p.petScale)) {allowed.petScale=Math.round(Math.max(.7,Math.min(1.4,p.petScale))*20)/20;}
       if (Number.isFinite(p.leadMinutes)) allowed.leadMinutes = Math.max(1, Math.min(60, Math.round(p.leadMinutes)));

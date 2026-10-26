@@ -56,7 +56,7 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ### Primera beta de Windows
 
-La edición **PokéDesk 1.5.1-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+La edición **PokéDesk 1.5.2-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
 
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
@@ -67,7 +67,7 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.1-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.2-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 

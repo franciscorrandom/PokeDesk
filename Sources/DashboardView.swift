@@ -179,6 +179,8 @@ struct DashboardView: View {
                 }.onChange(of: model.settings.meetingLeadMinutes) { model.save(); model.tick() }
                 Toggle("Sonido al recibir un aviso", isOn: $model.settings.soundEnabled).onChange(of: model.settings.soundEnabled) { model.save() }
                 Toggle("Animaciones y reacciones de \(model.settings.character.name)", isOn: $model.settings.motionEnabled).onChange(of: model.settings.motionEnabled) { model.save() }
+                Toggle("Giro suave en reposo", isOn: Binding(get: { model.settings.ambientRotationEnabled ?? true }, set: { model.settings.ambientRotationEnabled = $0; model.save() }))
+                Text("Gira muy lentamente de lado a lado, unos 25° por lado en un ciclo de ocho minutos. Se pausa durante el foco, los avisos y la interacción. Puedes seguir girándolo con Option y arrastrar.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 Text("\(model.settings.character.description) Celebra tus tareas y timers; durante el foco se mueve menos. Respeta Reducir movimiento de macOS.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 Text("Arrastra para mover · ⌥ Option + arrastra hacia los lados para girar. La orientación elegida se guarda.").font(.system(size: 11)).foregroundStyle(theme.muted)
                 Button("Repetir salida de la Pokébola") { model.requestPokeball() }

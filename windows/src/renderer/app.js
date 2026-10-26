@@ -99,6 +99,7 @@ function settings() {
     '<div><label for="voice">Voz de los avisos · inglés</label><div class="row"><select id="voice" name="voice">'+['Gracie','Holden'].map(v=>'<option '+(s.voice===v?'selected':'')+'>'+v+'</option>').join('')+button('▶','voicePreview','type="button" aria-label="Escuchar aviso de reunión"','small')+'</div><p class="muted">Grabaciones de reuniones en inglés; timers y tareas usan un sonido. No requiere servicios de voz ni créditos.</p></div>'+
     '<div><label for="lead">Avisar antes de reuniones · minutos</label><input id="lead" name="leadMinutes" type="number" min="1" max="60" value="'+s.leadMinutes+'"></div><div><label for="volume">Volumen</label><input id="volume" name="volume" type="range" min="0" max="1" step=".05" value="'+s.volume+'"></div>'+
     '<label class="check-row"><input name="sound" type="checkbox" '+(s.sound?'checked':'')+'>Sonido en los avisos</label><label class="check-row"><input name="motion" type="checkbox" '+(s.motion?'checked':'')+'>Gestos y movimiento</label>'+
+    '<label class="check-row"><input name="ambientRotation" type="checkbox" '+(s.ambientRotation!==false?'checked':'')+'>Giro suave en reposo</label><p class="muted">25° por lado en un ciclo de ocho minutos. Se pausa durante el foco, los avisos y la interacción.</p>'+
     (state.platform==='win32'?'<label class="check-row"><input name="autoStart" type="checkbox" '+(s.autoStart?'checked':'')+'>Iniciar al entrar a Windows</label>':'')+'<button type="submit" class="primary">Guardar ajustes</button></form>'+
     button(s.pausedUntil>state.now?'Reanudar avisos':'Pausar avisos por una hora','pauseNotices','data-paused="'+!(s.pausedUntil>state.now)+'"','small')+
     '<details class="card"><summary>Créditos y privacidad</summary><p>Proyecto de fans independiente. Arcanine, Mewtwo, Charizard, Lucario y Gengar: nguyenlouis32. Pikachu: jacobjksn42. Modelos bajo CC BY 4.0, adaptados con animaciones y parpadeos. Personajes Pokémon: sus respectivos titulares.</p><p class="muted">Tareas y notas permanecen en tu equipo. No hay cuenta de PokéDesk, analítica ni sincronización entre equipos.</p></details>'+button('Cerrar PokéDesk','quit','','small')+'</div>';
@@ -180,6 +181,7 @@ function applyState(next) {
     if (pet) {
       pet.setCharacter(state.settings.character).catch(e=>toast(e.message));
       pet.setYaw(state.settings.yaw); pet.setMotion(state.motion.enabled);
+      pet.setAmbientAllowed(state.settings.ambientRotation!==false&&!state.menuOpen&&!state.fullPanel&&!state.notice&&!(state.focus&&!state.focus.paused)&&!state.smokeTest);
       if (currentRevision !== state.motion.revision) { currentRevision = state.motion.revision; pet.play(state.motion.clip); }
     }
     updateTimers();
@@ -218,7 +220,7 @@ root.addEventListener('submit', async e => {
   } else if (form.id === 'timer-form') await command('timerStart', { minutes: Number(values.get('minutes')) });
   else if (form.id === 'task-form') await command('taskSave', { title: values.get('title'), time: values.get('time'), days: values.getAll('days').map(Number), repeat: values.has('repeat') });
   else if(form.id==='calendar-form') {const result=await command('calendarAdd',{url:values.get('url'),name:values.get('name')});if(result){panelDrafts.clear();renderPanel(true);document.getElementById('calendar-url').value='';}}
-  else if (form.id === 'settings-form') { const result = await command('settings', { name: values.get('name'), petScale:Number(values.get('petScale')), voice: values.get('voice'), volume: Number(values.get('volume')), leadMinutes: Number(values.get('leadMinutes')), sound: values.has('sound'), motion: values.has('motion'), ...(state.platform === 'win32' ? { autoStart: values.has('autoStart') } : {}) }); if (result) {panelDrafts.clear();toast('Ajustes guardados');} }
+  else if (form.id === 'settings-form') { const result = await command('settings', { name: values.get('name'), petScale:Number(values.get('petScale')), voice: values.get('voice'), volume: Number(values.get('volume')), leadMinutes: Number(values.get('leadMinutes')), sound: values.has('sound'), motion: values.has('motion'), ambientRotation: values.has('ambientRotation'), ...(state.platform === 'win32' ? { autoStart: values.has('autoStart') } : {}) }); if (result) {panelDrafts.clear();toast('Ajustes guardados');} }
 });
 api.subscribe('summon',()=>pet?.repeatSummon());
 api.subscribe('orientation', yaw => { if (pet) { state.settings.yaw = yaw; pet.setYaw(yaw); } });
@@ -244,6 +246,7 @@ function chime(volume) {
 function releaseGesture(cancelled = false) {
   if (!gesture) return;
   const pointerId = gesture.pointerId, captor=gesture.captor; gesture = null;
+  pet?.endInteraction();
   command('gestureEnd', { cancelled });
   if (captor?.hasPointerCapture(pointerId)) captor.releasePointerCapture(pointerId);
   publishPetShape();
@@ -257,7 +260,8 @@ if (view === 'pet') {
     if (!control && !pet?.hit(e.clientX, e.clientY)) return;
     if (gesture) releaseGesture(true);
     gesture = { mode: control ? 'control' : e.altKey ? 'rotate' : e.shiftKey ? 'pet' : 'move', pointerId: e.pointerId, captor:control?e.target.closest('button'):root };
-    command('gestureStart', { mode: gesture.mode });
+    const visualYaw = pet?.beginInteraction(gesture.mode);
+    command('gestureStart', { mode: gesture.mode, yaw: visualYaw });
     if(!control)e.preventDefault();
     try{gesture.captor.setPointerCapture(e.pointerId);}catch{releaseGesture(true);}
   });

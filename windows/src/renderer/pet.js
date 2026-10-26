@@ -4,6 +4,7 @@ import { maskHit } from './geometry.mjs';
 import characters from './characters.json' with {type:'json'};
 import {summonFrame,durations} from './summon.mjs';
 import {createPokeball} from './pokeball.js';
+import {AmbientRotation} from './ambient.mjs';
 
 export async function createPet(container,onShape=()=>{},settings={},onReady=()=>{},prepareToShow=async()=>({shown:true})) {
   let width=container.clientWidth,height=container.clientHeight;
@@ -22,6 +23,8 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   // CI desktops disable OS animations. Only the isolated smoke profile overrides that preference.
   const reduced=settings.testEffects?{matches:false,addEventListener(){}}:systemReduced;
   let initialized=false;
+  const ambient = new AmbientRotation();
+  let baseYaw = settings.yaw ?? 0, ambientAllowed = !settings.testEffects, interactionBusy = false;
   let current=null,pendingId='',switching=false,motionEnabled=settings.motion!==false,visible=!document.hidden,disposed=false,contextLost=false;
   const phaseHistory=[];
   let frameHandle=0,lastTime=0,lastShapeTime=-Infinity,currentClip='reposo',phase=null,dirty=true,frames=0,shapeReads=0;
@@ -118,6 +121,8 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
     frameHandle=0;if(disposed||contextLost||!visible)return;
     if(time-lastTime<1000/30){frameHandle=requestAnimationFrame(render);return;}
     const delta=Math.min((time-lastTime)/1000,.1);lastTime=time;
+    const offset=ambient.tick(time/1000,ambientAllowed&&!interactionBusy&&motionEnabled&&!reduced.matches&&visible&&!switching&&!phase&&currentClip==='reposo');
+    orientation.rotation.set(0,baseYaw+offset,0);
     if(motionEnabled&&!reduced.matches&&current&&!switching){current.mixer.update(delta);current.fading=current.fading.filter(f=>{f.time-=delta;if(f.time<=0){if(f.action!==current.active)f.action.stop();return false;}return true;});}
     if(phase){const elapsed=(time-phase.start)/1000;applyFrame(summonFrame(phase.id,elapsed),phase.id,elapsed);if(elapsed>=durations[phase.id])finishPhase();}
     const shape=dirty||(!switching&&time-lastShapeTime>=250);if(shape)lastShapeTime=time;
@@ -125,7 +130,10 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
     if(phase||motionEnabled&&!reduced.matches)frameHandle=requestAnimationFrame(render);
   }
   function invalidate(){dirty=true;if(!frameHandle&&visible&&!disposed&&!contextLost)frameHandle=requestAnimationFrame(render);}
-  function setYaw(yaw){if(orientation.rotation.y===yaw)return;orientation.rotation.set(0,yaw,0);invalidate();}
+  function setYaw(yaw){if(baseYaw===yaw)return;baseYaw=yaw;orientation.rotation.set(0,baseYaw+ambient.angle,0);invalidate();}
+  function setAmbientAllowed(value){ambientAllowed=!!value&&!settings.testEffects;}
+  function beginInteraction(mode){interactionBusy=true;ambient.hold(performance.now()/1000);if(mode==='rotate'){baseYaw=orientation.rotation.y;ambient.reset(performance.now()/1000);}return baseYaw;}
+  function endInteraction(){interactionBusy=false;ambient.hold(performance.now()/1000);}
   function setMotion(enabled){if(enabled===motionEnabled)return;motionEnabled=enabled;if(!enabled){finishPhase();settle();play('reposo',true);current?.mixer.update(0);}invalidate();}
   function resize(){width=container.clientWidth;height=container.clientHeight;camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(width,height);invalidate();}
   function visibility(){visible=!document.hidden;if(!visible){cancelAnimationFrame(frameHandle);frameHandle=0;finishPhase();settle();}else{lastTime=performance.now();invalidate();}}
@@ -145,7 +153,7 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   };
   window.petDiagnostics=diagnostic;
   initialized=true;
-  return {hit,play,setYaw,setMotion,setCharacter,refresh:()=>invalidate(),repeatSummon:async()=>{if(switching)return;switching=true;play('reposo',true);await animate('release');settle();switching=false;},
+  return {hit,play,setYaw,setMotion,setCharacter,setAmbientAllowed,beginInteraction,endInteraction,refresh:()=>invalidate(),repeatSummon:async()=>{if(switching)return;switching=true;play('reposo',true);await animate('release');settle();switching=false;},
     get info(){return {ok:true,character:current.id,clips:current.actions.size,bones:current.bones.length,phases:phaseHistory.slice(),reducedMotion:reduced.matches};},
     dispose(){disposed=true;cancelAnimationFrame(frameHandle);finishPhase();window.removeEventListener('resize',resize);document.removeEventListener('visibilitychange',visibility);if(current){current.mixer.stopAllAction();current.mixer.uncacheRoot(current.model);disposeModel(current.model);}effect.dispose();hitTarget.dispose();renderer.dispose();}
   };

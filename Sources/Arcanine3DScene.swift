@@ -9,6 +9,7 @@ final class Arcanine3DScene {
     private let appearance = SCNNode()
     private let orientation = SCNNode()
     private(set) var yaw: Double = 0
+    private(set) var ambientYaw: Double = 0
     private var root: SCNNode?
     private var animations: [String: SCNAnimation] = [:]
     private var restTransforms: [(SCNNode, SCNMatrix4)] = []
@@ -178,8 +179,23 @@ final class Arcanine3DScene {
         guard yaw != angle else { return }
         yaw = angle
         SCNTransaction.begin(); SCNTransaction.disableActions = true
+        orientation.eulerAngles = SCNVector3(0, angle + ambientYaw, 0)
+        SCNTransaction.commit()
+    }
+    func setAmbientYaw(_ value: Double) {
+        guard value.isFinite, ambientYaw != value else { return }
+        ambientYaw = value
+        SCNTransaction.begin(); SCNTransaction.disableActions = true
+        orientation.eulerAngles = SCNVector3(0, yaw + ambientYaw, 0)
+        SCNTransaction.commit()
+    }
+    func takeManualOrientation() -> Double {
+        let angle = PetRotation.normalized(yaw + ambientYaw)
+        ambientYaw = 0; yaw = angle
+        SCNTransaction.begin(); SCNTransaction.disableActions = true
         orientation.eulerAngles = SCNVector3(0, angle, 0)
         SCNTransaction.commit()
+        return angle
     }
     var orientationAngles: SCNVector3 { orientation.eulerAngles }
 
