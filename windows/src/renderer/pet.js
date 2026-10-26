@@ -138,7 +138,12 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   function resize(){width=container.clientWidth;height=container.clientHeight;camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(width,height);invalidate();}
   function visibility(){visible=!document.hidden;if(!visible){cancelAnimationFrame(frameHandle);frameHandle=0;finishPhase();settle();}else{lastTime=performance.now();invalidate();}}
   function lost(e){e.preventDefault();contextLost=true;cancelAnimationFrame(frameHandle);frameHandle=0;finishPhase();onReady({ok:false,character:current?.id,error:'El controlador gráfico perdió el contexto 3D. Intentaré recuperarlo automáticamente.'});}
-  function restored(){contextLost=false;renderer.compileAsync(scene,camera).then(()=>{settle();onReady({ok:true,character:current?.id,clips:current?.actions.size,bones:current?.bones.length});});}
+  function restored(){contextLost=false;renderer.compileAsync(scene,camera).then(()=>{
+    if(disposed)return;settle();
+    // A driver reset can happen during the first GLTF upload. Initialization
+    // owns that ready event until the model and diagnostics have been installed.
+    if(initialized&&current&&!switching)onReady({ok:true,character:current.id,clips:current.actions.size,bones:current.bones.length,phases:phaseHistory.slice(),reducedMotion:reduced.matches});
+  }).catch(()=>{if(!disposed)onReady({ok:false,character:current?.id,error:'No pude recuperar el visor 3D. Reabre PokéDesk.'});});}
   window.addEventListener('resize',resize);document.addEventListener('visibilitychange',visibility);reduced.addEventListener('change',()=>{if(reduced.matches){finishPhase();play('reposo',true);}invalidate();});
   renderer.domElement.addEventListener('webglcontextlost',lost);renderer.domElement.addEventListener('webglcontextrestored',restored);
   cameraFor(settings.character);setYaw(settings.yaw??0);lastTime=performance.now();

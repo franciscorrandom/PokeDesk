@@ -2,7 +2,7 @@
 
 Mascota 3D flotante con Arcanine, Mewtwo, Pikachu, Charizard, Lucario y Gengar, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
 
-La revisión 1.5.1 se prepara para pruebas. Las descargas publicadas en Releases y en Guía Estudio conservan su versión hasta que se apruebe su publicación.
+La versión 1.5.2 añade un giro frontal muy lento, de ida y vuelta, que puedes desactivar en Ajustes. La publicación de esta versión en Releases y Guía Estudio fue solicitada expresamente por Francisco.
 
 ## Instalar
 
