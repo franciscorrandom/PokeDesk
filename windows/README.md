@@ -1,10 +1,10 @@
-# PokéDesk para Windows · 1.5.1-beta.1
+# PokéDesk para Windows · 1.5.2-beta.1
 
 Primera edición Windows del producto con iCal. Electron y Three.js utilizan los mismos seis modelos, miniaturas, grabaciones y bibliotecas de animación de la edición Mac. No utiliza el cliente OAuth ni Google Tasks del prototipo anterior de Arcanine.
 
 ## Instalar y usar
 
-Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.5.1-beta.1-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
+Edición x64 para Windows 10/11 con controladores gráficos compatibles con WebGL 2. Ejecutar el instalador `PokeDesk-1.5.2-beta.1-Windows-x64.exe`; instala para el usuario actual y permite elegir la carpeta. Como alternativa, extraer **todo** el ZIP y abrir `PokeDesk.exe` dentro de la carpeta. No requiere Node, Python ni herramientas de desarrollo para utilizarla. El instalador todavía no lleva firma digital.
 
 Cerrar la antigua app Arcanine desde la bandeja antes de abrir PokéDesk. Esta edición usa un perfil propio y no importa la conexión OAuth ni los datos de la app anterior. Tampoco sincroniza datos con la edición Mac.
 
