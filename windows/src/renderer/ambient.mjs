@@ -1,4 +1,7 @@
 // Presentation only. Never persist the changing offset or allocate another timer.
+export function ambientRotationAllowed(state) {
+  return state.settings.ambientRotation !== false && !state.menuOpen && !state.panelOpen && !state.notice && !(state.focus && !state.focus.paused) && !state.smokeTest;
+}
 export class AmbientRotation {
   static amplitude = 25 * Math.PI / 180;
   static period = 480;

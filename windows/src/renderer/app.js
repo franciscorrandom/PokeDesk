@@ -1,6 +1,7 @@
 import { attachments, DEFAULT_BODY, PET_SIZE } from './geometry.mjs';
 import { icon } from './icons.js';
 const api = window.arcanine, root = document.getElementById('app'), view = new URLSearchParams(location.search).get('view');
+import {ambientRotationAllowed} from './ambient.mjs';
 let state, pet, currentRevision = -1, renderKey = '', gesture = null, petMenu, petShape;
 let panelSection='', panelDrafts=new Map();
 let menuAnimations=[],menuAnimationFrame=0,menuAnimationRevision=0;
@@ -181,7 +182,7 @@ function applyState(next) {
     if (pet) {
       pet.setCharacter(state.settings.character).catch(e=>toast(e.message));
       pet.setYaw(state.settings.yaw); pet.setMotion(state.motion.enabled);
-      pet.setAmbientAllowed(state.settings.ambientRotation!==false&&!state.menuOpen&&!state.fullPanel&&!state.notice&&!(state.focus&&!state.focus.paused)&&!state.smokeTest);
+      pet.setAmbientAllowed(ambientRotationAllowed(state));
       if (currentRevision !== state.motion.revision) { currentRevision = state.motion.revision; pet.play(state.motion.clip); }
     }
     updateTimers();
