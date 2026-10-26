@@ -24,4 +24,4 @@ por lado, con un ciclo de ocho minutos de reposo. Se pausa con el foco, los avis
 los menús, los gestos y la interacción; respeta Reducir movimiento. Puedes
 desactivarlo en Ajustes → Giro suave en reposo. Option/Alt + arrastrar sigue
 permitiendo girar manualmente por todos los perfiles y guardar la orientación.
-Windows: 1.5.2-beta.1, instalador y ZIP x64 para Windows 10/11.
+Windows: 1.5.2-beta.2, instalador y ZIP x64 para Windows 10/11.

@@ -1,5 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+test('La presentación completa del panel no mantiene pausado el giro cuando el panel está cerrado', async () => {
+  const {ambientRotationAllowed} = await import('../src/renderer/ambient.mjs');
+  const state={settings:{ambientRotation:true},fullPanel:true,panelOpen:false,menuOpen:false,notice:null,focus:null,smokeTest:false};
+  assert.equal(ambientRotationAllowed(state),true);
+  for(const patch of [{panelOpen:true},{menuOpen:true},{notice:{}},{focus:{paused:false}},{smokeTest:true},{settings:{ambientRotation:false}}])assert.equal(ambientRotationAllowed({...state,...patch}),false);
+  assert.equal(ambientRotationAllowed({...state,focus:{paused:true}}),true);
+});
 test('Giro frontal de ocho minutos, sin acelerones y limitado a 25 grados por lado', async () => {
   const {AmbientRotation} = await import('../src/renderer/ambient.mjs');
   const a = new AmbientRotation(); assert.equal(a.tick(0,true),0);
