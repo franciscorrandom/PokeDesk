@@ -1,12 +1,14 @@
 # PokéDesk · compañeros de escritorio para Mac
 
-Mascota 3D flotante con Arcanine, Mewtwo, Pikachu y Charizard, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
+Mascota 3D flotante con Arcanine, Mewtwo, Pikachu, Charizard, Lucario y Gengar, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
+
+La versión 1.5.2 añade un giro frontal muy lento, de ida y vuelta, que puedes desactivar en Ajustes. La publicación de esta versión en Releases y Guía Estudio fue solicitada expresamente por Francisco.
 
 ## Instalar
 
 Requiere **macOS 14 Sonoma o posterior**, en Mac Intel o Apple Silicon. La descarga es universal e incluye todos los recursos; no hay que instalar herramientas de programación.
 
-1. Descarga `PokeDesk-1.3.2-macOS.zip` desde [Releases](https://github.com/franciscorrandom/PokeDesk/releases).
+1. Obtén el ZIP de la versión de prueba entregada o una versión publicada desde [Releases](https://github.com/franciscorrandom/PokeDesk/releases).
 2. Descomprime el ZIP y arrastra `PokeDesk.app` a Aplicaciones.
 3. Abre la app. Esta edición gratuita está firmada de forma local, **sin Developer ID ni notarización**. Si macOS bloquea la apertura, después de intentarla ve a **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente** y confirma. Sigue las [instrucciones de Apple](https://support.apple.com/es-cl/102445); no hace falta desactivar la seguridad del Mac.
 4. En la bienvenida pega tu enlace iCal de Google Calendar y pulsa **Conectar calendario**. Puedes usar tareas, notas, animaciones y concentración aunque no conectes un calendario.
@@ -31,7 +33,7 @@ La conexión es de lectura: crea o cambia reuniones desde Google Calendar. Las t
 - **Arrastrar:** mover a otra parte del escritorio.
 - **⌥ Option + arrastrar:** rotación horizontal para ver otros perfiles.
 - **⇧ Mayús + arrastrar:** acariciar; también puedes elegir Acariciar en el menú.
-- **Compañero:** elige Arcanine, Mewtwo, Pikachu o Charizard desde el acceso **Cambiar Pokémon** del menú flotante, desde la barra de menús o en Ajustes → Tu compañero. El menú, los avisos y el timer adoptan sus colores. Se conservan agenda, tareas, notas y orientación de cada personaje.
+- **Compañero:** elige entre los seis Pokémon desde el acceso **Cambiar Pokémon** del menú flotante, la fila de miniaturas del panel, la barra de menús o Ajustes → Tu compañero. El menú, los avisos y el timer adoptan sus colores. Se conservan agenda, tareas, notas y orientación de cada personaje.
 - **Pokébolas 3D:** al abrir o volver a abrir la app, una Pokébola se abre y materializa al compañero con un núcleo blanco y un halo azul intenso. Al cambiar de personaje, otra lo recoge con luz roja antes de liberar al nuevo. Tapa articulada, halo, haz y destellos sobre fondo transparente. La secuencia espera a que el visor termine de preparar sus recursos. También puedes elegir **Repetir salida de la Pokébola** en Ajustes o la barra de menús. Se omite cuando desactivas el movimiento o macOS tiene activado Reducir movimiento.
 - **Animaciones:** once gestos de Arcanine y nueve para cada uno de los otros compañeros, incluidos parpadeos, saludo, caricias, movimiento de cola y meditación.
 - **Agenda:** avisos anticipados configurables y botón para entrar cuando el evento contiene un enlace compatible de Google Meet, Zoom, Teams o Webex.
@@ -52,6 +54,10 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ## Compilar y verificar
 
+### Primera beta de Windows
+
+La edición **PokéDesk 1.5.2-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
 Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior. Desde la carpeta del proyecto:
@@ -61,7 +67,7 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.3.2-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.2-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 
@@ -70,3 +76,44 @@ Las pruebas cubren avisos, timers, datos persistentes, notas, movimiento, secuen
 ## Créditos
 
 Proyecto de fans independiente, sin afiliación con Pokémon, Nintendo, Game Freak ni Creatures. El código propio está disponible bajo MIT; los recursos de terceros mantienen sus licencias y derechos respectivos. Véase [Créditos y licencias](docs/CREDITOS.md).
+
+## Órbita · 1.4.0
+
+Interfaz clara con acentos por Pokémon, selector rápido, menú con salida desde el cuerpo y respuesta al pasar el cursor. Respeta Reducir movimiento. La lectura iCal admite hasta 50 MB, cancela transferencias mayores y diferencia problemas de tamaño, codificación y permisos. El procesamiento de calendarios se realiza fuera del hilo de la interfaz.
+
+## Persecución de cola · 1.4.1 local
+
+Arcanine completa la vuelta con cuatro saltos de unos 0,62 segundos: primero se
+elevan las patas delanteras, las traseras dan el impulso y los apoyos llegan
+escalonados. La cabeza sigue mirando hacia la cola. El movimiento está horneado
+en el mismo clip `giro-rapido`; no añade cálculos de cinemática en ejecución.
+Las otras diez animaciones, el modelo y las texturas se conservan.
+
+La preparación se reproduce con NumPy: `python3 scripts/animate-arcanine-chase.py
+--output Assets/arcanine-biblioteca.glb`. La opción `--single-hop-preview` crea
+un estudio aislado en una salida explícita. `Tests/arcanine-gait.py` comprueba
+la coordinación, las longitudes de los huesos, el suelo, el cierre y la
+continuidad de las rotaciones. `scripts/preview-arcanine-gait.swift` exporta las
+vistas de revisión con el motor nativo.
+
+Esta revisión se prepara localmente para evaluación. No actualiza automáticamente
+las descargas ni la página de Guía Estudio.
+
+## Lucario y Gengar · 1.5.0
+
+Dos compañeros nuevos con nueve gestos cada uno, miniaturas 3D y paletas azul
+para Lucario y violeta para Gengar. El selector usa tres columnas y la barra de
+accesos muestra los seis compañeros en dos filas. Lucario conserva los brazos
+relajados y mueve sus sensores de aura; Gengar levita y tiene una broma con la
+lengua, sin las variantes superpuestas del original.
+
+Para regenerar sus recursos: `python3 scripts/animate-aura-ghost.py lucario` y
+`python3 scripts/animate-aura-ghost.py gengar`, con NumPy durante el desarrollo.
+Los modelos, texturas y clips están incluidos en la aplicación descargable.
+
+## Lucario en reposo · 1.5.1
+
+Las cuatro prolongaciones negras de la cabeza ahora caen hacia abajo y atrás,
+con una curva suave y un balanceo discreto. Se mantienen sus uniones y longitudes
+y los nueve gestos parten de esa postura, sin volver a la extensión horizontal
+de la pose de origen. Se actualiza también su miniatura 3D.

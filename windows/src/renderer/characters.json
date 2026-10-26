@@ -1,0 +1,330 @@
+[
+  {
+    "id": "arcanine",
+    "name": "Arcanine",
+    "number": "059",
+    "type": "Fuego",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Reposo y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Cabeza curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la pata",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola alegre",
+        "duration": 4.8
+      },
+      {
+        "id": "olfateo",
+        "title": "Olfatear",
+        "duration": 4.0
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.6
+      },
+      {
+        "id": "giro-rapido",
+        "title": "Perseguir su cola",
+        "duration": 4.0
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.6
+      },
+      {
+        "id": "sentarse",
+        "title": "Sentarse",
+        "duration": 7.2
+      }
+    ]
+  },
+  {
+    "id": "mewtwo",
+    "name": "Mewtwo",
+    "number": "150",
+    "type": "Psíquico",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Levitación y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola en movimiento",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso psíquico",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Meditación",
+        "duration": 7.199999809265137
+      }
+    ]
+  },
+  {
+    "id": "pikachu",
+    "name": "Pikachu",
+    "number": "025",
+    "type": "Eléctrico",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Orejas y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola en movimiento",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Descansar",
+        "duration": 7.199999809265137
+      }
+    ]
+  },
+  {
+    "id": "charizard",
+    "name": "Charizard",
+    "number": "006",
+    "type": "Fuego / Volador",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Respiración y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Alas y cola",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Descansar",
+        "duration": 7.199999809265137
+      }
+    ]
+  },
+  {
+    "id": "lucario",
+    "name": "Lucario",
+    "number": "448",
+    "type": "Lucha / Acero",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Orejas y parpadeo",
+        "duration": 8
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola y sensores de aura",
+        "duration": 4.8
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso de aura",
+        "duration": 4
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.6
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.6
+      },
+      {
+        "id": "sentarse",
+        "title": "Concentración",
+        "duration": 7.2
+      }
+    ]
+  },
+  {
+    "id": "gengar",
+    "name": "Gengar",
+    "number": "094",
+    "type": "Fantasma / Veneno",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Levitación y parpadeo",
+        "duration": 8
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Broma con la lengua",
+        "duration": 4.8
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.6
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.6
+      },
+      {
+        "id": "sentarse",
+        "title": "Descanso flotante",
+        "duration": 7.2
+      }
+    ]
+  }
+]

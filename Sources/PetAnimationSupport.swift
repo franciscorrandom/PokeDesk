@@ -1,5 +1,26 @@
 import Foundation
 
+/// A presentation-only yaw: ±25°, one round trip in eight minutes of idle time.
+struct PetAmbientRotation {
+    static let amplitude = 25.0 * Double.pi / 180
+    static let period = 480.0
+    private(set) var angle = 0.0
+    private var phase = 0.0
+    private var lastTime: Double?
+    private var holdUntil = 0.0
+    mutating func hold(at now: Double) { holdUntil = now + 20 }
+    mutating func reset(at now: Double) { phase = 0; angle = 0; lastTime = now; hold(at: now) }
+    mutating func tick(at now: Double, allowed: Bool) -> Double {
+        guard now.isFinite else { return angle }
+        let delta = min(0.1, max(0, now - (lastTime ?? now)))
+        lastTime = now
+        guard allowed, now >= holdUntil else { return angle }
+        phase = (phase + delta * 2 * .pi / Self.period).truncatingRemainder(dividingBy: 2 * .pi)
+        angle = Self.amplitude * sin(phase)
+        return angle
+    }
+}
+
 enum PetRotation {
     static func normalized(_ angle: Double) -> Double {
         guard angle.isFinite else { return 0 }
@@ -56,7 +77,8 @@ enum FloatingLayout {
 }
 
 enum QuickMenuLayout {
-    static let width = 548.0, height = 190.0
+    // Extra transparent space lets shortcuts travel from the Pokémon's body.
+    static let width = 548.0, height = 330.0
     static let buttonCount = 7
     static let arcButtonCount = 6
     static let radiusX = width / 2 - 52
@@ -77,7 +99,7 @@ enum QuickMenuLayout {
     static func place(anchorX: Double, anchorY: Double, screen: FloatingRect) -> FloatingRect {
         let margin = 8.0
         return FloatingRect(x: min(max(anchorX - width / 2, screen.x + margin), screen.maxX - width - margin),
-            y: min(max(anchorY - 34, screen.y + margin), screen.maxY - height - margin), width: width, height: height)
+            y: min(max(anchorY - 174, screen.y + margin), screen.maxY - height - margin), width: width, height: height)
     }
     static func detail(width: Double, height: Double, menu: FloatingRect, screen: FloatingRect) -> FloatingRect {
         let margin = 12.0, gap = 8.0

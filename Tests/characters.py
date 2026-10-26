@@ -52,6 +52,29 @@ def validate(character, joint_count, author):
             assert 3 < paw[2][3]-upper[2][3] < 5, 'Resting hands should sit slightly forward'
             assert abs(paw[0][3]) < abs(fore[0][3]), 'Elbows should bend gently inward'
 
+    if character=='lucario':
+        names={n.get('name'):i for i,n in enumerate(doc['nodes'])}
+        unit=math.sqrt(sum(world(names['Origin_02'])[r][0]**2 for r in range(3)))
+        for arm,hand in [('LArm_041','LHand_043'),('RArm_079','RHand_081')]:
+            upper,paw=world(names[arm]),world(names[hand])
+            assert paw[1][3] < upper[1][3]-25*unit, 'Lucario should rest his hands below the chest'
+            assert 4*unit < paw[2][3]-upper[2][3] < 25*unit, 'Lucario hands should rest gently forward'
+        # A relaxed silhouette must not regress to the horizontal source T-pose.
+        shoulder_y=world(names['LArm_041'])[1][3]
+        for side,label,start in [('L','A',54),('L','B',59),('R','A',66),('R','B',71)]:
+            chain=[names[f'{side}Feeler{label}{k}_{start+k-1:03}'] for k in range(1,5)]
+            chain.append(doc['nodes'][chain[-1]]['children'][0])
+            points=[world(i) for i in chain]
+            assert parents[chain[0]]==names['Head_047'], 'Aura appendages must remain attached to the head'
+            assert all(a[1][3]>b[1][3] for a,b in zip(points,points[1:])), 'Resting appendages must fall downward'
+            assert points[-1][1][3] < points[0][1][3]-18*unit, 'Aura appendages should hang below the cheeks'
+            assert points[-1][2][3] < points[0][2][3]-10*unit, 'Aura appendages must hang behind the neck'
+            assert abs(points[-1][1][3]-shoulder_y)<10*unit, 'Resting tips should sit near shoulder height'
+    if character=='gengar':
+        names={n.get('name'):i for i,n in enumerate(doc['nodes'])}
+        assert all(doc['nodes'][names[n]].get('scale')==[0,0,0] for n in ['GengarTongue','GengarMouthMask'])
+        assert all(n.get('mesh') not in [2,3,4] for n in doc['nodes']), 'Duplicate source tongue and mask meshes must not show at rest'
+
 
     expected = {'reposo', 'curiosidad', 'saludo', 'cola-alegre', 'estiramiento', 'aviso-reunion', 'celebracion', 'caricias', 'sentarse'}
     assert len(doc['animations']) == 9
@@ -77,7 +100,9 @@ def validate(character, joint_count, author):
                 expressions.add(doc['nodes'][node]['name'])
             animated_channels += 1
         assert joint_motion, clip['name']
-        assert expressions == {character.title()+'Eyes'+x for x in ['Open','Half','Closed']} | ({'MewtwoPupils'} if character == 'mewtwo' else set())
+        expected_expressions={character.title()+'Eyes'+x for x in ['Open','Half','Closed']} | ({'MewtwoPupils'} if character == 'mewtwo' else set())
+        if character=='gengar': expected_expressions |= {'GengarTongue','GengarMouthMask'}
+        assert expressions == expected_expressions
 
     for n in doc['nodes']:
         if 'skin' not in n or 'mesh' not in n: continue
@@ -91,12 +116,12 @@ def validate(character, joint_count, author):
     assert len(read(doc['skins'][0]['inverseBindMatrices'])) == joint_count
     print(f'{character.title()} GLB válido: {joint_count} articulaciones, 9 clips, {animated_channels} canales; cierres, expresiones y pesos correctos.')
 
-for spec in [("mewtwo",77,"nguyenlouis32"),("pikachu",49,"jacobjksn42"),("charizard",87,"nguyenlouis32")]:
+for spec in [("mewtwo",77,"nguyenlouis32"),("pikachu",49,"jacobjksn42"),("charizard",87,"nguyenlouis32"),("lucario",86,"nguyenlouis32"),("gengar",65,"nguyenlouis32")]:
     validate(*spec)
 
 # Every chooser image is a dedicated, consistently sized 3D render.
-for character in ['arcanine','mewtwo','pikachu','charizard']:
+for character in ['arcanine','mewtwo','pikachu','charizard','lucario','gengar']:
     raw=(root/f'Assets/preview-{character}.png').read_bytes()
     assert raw[:8]==b'\x89PNG\r\n\x1a\n'
     assert struct.unpack_from('>II',raw,16)==(320,320)
-print('Cuatro miniaturas 3D de 320 × 320 incluidas.')
+print('Seis miniaturas 3D de 320 × 320 incluidas.')

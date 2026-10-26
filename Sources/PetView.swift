@@ -56,6 +56,9 @@ final class PetView: NSView {
     var onRotationEnd: ((Double) -> Void)?
     var onPettingRequested: (() -> Void)?
     private var motion = Arcanine3DMotion()
+    private var ambientRotation = PetAmbientRotation()
+    var ambientRotationEnabled = true
+    var menuOpen = false
     private var renderedRevision = -1
     private var previewing = false
     private var initialMouse = NSPoint.zero
@@ -132,13 +135,15 @@ final class PetView: NSView {
     }
     func setYaw(_ angle: Double) { engine.setYaw(angle); sceneView.needsDisplay = true }
     func tickMotion() {
+        let now = ProcessInfo.processInfo.systemUptime
+        let ambientAllowed = ambientRotationEnabled && animate && !previewing && !dragging && !menuOpen && !focusing && !alerting && !speaking && engine.ready && !engine.isTransitioning && engine.loadingCharacter == nil && motion.clip == .idle && window?.isVisible == true
+        engine.setAmbientYaw(ambientRotation.tick(at: now, allowed: ambientAllowed))
         if !previewing { engine.updateSummoning(at: ProcessInfo.processInfo.systemUptime) }
         if engine.isTransitioning {
             sceneView.isPlaying = !previewing && animate && window?.isVisible == true
             return
         }
         guard engine.ready, !previewing else { return }
-        let now = ProcessInfo.processInfo.systemUptime
         motion.focusing = focusing; motion.alerting = alerting
         motion.setEnabled(animate, at: now)
         motion.tick(at: now)
@@ -198,10 +203,16 @@ final class PetView: NSView {
         window?.convertPoint(toScreen: event.locationInWindow) ?? event.locationInWindow
     }
     override func mouseDown(with event: NSEvent) {
+        let now = ProcessInfo.processInfo.systemUptime
+        ambientRotation.hold(at: now)
         initialMouse = mousePosition(event); initialOrigin = window?.frame.origin ?? .zero
         initialYaw = yaw
         // Lock the gesture at mouse-down: releasing Option mid-drag never moves the panel.
         rotating = event.modifierFlags.contains(.option)
+        if rotating && !engine.isTransitioning {
+            initialYaw = engine.takeManualOrientation()
+            ambientRotation.reset(at: now)
+        }
         rotationBlocked = rotating && engine.isTransitioning
         petting = !rotating && event.modifierFlags.contains(.shift)
         pettedDuringDrag = false
@@ -230,6 +241,7 @@ final class PetView: NSView {
         }
     }
     override func mouseUp(with event: NSEvent) {
+        ambientRotation.hold(at: ProcessInfo.processInfo.systemUptime)
         dragging = false
         if petting {
             petting = false

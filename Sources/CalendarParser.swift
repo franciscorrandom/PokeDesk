@@ -25,7 +25,8 @@ final class CalendarParser {
             hour: parts.hour, minute: parts.minute, second: parts.second))?.timeIntervalSince1970 ?? .nan
     }
     func parse(_ text: String, now: Date, feedID: UUID, name: String = "") throws -> CalendarSnapshot {
-        guard text.utf8.count <= 10 * 1024 * 1024, text.contains("BEGIN:VCALENDAR") else {
+        guard text.utf8.count <= CalendarPayload.maximumBytes else { throw CalendarPayload.sizeIssue }
+        guard text.contains("BEGIN:VCALENDAR") else {
             throw CalendarIssue.message("El enlace no entregó un calendario iCal válido. Copia la dirección secreta en formato iCal de Google Calendar.")
         }
         guard let context = JSContext() else { throw CalendarIssue.message("No pude iniciar el lector de calendarios.") }

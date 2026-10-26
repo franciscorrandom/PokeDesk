@@ -1,0 +1,62 @@
+{
+  "source": {
+    "author": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/lucario-98c5d0459a434ff2ac6058be1db192b6",
+    "title": "Lucario",
+    "modifications": "Relaxed arms with chest attachments preserved, original rig and weights, rebuilt inverse binds and normals; head-attached blink expressions from original atlas; nine articulated PokéDesk clips. Curved tail, ears and four relaxed downward/backward aura appendages with gentle delayed sway; standing focus pose."
+  },
+  "joints": 86,
+  "clips": [
+    {
+      "id": "reposo",
+      "duration": 8,
+      "channels": 34
+    },
+    {
+      "id": "curiosidad",
+      "duration": 4,
+      "channels": 34
+    },
+    {
+      "id": "saludo",
+      "duration": 4,
+      "channels": 36
+    },
+    {
+      "id": "cola-alegre",
+      "duration": 4.8,
+      "channels": 34
+    },
+    {
+      "id": "estiramiento",
+      "duration": 5,
+      "channels": 36
+    },
+    {
+      "id": "aviso-reunion",
+      "duration": 4,
+      "channels": 36
+    },
+    {
+      "id": "celebracion",
+      "duration": 3.6,
+      "channels": 36
+    },
+    {
+      "id": "caricias",
+      "duration": 5.6,
+      "channels": 34
+    },
+    {
+      "id": "sentarse",
+      "duration": 7.2,
+      "channels": 38
+    }
+  ],
+  "expressions": {
+    "Open": 0,
+    "Half": -0.5,
+    "Closed": -0.75
+  }
+}

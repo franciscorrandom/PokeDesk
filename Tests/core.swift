@@ -152,4 +152,13 @@ var previousProfile = try JSONSerialization.jsonObject(with: JSONEncoder().encod
 previousProfile.removeValue(forKey: "petCharacter"); previousProfile.removeValue(forKey: "characterYaws")
 let previousCompanion = try JSONDecoder().decode(PetSettings.self, from: JSONSerialization.data(withJSONObject: previousProfile))
 check(previousCompanion.character == .arcanine && previousCompanion.tasks == settings.tasks, "Migrar perfiles sin campos de personajes")
+check(PetCharacter.allCases.count == 6, "El catálogo incluye seis compañeros")
+for character in [PetCharacter.lucario, .gengar] {
+    var expanded = companionsSaved
+    expanded.petCharacter = character.rawValue
+    expanded.setCharacterYaw(0.35)
+    let restored = try JSONDecoder().decode(PetSettings.self, from: JSONEncoder().encode(expanded))
+    check(restored.character == character && restored.characterYaw == 0.35, "Los nuevos compañeros y sus perfiles se conservan")
+    check(restored.tasks == settings.tasks && restored.notes == settings.notes && restored.focusTimer == settings.focusTimer && restored.calendarFeeds == settings.calendarFeeds, "Ampliar el catálogo conserva tareas, notas, foco y calendario")
+}
 print("\(count) comprobaciones correctas de timers, cara, voz, migración, recurrencia, personajes y recordatorios.")

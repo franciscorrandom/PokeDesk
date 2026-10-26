@@ -1,9 +1,16 @@
 .build/
 dist/
 .DS_Store
+__pycache__/
 *.enc
 estado.json
 google-client.json
 *.p12
 *.mobileprovision
 .env*
+windows/node_modules
+windows/assets/
+windows/dist/
+windows/.build/
+windows/.build*.log
+windows/src/renderer/vendor/

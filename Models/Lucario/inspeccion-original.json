@@ -1,0 +1,28 @@
+{
+  "nombre": "Lucario",
+  "fecha_verificacion": "2026-10-23",
+  "archivo_original": "lucario-original.glb",
+  "sha256": "162c532042a5d8d08a2423d72277f3b60eb774b5c6bd905e0f6a1f1b9240e766",
+  "bytes": 515220,
+  "triangulos": 7178,
+  "vertices_exportados": 4749,
+  "articulaciones": 86,
+  "mallas": 3,
+  "materiales": 3,
+  "texturas_embebidas": 3,
+  "animaciones_originales": 0,
+  "extensiones_requeridas": [],
+  "fuente": "https://sketchfab.com/3d-models/lucario-98c5d0459a434ff2ac6058be1db192b6",
+  "autor": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+  "licencia": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+  "licencia_url": "https://creativecommons.org/licenses/by/4.0/",
+  "descarga": "Botón oficial de Sketchfab, GLB convertido",
+  "estado": "Original intacto; biblioteca de nueve clips integrada en PokéDesk 1.5.0",
+  "validaciones": [
+    "GLB 2.0, longitud y buffers correctos",
+    "texturas embebidas, sin dependencias externas",
+    "valores numéricos finitos",
+    "índices de vértices y articulaciones válidos",
+    "pesos de skinning normalizados"
+  ]
+}

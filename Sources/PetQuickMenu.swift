@@ -16,13 +16,22 @@ enum PetQuickAction: String, CaseIterable {
     }
     var symbol: String {
         switch self {
-        case .petting: return "heart.fill"
+        case .petting: return "heart"
         case .agenda: return "calendar"
         case .focus: return "timer"
-        case .animations: return "pawprint.fill"
+        case .animations: return "sparkles"
         case .notes: return "note.text"
-        case .openPanel: return "square.grid.2x2.fill"
+        case .openPanel: return "square.grid.2x2"
         case .companions: return "arrow.triangle.2.circlepath"
+        }
+    }
+    var shortTitle: String {
+        switch self {
+        case .petting: return "Cariño"
+        case .focus: return "Foco"
+        case .animations: return "Gestos"
+        case .openPanel: return "Panel"
+        default: return title
         }
     }
     var tab: Int? {
@@ -42,6 +51,10 @@ enum PetQuickAction: String, CaseIterable {
 @MainActor final class PetQuickMenuState: ObservableObject {
     @Published var selected: PetQuickAction?
     @Published var character: PetCharacter = .arcanine
+    @Published var expanded = false
+    @Published var interactionReady = false
+    @Published var origin = CGPoint(x: QuickMenuLayout.width / 2, y: 270)
+    var presentation = 0
 }
 
 /// The empty middle of the semicircle does not become an invisible rectangular window.
@@ -65,24 +78,25 @@ private struct PetShortcutButton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         Button(action: invoke) {
-            VStack(spacing: 6) {
-                Image(systemName: action.symbol).font(.system(size: 21, weight: .semibold))
-                    .foregroundStyle(selected || action == .petting ? .white : theme.red)
-                    .frame(width: 50, height: 50)
-                    .background(selected || action == .petting ? theme.red : theme.card)
+            VStack(spacing: 7) {
+                Image(systemName: action.symbol).font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(selected ? theme.red : theme.ink)
+                    .frame(width: 46, height: 46)
+                    .background(selected || hovering ? theme.accentSoft : theme.paper)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(theme.gold.opacity(0.85), lineWidth: 2))
-                    .shadow(color: theme.ink.opacity(0.17), radius: 3, y: 2)
-                Text(action.title).font(.system(size: 10, weight: .bold, design: .rounded))
+                    .overlay(Circle().stroke(theme.line.opacity(0.6), lineWidth: 0.5))
+                    .shadow(color: theme.ink.opacity(0.10), radius: hovering ? 9 : 6, y: hovering ? 4 : 2)
+                Text(action.shortTitle).font(.system(size: 11, weight: .medium))
                     .lineLimit(1).minimumScaleFactor(0.85)
                     .foregroundStyle(theme.ink)
-                    .padding(.horizontal, 6).padding(.vertical, 3)
-                    .background(theme.paper.opacity(0.98)).clipShape(Capsule())
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(theme.paper).clipShape(Capsule())
             }.frame(width: 94, height: 76)
                 .contentShape(RoundedRectangle(cornerRadius: 18))
-                .scaleEffect(hovering && !reduceMotion ? 1.06 : 1)
+                .scaleEffect(hovering && !reduceMotion ? 1.09 : 1)
+                .offset(y: hovering && !reduceMotion ? -3 : 0)
         }.buttonStyle(.plain).onHover { hovering = $0 }
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
+            .animation(reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.76), value: hovering)
             .accessibilityLabel(action.title).help(action == .openPanel ? "Abrir todas las opciones de PokéDesk" : action.title)
     }
 }
@@ -92,39 +106,37 @@ struct PetQuickMenuView: View {
     @ObservedObject var state: PetQuickMenuState
     let onSelect: (PetQuickAction) -> Void
     let onClose: () -> Void
-    private var arc: Path {
-        Path { path in
-            for degrees in stride(from: 166.0, through: 14.0, by: -2) {
-                let angle = degrees * .pi / 180
-                let point = CGPoint(x: QuickMenuLayout.width / 2 + QuickMenuLayout.radiusX * cos(angle), y: 143 - 104 * sin(angle))
-                if degrees == 166 { path.move(to: point) } else { path.addLine(to: point) }
-            }
-        }
-    }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         ZStack(alignment: .topLeading) {
-            arc.stroke(theme.line, style: StrokeStyle(lineWidth: 58, lineCap: .round))
-                .shadow(color: .black.opacity(0.10), radius: 3, y: 2).allowsHitTesting(false)
-            arc.stroke(theme.paper.opacity(0.98), style: StrokeStyle(lineWidth: 54, lineCap: .round)).allowsHitTesting(false)
             ForEach(Array(PetQuickAction.allCases.filter { $0 != .companions }.enumerated()), id: \.element.rawValue) { index, action in
                 let point = QuickMenuLayout.buttonCenter(index)
                 PetShortcutButton(action: action, selected: state.selected == action) { onSelect(action) }
-                    .position(x: point.x, y: point.y)
+                    .disabled(!state.interactionReady)
+                    .scaleEffect(state.expanded || reduceMotion ? 1 : 0.18)
+                    .opacity(state.expanded ? 1 : 0)
+                    .position(x: state.expanded || reduceMotion ? point.x : state.origin.x,
+                              y: state.expanded || reduceMotion ? point.y : state.origin.y)
+                    .animation(reduceMotion ? nil : .spring(response: 0.40, dampingFraction: 0.82).delay(Double(index) * 0.018), value: state.expanded)
             }
             Button { onSelect(.companions) } label: {
                 Label("Cambiar Pokémon", systemImage: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(state.selected == .companions ? .white : theme.red)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(theme.red)
                     .frame(width: 166, height: 34)
-                    .background(state.selected == .companions ? theme.red : theme.paper)
-                    .clipShape(Capsule()).overlay(Capsule().stroke(theme.gold, lineWidth: 1.5))
-            }.buttonStyle(.plain).position(x: QuickMenuLayout.width / 2, y: 126)
+                    .background(state.selected == .companions ? theme.accentSoft : theme.paper)
+                    .clipShape(Capsule()).shadow(color: theme.ink.opacity(0.08), radius: 5, y: 2)
+            }.buttonStyle(.plain).disabled(!state.interactionReady)
+                .scaleEffect(state.expanded ? 1 : 0.3).opacity(state.expanded ? 1 : 0)
+                .position(x: state.expanded ? QuickMenuLayout.width / 2 : state.origin.x,
+                          y: state.expanded ? 126 : state.origin.y)
+                .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.85).delay(0.08), value: state.expanded)
             Button(action: onClose) {
-                Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
+                Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(theme.muted).frame(width: 26, height: 26)
                     .background(theme.paper).clipShape(Circle())
-                    .overlay(Circle().stroke(theme.line, lineWidth: 1))
             }.buttonStyle(.plain).position(x: QuickMenuLayout.width / 2, y: 164)
+                .opacity(state.expanded ? 1 : 0)
                 .accessibilityLabel("Cerrar accesos rápidos").help("Cerrar accesos · Escape")
         }.frame(width: QuickMenuLayout.width, height: QuickMenuLayout.height)
             .preferredColorScheme(.light).environment(\.petTheme, theme)
@@ -145,7 +157,7 @@ struct PetQuickDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 9) {
                 Image(systemName: action.symbol).foregroundStyle(theme.red)
-                Text(action.title).font(.system(size: 16, weight: .bold, design: .rounded))
+                Text(action.title).font(.system(size: 16, weight: .semibold))
                 Spacer()
                 PokedexIconButton(symbol: "xmark", label: "Cerrar \(action.title)") { onClose() }
             }
@@ -163,7 +175,7 @@ struct PetQuickDetailView: View {
         }.padding(16).foregroundStyle(theme.ink)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(theme.paper).clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(theme.line, lineWidth: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(theme.line, lineWidth: 1))
             .tint(theme.red).buttonStyle(PokedexButtonStyle()).controlSize(.small).preferredColorScheme(.light).environment(\.petTheme, theme)
     }
     private var agenda: some View {
@@ -193,7 +205,7 @@ struct PetQuickDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             if let timer = model.settings.focusTimer {
                 Text(timer.phase == .finished ? "Foco completado" : timer.display(at: model.clockNow))
-                    .font(.system(size: 25, weight: .bold, design: .rounded)).monospacedDigit()
+                    .font(.system(size: 25, weight: .semibold)).monospacedDigit()
                 HStack {
                     if timer.phase != .finished { Button(timer.phase == .paused ? "Reanudar" : "Pausar") { model.pauseOrResumeFocus() } }
                     Button(timer.phase == .finished ? "Listo" : "Cancelar") { model.stopFocus() }
@@ -215,7 +227,7 @@ struct PetQuickDetailView: View {
                     VStack(spacing: 5) {
                         Image(systemName: clip == .petting ? "heart.fill" : clip == .sit ? "pawprint.fill" : "play.fill")
                             .font(.system(size: 13)).foregroundStyle(theme.red)
-                        Text(model.settings.character.title(for: clip)).font(.system(size: 10, weight: .semibold, design: .rounded)).lineLimit(2)
+                        Text(model.settings.character.title(for: clip)).font(.system(size: 10, weight: .semibold)).lineLimit(2)
                     }.frame(maxWidth: .infinity).frame(height: 55)
                         .background(theme.card).clipShape(RoundedRectangle(cornerRadius: 9))
                         .overlay(RoundedRectangle(cornerRadius: 9).stroke(theme.line, lineWidth: 1))

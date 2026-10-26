@@ -99,6 +99,20 @@ for index in 0..<8 {
 psychic.request(.alert, at: 30_000)
 psychic.click(at: 30_001)
 check(psychic.clip == .alert, "Los avisos de reunión conservan prioridad con Mewtwo")
+for character in [PetCharacter.lucario, .gengar] {
+    var newcomer = Arcanine3DMotion(character: character)
+    for clip in character.clips {
+        newcomer.request(clip, at: 0, manual: true)
+        check(newcomer.clip == clip, "Los nuevos compañeros aceptan todo su repertorio")
+        newcomer.tick(at: clip.duration + 0.01)
+        check(newcomer.clip == .idle, "Cada gesto nuevo vuelve al reposo")
+    }
+    newcomer.request(.chaseTail, at: 20, manual: true)
+    check(newcomer.clip == .idle, "Los nuevos compañeros no reciben el giro canino")
+    newcomer.request(.alert, at: 21)
+    newcomer.click(at: 22)
+    check(newcomer.clip == .alert, "Los avisos mantienen prioridad con los nuevos compañeros")
+}
 print("\(checks) comprobaciones 3D correctas")
 let screens = [FloatingRect(x: 0, y: 0, width: 1440, height: 900),
                FloatingRect(x: -1440, y: 24, width: 1440, height: 876),
@@ -122,4 +136,24 @@ for index in 0..<QuickMenuLayout.buttonCount {
     check(QuickMenuLayout.containsControl(x: point.x, y: point.y), "Los siete accesos tienen una zona de clic")
 }
 check(!QuickMenuLayout.containsControl(x: QuickMenuLayout.width / 2, y: 94), "El centro vacío del arco permite pasar los clics")
+var ambient = PetAmbientRotation()
+check(ambient.tick(at: 0, allowed: true) == 0, "El giro ambiental empieza sin saltos")
+var maximum = 0.0, minimum = 0.0, previousAngle = 0.0
+for frame in 1...14400 {
+    let angle = ambient.tick(at: Double(frame) / 30, allowed: true)
+    maximum = max(maximum, angle); minimum = min(minimum, angle)
+    check(abs(angle - previousAngle) < 0.00020, "Velocidad ambiental casi imperceptible")
+    previousAngle = angle
+}
+check(abs(maximum - PetAmbientRotation.amplitude) < 0.00001 && abs(minimum + PetAmbientRotation.amplitude) < 0.00001, "Solo recorre el frente, 25 grados a cada lado")
+check(abs(ambient.angle) < 0.00001, "El ciclo completo tarda ocho minutos")
+let held = ambient.tick(at: 480.1, allowed: true)
+for frame in 1...900 { check(ambient.tick(at: 480.1 + Double(frame) / 30, allowed: false) == held, "Foco, aviso, menú y movimiento reducido detienen el giro sin saltos") }
+ambient.hold(at: 511)
+check(ambient.tick(at: 520, allowed: true) == held, "Respeta la pausa tras interacción")
+ambient.reset(at: 521)
+check(ambient.angle == 0 && ambient.tick(at: 530, allowed: true) == 0, "La rotación manual toma el ángulo visual y reinicia el offset")
+check(ambient.tick(at: .nan, allowed: true) == 0, "Un reloj inválido no corrompe la orientación")
+var resume = PetAmbientRotation(); _ = resume.tick(at: 0, allowed: true)
+check(abs(resume.tick(at: 10000, allowed: true)) < 0.001, "Despertar el equipo no adelanta toda la rotación")
 print("\(checks) comprobaciones de movimiento y posición de accesos correctas")
