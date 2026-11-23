@@ -326,5 +326,164 @@
         "duration": 7.2
       }
     ]
+  },
+  {
+    "id": "bulbasaur",
+    "name": "Bulbasaur",
+    "number": "001",
+    "type": "Planta / Veneno",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Respiración y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la pata",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Bulbo en movimiento",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Acurrucarse",
+        "duration": 7.199999809265137
+      }
+    ]
+  },
+  {
+    "id": "dragonite",
+    "name": "Dragonite",
+    "number": "149",
+    "type": "Dragón / Volador",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Respiración y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la mano",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Alas y cola",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Descansar",
+        "duration": 7.199999809265137
+      }
+    ]
+  },
+  {
+    "id": "eevee",
+    "name": "Eevee",
+    "number": "133",
+    "type": "Normal",
+    "clips": [
+      {
+        "id": "reposo",
+        "title": "Orejas y parpadeo",
+        "duration": 8.0
+      },
+      {
+        "id": "curiosidad",
+        "title": "Mirada curiosa",
+        "duration": 4.0
+      },
+      {
+        "id": "saludo",
+        "title": "Saludo con la pata",
+        "duration": 4.0
+      },
+      {
+        "id": "cola-alegre",
+        "title": "Cola en movimiento",
+        "duration": 4.800000190734863
+      },
+      {
+        "id": "estiramiento",
+        "title": "Estirarse",
+        "duration": 5.0
+      },
+      {
+        "id": "aviso-reunion",
+        "title": "Aviso atento",
+        "duration": 4.0
+      },
+      {
+        "id": "celebracion",
+        "title": "Celebración",
+        "duration": 3.5999999046325684
+      },
+      {
+        "id": "caricias",
+        "title": "Disfrutar las caricias",
+        "duration": 5.599999904632568
+      },
+      {
+        "id": "sentarse",
+        "title": "Acurrucarse",
+        "duration": 7.199999809265137
+      }
+    ]
   }
 ]

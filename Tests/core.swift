@@ -152,8 +152,8 @@ var previousProfile = try JSONSerialization.jsonObject(with: JSONEncoder().encod
 previousProfile.removeValue(forKey: "petCharacter"); previousProfile.removeValue(forKey: "characterYaws")
 let previousCompanion = try JSONDecoder().decode(PetSettings.self, from: JSONSerialization.data(withJSONObject: previousProfile))
 check(previousCompanion.character == .arcanine && previousCompanion.tasks == settings.tasks, "Migrar perfiles sin campos de personajes")
-check(PetCharacter.allCases.count == 6, "El catálogo incluye seis compañeros")
-for character in [PetCharacter.lucario, .gengar] {
+check(PetCharacter.allCases.count == 9, "El catálogo incluye nueve compañeros")
+for character in [PetCharacter.lucario, .gengar, .bulbasaur, .dragonite, .eevee] {
     var expanded = companionsSaved
     expanded.petCharacter = character.rawValue
     expanded.setCharacterYaw(0.35)

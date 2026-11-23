@@ -552,12 +552,51 @@ final class BubblePanel: NSPanel {
         next()
     }
 
+    /// Validate the actual eyelid pose loaded by SceneKit, including rigs with no eye-swap meshes.
+    private func verifyRosterBlink(_ character: PetCharacter) -> Bool {
+        guard character == .dragonite else {
+            petView.preview(.idle, at: 3)
+            _ = petView.snapshot()
+            return (petView.node(character.name+"EyesClosed")?.presentation.scale.x ?? 0) > 0.9
+        }
+        guard let url = Bundle.main.url(forResource: character.modelResource, withExtension: "glb"),
+              let bytes = try? Data(contentsOf: url), bytes.count >= 20 else { return false }
+        let jsonLength = (0..<4).reduce(0) { $0 | Int(bytes[12+$1]) << ($1*8) }
+        guard jsonLength > 0, jsonLength <= bytes.count-20,
+              let document = try? JSONSerialization.jsonObject(with: bytes.subdata(in: 20..<20+jsonLength)) as? [String: Any],
+              let asset = document["asset"] as? [String: Any],
+              let extras = asset["extras"] as? [String: Any],
+              let blink = extras["pokedeskBlink"] as? [String: Any],
+              let time = blink["time"] as? Double, time.isFinite, time > 0, time < ArcanineClip.idle.duration,
+              let poses = blink["nodes"] as? [String: [Double]], poses.count >= 2 else { return false }
+        petView.preview(.idle, at: 0)
+        _ = petView.snapshot()
+        var open = [String: SIMD4<Float>]()
+        for name in poses.keys {
+            guard let node = petView.node(name) else { return false }
+            open[name] = node.presentation.simdOrientation.vector
+        }
+        petView.preview(.idle, at: time)
+        _ = petView.snapshot()
+        var movingEyelids = 0
+        for (name, values) in poses {
+            guard values.count == 4, values.allSatisfy({ $0.isFinite }),
+                  let node = petView.node(name), let before = open[name] else { return false }
+            let expected = SIMD4<Float>(Float(values[0]), Float(values[1]), Float(values[2]), Float(values[3]))
+            let actual = node.presentation.simdOrientation.vector
+            guard abs(simd_length(expected)-1) < 0.001,
+                  1-abs(simd_dot(actual, expected)) < 0.0005 else { return false }
+            if 1-abs(simd_dot(actual, before)) > 0.0001 { movingEyelids += 1 }
+        }
+        return movingEyelids >= 2
+    }
+
     private func performRosterTest() {
         renderTimer?.invalidate()
         model.settings.soundEnabled = false
         model.settings.petSize = 230
         model.settings.tasks = [DailyTask(title: "Tarea conservada", hour: 10, minute: 0)]
-        model.settings.notes = [PetNote(title: "Nota conservada", body: "Seis compañeros", createdAt: Date(), updatedAt: Date())]
+        model.settings.notes = [PetNote(title: "Nota conservada", body: "Catálogo de compañeros", createdAt: Date(), updatedAt: Date())]
         model.startFocus(minutes: 10); model.pauseOrResumeFocus()
         let tasks = model.settings.tasks, notes = model.settings.notes, timerID = model.settings.focusTimer?.id
         var report: [String: Any] = [:]
@@ -576,13 +615,13 @@ final class BubblePanel: NSPanel {
             guard !remaining.isEmpty else {
                 self.characterReady = nil
                 report["dataPreserved"] = self.model.settings.tasks == tasks && self.model.settings.notes == notes && self.model.settings.focusTimer?.id == timerID
-                report["sixModelsBundled"] = PetCharacter.allCases.count == 6 && PetCharacter.allCases.allSatisfy { $0.isAvailable() }
+                report["allModelsBundled"] = PetCharacter.allCases.count == 9 && PetCharacter.allCases.allSatisfy { $0.isAvailable() }
                 self.petView.focusTimer = nil
                 self.showQuickMenu(); self.selectQuickAction(.companions)
                 DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
                     if let view = self.quickMenu?.contentView { self.capturePreview(view, name: "pokedesk-quick-menu") }
                     if let view = self.quickDetail?.contentView { self.capturePreview(view, name: "pokedesk-companions") }
-                    report["six3DThumbnailsBundled"] = PetCharacter.allCases.allSatisfy { Bundle.main.url(forResource: $0.thumbnailResource, withExtension: "png") != nil }
+                    report["all3DThumbnailsBundled"] = PetCharacter.allCases.allSatisfy { Bundle.main.url(forResource: $0.thumbnailResource, withExtension: "png") != nil }
                     report["quickSelectorVisible"] = self.quickState.selected == .companions && self.quickDetail?.isVisible == true
                     report["quickSelectorSelection"] = self.quickState.selected?.rawValue ?? "none"
                     report["quickSelectorPanelVisible"] = self.quickDetail?.isVisible == true
@@ -598,16 +637,15 @@ final class BubblePanel: NSPanel {
                 self.petView.focusTimer = nil; self.petView.setYaw(0)
                 self.petView.preview(.idle, at: 0)
                 self.capturePreview(self.petView, name: character.rawValue+"-preview")
-                self.petView.preview(.idle, at: 3)
+                report[character.rawValue+"Blink"] = self.verifyRosterBlink(character)
                 self.capturePreview(self.petView, name: character.rawValue+"-blink-preview")
-                report[character.rawValue+"Blink"] = (self.petView.node(character.name+"EyesClosed")?.presentation.scale.x ?? 0) > 0.9
                 report[character.rawValue+"Joints"] = self.petView.engine.jointCount == character.expectedJoints
                 var clipped = [String](), moving = [String]()
                 for clip in character.clips {
                     self.petView.preview(clip, at: 0); let before = self.petView.snapshot().tiffRepresentation
                     self.petView.preview(clip, at: clip.duration*0.4)
                     if before != self.petView.snapshot().tiffRepresentation { moving.append(clip.rawValue) }
-                    if character == .lucario || character == .gengar {
+                    if [PetCharacter.lucario, .gengar, .bulbasaur, .dragonite, .eevee].contains(character) {
                         self.capturePreview(self.petView, name: character.rawValue+"-3d-"+clip.rawValue)
                     }
                     for angle in stride(from: 0.0, to: .pi*2, by: .pi/4) {
@@ -622,7 +660,7 @@ final class BubblePanel: NSPanel {
                 report[character.rawValue+"AllClipsMove"] = moving.count == character.clips.count
                 report[character.rawValue+"RotationFits"] = clipped.isEmpty
                 report[character.rawValue+"ClippedSamples"] = clipped
-                self.captureCharacterAnimation(character == .charizard || character == .gengar ? .happyTail : .greeting, name: character.rawValue+"-demo")
+                self.captureCharacterAnimation(character == .charizard || character == .gengar || character == .dragonite ? .happyTail : .greeting, name: character.rawValue+"-demo")
                 if character == .lucario { self.captureCharacterAnimation(.idle, name: "lucario-reposo") }
                 self.characterReady = nil
                 self.petView.engine.cancelSummoning()

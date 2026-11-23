@@ -1,0 +1,913 @@
+{
+  "bytes": 5675848,
+  "sha256": "becaa8098e26676837dd2f19589a16c774e46b433118b9d911cc7876abbe36b8",
+  "asset": {
+    "generator": "glTF-Transform v4.3.0",
+    "version": "2.0",
+    "extras": {
+      "author": "Mariokart07 (https://sketchfab.com/Mariokart07)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/dragonite-official-874c7fcdbd344c7bb9e8ed3e6a04dfac",
+      "title": "Dragonite (Official)"
+    }
+  },
+  "extensionsUsed": [
+    "EXT_texture_webp",
+    "KHR_draco_mesh_compression",
+    "KHR_materials_unlit"
+  ],
+  "extensionsRequired": [
+    "EXT_texture_webp",
+    "KHR_draco_mesh_compression"
+  ],
+  "joints": 80,
+  "meshes": [
+    {
+      "name": "Object_0",
+      "materials": [
+        "body_a"
+      ]
+    },
+    {
+      "name": "Object_1",
+      "materials": [
+        "body_b"
+      ]
+    },
+    {
+      "name": "Object_2",
+      "materials": [
+        "l_eye"
+      ]
+    },
+    {
+      "name": "Object_3",
+      "materials": [
+        "l_eye"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "index": 0,
+      "name": "GLTF_created_0_rootJoint",
+      "children": [
+        5
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Object_7",
+      "children": []
+    },
+    {
+      "index": 2,
+      "name": "Object_8",
+      "children": []
+    },
+    {
+      "index": 3,
+      "name": "Object_10",
+      "children": []
+    },
+    {
+      "index": 4,
+      "name": "Object_11",
+      "children": []
+    },
+    {
+      "index": 5,
+      "name": "pm0149_00_00_78",
+      "children": [
+        6,
+        74
+      ]
+    },
+    {
+      "index": 6,
+      "name": "origin_67",
+      "children": [
+        7
+      ]
+    },
+    {
+      "index": 7,
+      "name": "waist_66",
+      "children": [
+        8,
+        53
+      ]
+    },
+    {
+      "index": 8,
+      "name": "spine_01_44",
+      "children": [
+        9
+      ]
+    },
+    {
+      "index": 9,
+      "name": "spine_02_43",
+      "children": [
+        10,
+        29,
+        36,
+        43,
+        48
+      ]
+    },
+    {
+      "index": 10,
+      "name": "neck_18",
+      "children": [
+        11
+      ]
+    },
+    {
+      "index": 11,
+      "name": "head_17",
+      "children": [
+        12,
+        14,
+        16,
+        18,
+        20,
+        21,
+        24,
+        27,
+        28
+      ]
+    },
+    {
+      "index": 12,
+      "name": "left_upper_eyelid_01_1",
+      "children": [
+        13
+      ]
+    },
+    {
+      "index": 13,
+      "name": "left_upper_eyelid_02_0",
+      "children": []
+    },
+    {
+      "index": 14,
+      "name": "left_lower_eyelid_01_3",
+      "children": [
+        15
+      ]
+    },
+    {
+      "index": 15,
+      "name": "left_lower_eyelid_02_2",
+      "children": []
+    },
+    {
+      "index": 16,
+      "name": "right_upper_eyelid_01_5",
+      "children": [
+        17
+      ]
+    },
+    {
+      "index": 17,
+      "name": "right_upper_eyelid_02_4",
+      "children": []
+    },
+    {
+      "index": 18,
+      "name": "right_lower_eyelid_01_7",
+      "children": [
+        19
+      ]
+    },
+    {
+      "index": 19,
+      "name": "right_lower_eyelid_02_6",
+      "children": []
+    },
+    {
+      "index": 20,
+      "name": "jaw_8",
+      "children": []
+    },
+    {
+      "index": 21,
+      "name": "left_feeler_01_11",
+      "children": [
+        22
+      ]
+    },
+    {
+      "index": 22,
+      "name": "left_feeler_02_10",
+      "children": [
+        23
+      ]
+    },
+    {
+      "index": 23,
+      "name": "left_feeler_03_9",
+      "children": []
+    },
+    {
+      "index": 24,
+      "name": "right_feeler_01_14",
+      "children": [
+        25
+      ]
+    },
+    {
+      "index": 25,
+      "name": "right_feeler_02_13",
+      "children": [
+        26
+      ]
+    },
+    {
+      "index": 26,
+      "name": "right_feeler_03_12",
+      "children": []
+    },
+    {
+      "index": 27,
+      "name": "pointlight1_15",
+      "children": []
+    },
+    {
+      "index": 28,
+      "name": "pointlight2_16",
+      "children": []
+    },
+    {
+      "index": 29,
+      "name": "left_shoulder_25",
+      "children": [
+        30
+      ]
+    },
+    {
+      "index": 30,
+      "name": "left_arm_01_24",
+      "children": [
+        31
+      ]
+    },
+    {
+      "index": 31,
+      "name": "left_arm_02_23",
+      "children": [
+        32
+      ]
+    },
+    {
+      "index": 32,
+      "name": "left_hand_22",
+      "children": [
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "index": 33,
+      "name": "left_middle_19",
+      "children": []
+    },
+    {
+      "index": 34,
+      "name": "left_ring_20",
+      "children": []
+    },
+    {
+      "index": 35,
+      "name": "left_index_21",
+      "children": []
+    },
+    {
+      "index": 36,
+      "name": "right_shoulder_32",
+      "children": [
+        37
+      ]
+    },
+    {
+      "index": 37,
+      "name": "right_arm_01_31",
+      "children": [
+        38
+      ]
+    },
+    {
+      "index": 38,
+      "name": "right_arm_02_30",
+      "children": [
+        39
+      ]
+    },
+    {
+      "index": 39,
+      "name": "right_hand_29",
+      "children": [
+        40,
+        41,
+        42
+      ]
+    },
+    {
+      "index": 40,
+      "name": "right_middle_26",
+      "children": []
+    },
+    {
+      "index": 41,
+      "name": "right_ring_27",
+      "children": []
+    },
+    {
+      "index": 42,
+      "name": "right_index_28",
+      "children": []
+    },
+    {
+      "index": 43,
+      "name": "left_wing_01_37",
+      "children": [
+        44
+      ]
+    },
+    {
+      "index": 44,
+      "name": "left_wing_02_36",
+      "children": [
+        45
+      ]
+    },
+    {
+      "index": 45,
+      "name": "left_wing_03_35",
+      "children": [
+        46
+      ]
+    },
+    {
+      "index": 46,
+      "name": "left_wing_04_34",
+      "children": [
+        47
+      ]
+    },
+    {
+      "index": 47,
+      "name": "left_wing_05_33",
+      "children": []
+    },
+    {
+      "index": 48,
+      "name": "right_wing_01_42",
+      "children": [
+        49
+      ]
+    },
+    {
+      "index": 49,
+      "name": "right_wing_02_41",
+      "children": [
+        50
+      ]
+    },
+    {
+      "index": 50,
+      "name": "right_wing_03_40",
+      "children": [
+        51
+      ]
+    },
+    {
+      "index": 51,
+      "name": "right_wing_04_39",
+      "children": [
+        52
+      ]
+    },
+    {
+      "index": 52,
+      "name": "right_wing_05_38",
+      "children": []
+    },
+    {
+      "index": 53,
+      "name": "hips_65",
+      "children": [
+        54,
+        60,
+        67
+      ]
+    },
+    {
+      "index": 54,
+      "name": "tail_01_50",
+      "children": [
+        55
+      ]
+    },
+    {
+      "index": 55,
+      "name": "tail_02_49",
+      "children": [
+        56
+      ]
+    },
+    {
+      "index": 56,
+      "name": "tail_03_48",
+      "children": [
+        57
+      ]
+    },
+    {
+      "index": 57,
+      "name": "tail_04_47",
+      "children": [
+        58
+      ]
+    },
+    {
+      "index": 58,
+      "name": "tail_05_46",
+      "children": [
+        59
+      ]
+    },
+    {
+      "index": 59,
+      "name": "tail_06_45",
+      "children": []
+    },
+    {
+      "index": 60,
+      "name": "left_leg_01_57",
+      "children": [
+        61
+      ]
+    },
+    {
+      "index": 61,
+      "name": "left_leg_02_56",
+      "children": [
+        62
+      ]
+    },
+    {
+      "index": 62,
+      "name": "left_foot_55",
+      "children": [
+        63
+      ]
+    },
+    {
+      "index": 63,
+      "name": "left_toe_54",
+      "children": [
+        64,
+        65,
+        66
+      ]
+    },
+    {
+      "index": 64,
+      "name": "left_foot_middle_51",
+      "children": []
+    },
+    {
+      "index": 65,
+      "name": "left_foot_index_52",
+      "children": []
+    },
+    {
+      "index": 66,
+      "name": "left_foot_ring_53",
+      "children": []
+    },
+    {
+      "index": 67,
+      "name": "right_leg_01_64",
+      "children": [
+        68
+      ]
+    },
+    {
+      "index": 68,
+      "name": "right_leg_02_63",
+      "children": [
+        69
+      ]
+    },
+    {
+      "index": 69,
+      "name": "right_foot_62",
+      "children": [
+        70
+      ]
+    },
+    {
+      "index": 70,
+      "name": "right_toe_61",
+      "children": [
+        71,
+        72,
+        73
+      ]
+    },
+    {
+      "index": 71,
+      "name": "right_foot_middle_58",
+      "children": []
+    },
+    {
+      "index": 72,
+      "name": "right_foot_index_59",
+      "children": []
+    },
+    {
+      "index": 73,
+      "name": "right_foot_ring_60",
+      "children": []
+    },
+    {
+      "index": 74,
+      "name": "lod_group_77",
+      "children": [
+        75,
+        78,
+        81
+      ]
+    },
+    {
+      "index": 75,
+      "name": "lod0_70",
+      "children": [
+        76,
+        77
+      ]
+    },
+    {
+      "index": 76,
+      "name": "pm0149_00_00_body_mesh_68",
+      "children": []
+    },
+    {
+      "index": 77,
+      "name": "pm0149_00_00_eye_mesh_69",
+      "children": []
+    },
+    {
+      "index": 78,
+      "name": "lod1_73",
+      "children": [
+        79,
+        80
+      ]
+    },
+    {
+      "index": 79,
+      "name": "pm0149_00_00_eye_mesh_lod1_71",
+      "children": []
+    },
+    {
+      "index": 80,
+      "name": "pm0149_00_00_body_mesh_lod1_72",
+      "children": []
+    },
+    {
+      "index": 81,
+      "name": "lod2_76",
+      "children": [
+        82,
+        83
+      ]
+    },
+    {
+      "index": 82,
+      "name": "pm0149_00_00_eye_mesh_lod2_74",
+      "children": []
+    },
+    {
+      "index": 83,
+      "name": "pm0149_00_00_body_mesh_lod2_75",
+      "children": []
+    }
+  ],
+  "animations": [
+    {
+      "name": "pm0149_00_00_00000_defaultwait01_loop",
+      "channels": 200,
+      "duration": 2.5166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00010_defaultidle01",
+      "channels": 198,
+      "duration": 3.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00021_turn_r090",
+      "channels": 201,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00024_turn_l090",
+      "channels": 198,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00030_walk01_loop",
+      "channels": 201,
+      "duration": 1.5833333730697632
+    },
+    {
+      "name": "pm0149_00_00_00100_run01_loop",
+      "channels": 198,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_00150_jumpup01_start",
+      "channels": 201,
+      "duration": 0.11666666716337204
+    },
+    {
+      "name": "pm0149_00_00_00151_jumpup01_loop",
+      "channels": 201,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_00152_jumpdown01_start",
+      "channels": 201,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_00153_jumpdown01_loop",
+      "channels": 197,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_00155_land02",
+      "channels": 202,
+      "duration": 0.7166666388511658
+    },
+    {
+      "name": "pm0149_00_00_00270_rest01_start",
+      "channels": 199,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00271_rest01_loop",
+      "channels": 196,
+      "duration": 2.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00272_rest01_end",
+      "channels": 197,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_00280_sleep01_start",
+      "channels": 193,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_00281_sleep01_loop",
+      "channels": 199,
+      "duration": 2.683333396911621
+    },
+    {
+      "name": "pm0149_00_00_00282_sleep01_end",
+      "channels": 201,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_00290_eat01_start",
+      "channels": 202,
+      "duration": 0.3499999940395355
+    },
+    {
+      "name": "pm0149_00_00_00291_eat01_loop",
+      "channels": 201,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_00292_eat01_end",
+      "channels": 201,
+      "duration": 0.8500000238418579
+    },
+    {
+      "name": "pm0149_00_00_00293_eat02_start",
+      "channels": 199,
+      "duration": 1.1833332777023315
+    },
+    {
+      "name": "pm0149_00_00_00294_eat02_loop",
+      "channels": 200,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_00295_eat02_end",
+      "channels": 201,
+      "duration": 0.8500000238418579
+    },
+    {
+      "name": "pm0149_00_00_00300_roar01",
+      "channels": 201,
+      "duration": 2.683333396911621
+    },
+    {
+      "name": "pm0149_00_00_00320_refresh01",
+      "channels": 200,
+      "duration": 2.3499999046325684
+    },
+    {
+      "name": "pm0149_00_00_00550_glad01",
+      "channels": 199,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_00560_notice01",
+      "channels": 195,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_00563_hate01",
+      "channels": 200,
+      "duration": 2.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20000_defaultwait01_loop",
+      "channels": 203,
+      "duration": 1.5166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20001_battlewait01_loop",
+      "channels": 201,
+      "duration": 1.5166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20010_defaultidle01",
+      "channels": 198,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_20011_defaultidle02",
+      "channels": 200,
+      "duration": 2.183333396911621
+    },
+    {
+      "name": "pm0149_00_00_20021_turn_r090",
+      "channels": 199,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20024_turn_l090",
+      "channels": 201,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20030_walk01_loop",
+      "channels": 203,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20100_run01_loop",
+      "channels": 199,
+      "duration": 0.8500000238418579
+    },
+    {
+      "name": "pm0149_00_00_20145_stepout01_start",
+      "channels": 202,
+      "duration": 0.11666666716337204
+    },
+    {
+      "name": "pm0149_00_00_20146_stepout01",
+      "channels": 201,
+      "duration": 0.25
+    },
+    {
+      "name": "pm0149_00_00_20147_stepout01_end",
+      "channels": 198,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20150_jumpup01_start",
+      "channels": 201,
+      "duration": 0.11666666716337204
+    },
+    {
+      "name": "pm0149_00_00_20151_jumpup01_loop",
+      "channels": 200,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_20152_jumpdown01_start",
+      "channels": 201,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_20153_jumpdown01_loop",
+      "channels": 198,
+      "duration": 0.4166666567325592
+    },
+    {
+      "name": "pm0149_00_00_20155_land02",
+      "channels": 200,
+      "duration": 0.7166666388511658
+    },
+    {
+      "name": "pm0149_00_00_20300_roar01",
+      "channels": 199,
+      "duration": 2.683333396911621
+    },
+    {
+      "name": "pm0149_00_00_20400_attack01",
+      "channels": 200,
+      "duration": 2.183333396911621
+    },
+    {
+      "name": "pm0149_00_00_20410_attack02",
+      "channels": 202,
+      "duration": 2.5166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20450_rangeattack01",
+      "channels": 199,
+      "duration": 2.7166666984558105
+    },
+    {
+      "name": "pm0149_00_00_20460_rangeattack02_start",
+      "channels": 200,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_20461_rangeattack02_loop",
+      "channels": 201,
+      "duration": 0.6499999761581421
+    },
+    {
+      "name": "pm0149_00_00_20462_rangeattack02_end",
+      "channels": 200,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20500_damage01",
+      "channels": 202,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_20501_damage02",
+      "channels": 202,
+      "duration": 1.1833332777023315
+    },
+    {
+      "name": "pm0149_00_00_20510_stun01_start",
+      "channels": 202,
+      "duration": 0.6833333373069763
+    },
+    {
+      "name": "pm0149_00_00_20511_stun01_loop",
+      "channels": 201,
+      "duration": 2.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20512_stun01_end",
+      "channels": 202,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20520_down01_start",
+      "channels": 200,
+      "duration": 2.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20521_down01_loop",
+      "channels": 198,
+      "duration": 2.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20522_down01_end",
+      "channels": 199,
+      "duration": 1.0166666507720947
+    },
+    {
+      "name": "pm0149_00_00_20560_notice01",
+      "channels": 201,
+      "duration": 1.6833332777023315
+    },
+    {
+      "name": "pm0149_00_00_28000_eye01",
+      "channels": 42,
+      "duration": 0.3499999940395355
+    },
+    {
+      "name": "pm0149_00_00_28100_mouth01",
+      "channels": 27,
+      "duration": 0.3499999940395355
+    }
+  ]
+}

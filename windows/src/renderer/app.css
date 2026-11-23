@@ -96,7 +96,13 @@ input,textarea,select{border:1px solid var(--line);background:#fff;border-radius
 .arc-switch{display:flex;align-items:center;justify-content:center;gap:7px;left:190px;top:130px;width:169px;height:31px;border:0;border-radius:20px;background:#fff;color:var(--red);font-size:11px;font-weight:500;box-shadow:0 4px 13px #252a3610;padding:4px 9px}.arc-switch .orbit-icon{width:15px;height:15px;position:static;inset:auto}.arc-close{background:#fff;color:var(--muted);border:0;box-shadow:0 3px 9px #252a360b;top:166px;left:262px;width:25px;height:25px;padding:5px}.arc-close .orbit-icon{width:14px;height:14px;position:static;inset:auto}.pet-badge{background:#fff;border:0;font-weight:500;color:var(--red);box-shadow:0 5px 13px #252a3615;padding:5px 12px}.detail .header{border-bottom:1px solid var(--line)}.detail .header h1{font-size:15px}.notice-panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px 19px;box-shadow:0 7px 24px #252a3615}.error{border:0;border-radius:11px;background:#fff0ed;color:#8c392e;line-height:1.6}.roster .selected{border:1px solid var(--red);padding:10px;background:var(--accent-soft)}
 @media(prefers-reduced-motion:reduce){button,.arc-symbol{transition:none}button:hover,.arc-button:hover .arc-symbol,button:active,.arc-button:active .arc-symbol{transform:none}}
 
-/* Six companions remain visible in both the full and compact selector. */
+/* The nine companions use three readable columns in each chooser. */
 .roster{grid-template-columns:repeat(3,minmax(0,1fr))}.roster img{height:82px}.roster .tile{min-width:0}.roster .tile b{font-size:12px}.roster .tile span{font-size:10px;line-height:1.3}
 
 .detail .roster-section{gap:12px}.detail .roster-title{font-size:18px}.detail .roster-description{display:none}.detail .roster img{height:56px}.detail .roster .tile span{display:none}
+
+:root[data-character=bulbasaur]{--red:#307357;--red-dark:#235840;--accent-soft:#e8f7e8;--hover:#e8f7e8;--gold:#a8d48c;--blue:#397d70}
+.detail .roster{grid-template-columns:repeat(3,minmax(0,1fr))}.detail .roster .tile{padding:8px}.detail .roster .tile b{font-size:11px}
+
+:root[data-character=dragonite]{--red:#a85c21;--red-dark:#804417;--accent-soft:#fff2de;--hover:#fff2de;--gold:#85bf9c;--blue:#387b5e}
+:root[data-character=eevee]{--red:#785238;--red-dark:#573c29;--accent-soft:#f7f0e0;--hover:#f7f0e0;--gold:#e8cf9e;--blue:#785238}

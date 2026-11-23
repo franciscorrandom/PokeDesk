@@ -125,7 +125,8 @@ final class Arcanine3DScene {
         let box = modelRoot.boundingBox
         guard box.max.y > box.min.y else { fail("El modelo 3D no tiene una altura válida."); return }
         let footprint = hypot(box.max.x - box.min.x, box.max.z - box.min.z)
-        let scale = requested == .charizard ? min(2.2 / (box.max.y - box.min.y), 4.6 / max(0.01, footprint)) : 2.2 / (box.max.y - box.min.y)
+        let limitFootprint = [PetCharacter.charizard, .dragonite, .eevee].contains(requested)
+        let scale = limitFootprint ? min(2.2 / (box.max.y - box.min.y), 4.6 / max(0.01, footprint)) : 2.2 / (box.max.y - box.min.y)
         let placement = SCNNode()
         placement.scale = SCNVector3(scale, scale, scale)
         placement.position = SCNVector3(-(box.max.x + box.min.x) * scale / 2, -box.min.y * scale, -(box.max.z + box.min.z) * scale / 2)

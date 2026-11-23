@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
-CHARACTERS = ['arcanine', 'mewtwo', 'pikachu', 'charizard', 'lucario', 'gengar']
+CHARACTERS = ['arcanine', 'mewtwo', 'pikachu', 'charizard', 'lucario', 'gengar', 'bulbasaur', 'dragonite', 'eevee']
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--character', choices=CHARACTERS, action='append')
 parser.add_argument('--source-dir', type=Path, default=ROOT/'dist')

@@ -84,3 +84,39 @@ Agenda, tareas, notas, timer, voz y orientación se conservan al cambiar.
 
 La revisión se prepara en el repositorio y sus artefactos de prueba. Actualizar
 Guía Estudio requiere una petición explícita de Francisco.
+
+## PokéDesk 1.7.0: Dragonite y Eevee
+
+El catálogo incorpora a Dragonite (#149, Dragón/Volador) y Eevee (#133, Normal)
+y conserva a los siete compañeros anteriores, incluido Bulbasaur. Los nueve
+personajes se eligen en una cuadrícula de tres columnas. Dragonite usa naranja
+y verde suave; Eevee usa marrón y crema. El menú, los paneles, los avisos y el
+timer comparten la paleta del personaje seleccionado.
+
+Dragonite conserva sus 80 articulaciones y el parpadeo real de sus párpados.
+Eevee conserva sus 69 articulaciones, mueve orejas y cola y usa expresiones
+del atlas original. Cada uno incluye nueve gestos, con los mismos identificadores
+que los recordatorios y timers existentes. Los originales, fuentes, licencias
+y pasos de preparación se conservan en `Models/Dragonite` y `Models/Eevee`.
+Los recursos completos quedan embebidos en la app; la preparación no se ejecuta
+en el equipo del usuario.
+
+La versión se prepara para prueba local. No modifica automáticamente las
+descargas públicas ni el sitio de GuíaEstudio.
+
+## PokéDesk 1.7.1: Eevee de referencia
+
+Eevee utiliza el modelo de nguyenlouis32 identificado por el UID
+`e93d3b389ea04c9ca8e532b7471a1cb0`. Su original contiene 57 articulaciones,
+tres mallas y tres imágenes PNG. Se conserva su postura erguida y su café claro:
+no se recolorean imágenes ni se inclina la escena para ocultar la postura.
+Las patas delanteras quedan visibles por debajo del pecho y la mirada se
+orienta al frente. Los nueve gestos se preparan sobre ese rig y el atlas
+original; los apoyos permanecen anclados durante los gestos de cabeza y cola.
+
+La revisión conserva el identificador `eevee`, la orientación guardada, el
+perfil y el catálogo de nueve compañeros. Las pruebas numéricas comprueban
+mirada, extensión de las patas delanteras, longitudes, contacto con el suelo,
+parpadeos y continuidad. El helper `scripts/preview-companion.swift` permite
+inspeccionar frente, perfil, tres cuartos y un instante de cualquier clip con
+la misma cámara y luz de la app, sin acceder a calendarios o perfiles reales.
