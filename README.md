@@ -1,8 +1,8 @@
 # PokéDesk · compañeros de escritorio para Mac
 
-Mascota 3D flotante con Arcanine, Mewtwo, Pikachu, Charizard, Lucario y Gengar, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
+Mascota 3D flotante con Arcanine, Mewtwo, Pikachu, Charizard, Lucario, Gengar, Bulbasaur, Dragonite y Eevee, animaciones articuladas, agenda de Google Calendar por iCal, tareas locales, notas con historial y timers de concentración. Aplicación nativa de macOS: Swift, AppKit, SwiftUI y SceneKit. No necesita Google Cloud, JSON OAuth ni servicios de pago para funcionar.
 
-La versión 1.5.2 añade un giro frontal muy lento, de ida y vuelta, que puedes desactivar en Ajustes. La publicación de esta versión en Releases y Guía Estudio fue solicitada expresamente por Francisco.
+La versión 1.7.1 incorpora el Eevee de nguyenlouis32, con postura erguida y café claro. Incluye nueve compañeros en Mac y en la beta 1.7.1-beta.1 de Windows.
 
 ## Instalar
 
@@ -33,7 +33,7 @@ La conexión es de lectura: crea o cambia reuniones desde Google Calendar. Las t
 - **Arrastrar:** mover a otra parte del escritorio.
 - **⌥ Option + arrastrar:** rotación horizontal para ver otros perfiles.
 - **⇧ Mayús + arrastrar:** acariciar; también puedes elegir Acariciar en el menú.
-- **Compañero:** elige entre los seis Pokémon desde el acceso **Cambiar Pokémon** del menú flotante, la fila de miniaturas del panel, la barra de menús o Ajustes → Tu compañero. El menú, los avisos y el timer adoptan sus colores. Se conservan agenda, tareas, notas y orientación de cada personaje.
+- **Compañero:** elige entre los nueve Pokémon desde el acceso **Cambiar Pokémon** del menú flotante, la fila de miniaturas del panel, la barra de menús o Ajustes → Tu compañero. El menú, los avisos y el timer adoptan sus colores. Se conservan agenda, tareas, notas y orientación de cada personaje.
 - **Pokébolas 3D:** al abrir o volver a abrir la app, una Pokébola se abre y materializa al compañero con un núcleo blanco y un halo azul intenso. Al cambiar de personaje, otra lo recoge con luz roja antes de liberar al nuevo. Tapa articulada, halo, haz y destellos sobre fondo transparente. La secuencia espera a que el visor termine de preparar sus recursos. También puedes elegir **Repetir salida de la Pokébola** en Ajustes o la barra de menús. Se omite cuando desactivas el movimiento o macOS tiene activado Reducir movimiento.
 - **Animaciones:** once gestos de Arcanine y nueve para cada uno de los otros compañeros, incluidos parpadeos, saludo, caricias, movimiento de cola y meditación.
 - **Agenda:** avisos anticipados configurables y botón para entrar cuando el evento contiene un enlace compatible de Google Meet, Zoom, Teams o Webex.
@@ -56,7 +56,7 @@ Esta edición usa un identificador y un perfil separados de la versión anterior
 
 ### Primera beta de Windows
 
-La edición **PokéDesk 1.5.2-beta.2 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos seis modelos y 56 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
+La edición **PokéDesk 1.7.1-beta.1 para Windows x64** se desarrolla en [`windows/`](windows/README.md), con los mismos nueve modelos y 83 clips, iCal, tareas propias, notas y foco. Usa Electron y Three.js y tiene su propio perfil de datos. Esta beta requiere validación en Windows antes de convertirse en descarga estable; la edición Mac utiliza SwiftUI y SceneKit de forma nativa. El workflow `Windows beta` genera instalador, ZIP y resultados de prueba nativa.
 
 Esta edición con iCal es la base del producto para futuras mejoras. El selector de mascotas y las animaciones de Mewtwo se documentan en [Personajes](docs/PERSONAJES.md).
 
@@ -67,7 +67,7 @@ Necesitas un Mac con herramientas de desarrollo de Apple y Swift 5.9 o posterior
 ./scripts/build-macos.sh
 ```
 
-El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.5.2-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
+El primer build descarga GLTFKit2 desde su repositorio oficial, fijado a un commit. Genera `dist/PokeDesk.app` y `dist/PokeDesk-1.7.1-macOS.zip`, firmados localmente. No se requiere Node para ejecutar ni compilar: ICAL.js está incluido y funciona dentro de JavaScriptCore.
 
 Para compilar solo una arquitectura: `ARCANINE_ARCHS=arm64 ./scripts/build-macos.sh`. Para usar un certificado ya instalado: `ARCANINE_SIGN_IDENTITY='Developer ID Application: …' ./scripts/build-macos.sh`. Consulta [Distribución](docs/DISTRIBUCION.md) para notarizar una futura versión.
 
@@ -117,3 +117,22 @@ Las cuatro prolongaciones negras de la cabeza ahora caen hacia abajo y atrás,
 con una curva suave y un balanceo discreto. Se mantienen sus uniones y longitudes
 y los nueve gestos parten de esa postura, sin volver a la extensión horizontal
 de la pose de origen. Se actualiza también su miniatura 3D.
+
+## Bulbasaur · preparación 1.6.0
+
+Modelo ligero de nguyenlouis32 con 72 articulaciones, nueve gestos y parpadeo. Su saludo eleva una pata mientras las otras sostienen el cuerpo; el descanso pliega las articulaciones y mantiene los apoyos. El bulbo acompaña los gestos. La biblioteca se regenera con `python3 scripts/animate-bulbasaur.py` (NumPy solo para desarrollo). Original y atribución: `Models/Bulbasaur/`.
+
+## Dragonite y Eevee · preparación 1.7.0
+
+Dos compañeros adicionales con nueve gestos cada uno. Dragonite mueve alas y
+cola y parpadea con sus párpados articulados. Eevee mueve orejas y cola, saluda
+con la pata y se acurruca. El selector muestra los nueve compañeros en tres
+filas; se conservan las tareas, notas, calendario, timer y orientación guardada.
+Los modelos originales, atribuciones y preparación reproducible están en
+`Models/Dragonite`, `Models/Eevee` y `scripts/prepare-*`.
+
+## Eevee de referencia · 1.7.1
+
+Eevee usa el modelo de nguyenlouis32, con cabeza erguida, patas delanteras
+visibles y su café claro original. Incluye nueve gestos y parpadeos. La revisión
+conserva los nueve compañeros, la configuración y los recursos de Dragonite.

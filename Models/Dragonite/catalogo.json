@@ -1,0 +1,108 @@
+{
+  "source": {
+    "author": "Mariokart07 (https://sketchfab.com/Mariokart07)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/dragonite-official-874c7fcdbd344c7bb9e8ed3e6a04dfac",
+    "title": "Dragonite (Official)",
+    "modifications": "Decoded Draco and WebP to portable float geometry and embedded PNG textures. Nine 30 Hz articulated clips resampled from the attributed source animations, with quaternion interpolation and smooth returns to a common standing pose, an asymmetric greeting and tail follow-through. The original eight eyelid bones animate real skinned eyelids; no expression marker meshes were added. Standing pose baked into indexed geometry and inverse binds rebuilt so static bounds match the skinned silhouette.",
+    "pokedeskBlink": {
+      "time": 3,
+      "nodes": {
+        "left_upper_eyelid_01_1": [
+          -0.6562913282027971,
+          0.33659916725433614,
+          -0.57039468818391,
+          0.36143131134570483
+        ],
+        "left_lower_eyelid_01_3": [
+          0.37351157714036576,
+          -0.5437885741190677,
+          -0.3232247484056167,
+          0.6784606476559962
+        ],
+        "right_upper_eyelid_01_5": [
+          0.6562915072317791,
+          0.33659903325418983,
+          0.5703945989638028,
+          0.3614312518594748
+        ],
+        "right_lower_eyelid_01_7": [
+          -0.3735117274373561,
+          -0.5437888144089669,
+          0.323224540901629,
+          0.6784604711767543
+        ]
+      }
+    },
+    "pokedeskBindPose": {
+      "min": [
+        -0.9544325470924377,
+        -0.0013434449210763648,
+        -2.032766342163086
+      ],
+      "max": [
+        0.9273382425308228,
+        2.2764835357666016,
+        0.4977467060089108
+      ],
+      "method": "Standing vertices and normals baked with original weights; inverse binds rebuilt for the same standing joint transforms."
+    }
+  },
+  "joints": 80,
+  "clips": [
+    {
+      "id": "reposo",
+      "duration": 8,
+      "channels": 79,
+      "source": "00000_defaultwait01_loop"
+    },
+    {
+      "id": "curiosidad",
+      "duration": 4,
+      "channels": 78,
+      "source": "00010_defaultidle01"
+    },
+    {
+      "id": "saludo",
+      "duration": 4,
+      "channels": 33,
+      "source": "00560_notice01"
+    },
+    {
+      "id": "cola-alegre",
+      "duration": 4.8,
+      "channels": 79,
+      "source": "00000_defaultwait01_loop"
+    },
+    {
+      "id": "estiramiento",
+      "duration": 5,
+      "channels": 86,
+      "source": "00320_refresh01"
+    },
+    {
+      "id": "aviso-reunion",
+      "duration": 4,
+      "channels": 72,
+      "source": "00560_notice01"
+    },
+    {
+      "id": "celebracion",
+      "duration": 3.6,
+      "channels": 91,
+      "source": "00550_glad01"
+    },
+    {
+      "id": "caricias",
+      "duration": 5.6,
+      "channels": 23,
+      "source": "00271_rest01_loop"
+    },
+    {
+      "id": "sentarse",
+      "duration": 7.2,
+      "channels": 107,
+      "source": "rest start, loop and end"
+    }
+  ]
+}

@@ -49,7 +49,7 @@ function placeMenus() {
   const arc = { x: b.x + local.x*k, y: b.y + local.y*k, width: local.width*k, height: local.height*k };
   const detail = panelFull?null:windows.get('dashboard');
   if (detail) {
-    const height = Math.min(438,a.height-16), width = Math.min(370,a.width-16);
+    const height = Math.min(section === 'characters' ? 520 : 438,a.height-16), width = Math.min(370,a.width-16);
     let y = arc.y - height - 10, x = b.x + (body.left + body.right) / 2 - width / 2;
     if (y < a.y + 8) { y = Math.max(a.y + 8, b.y + body.top - 110); x = b.x + body.left - width - 12; if (x < a.x) x = b.x + body.right + 12; }
     detail.setBounds(clampWindow({ x, y, width, height }, { workArea: a }));
@@ -140,7 +140,7 @@ async function showSection(value, full = false) {
   const sections = ['home', 'agenda', 'tasks', 'focus', 'animations', 'notes', 'settings', 'characters'];
   if (!sections.includes(value)) throw new Error('Sección desconocida.');
   section = value; panelFull=full;
-  const win = createWindow('dashboard', full ? 440 : 370, full ? 742 : 438);
+  const win = createWindow('dashboard', full ? 440 : 370, full ? 742 : section === 'characters' ? 520 : 438);
   if (full) {
     closeMenus();
     const a = screen.getPrimaryDisplay().workArea;
@@ -327,13 +327,18 @@ async function runSmoke() {
   for(const c of CHARACTERS) {
     if(c.id!==store.state.settings.character) {await execute('character',{id:c.id});await sleep(1000);await capture(c.id+'-pokeball');}
     const info=await waitReady(c.id);if(c.id==='arcanine'&&!info.reducedMotion&&!info.phases?.some(p=>p.id==='release'&&p.animated))throw new Error('No se reprodujo la Pokébola inicial: '+JSON.stringify({info,renderer:await js('window.petDiagnostics?.info()'),document:await js('({hidden:document.hidden,visibility:document.visibilityState})'),settings:store.state.settings,motion:{enabled:motion.enabled},shown:pet.isVisible()}));if(info.clips!==c.clips.length)throw new Error('Clips incompletos de '+c.id);
+    const contract=await js('window.petDiagnostics.animationContract()');
+    const expectedJoints={dragonite:80,eevee:57}[c.id];
+    if(expectedJoints&&contract.joints!==expectedJoints)throw new Error('Rig incorrecto de '+c.id+': '+contract.joints+' articulaciones');
+    if(contract.closures.length!==c.clips.length||contract.closures.some(clip=>!clip.seamless))throw new Error('Cierre de animación inválido de '+c.id);
+    if(c.id==='eevee'&&['Open','Half','Closed'].some(label=>!contract.eyes?.[label]||contract.eyes[label].some(value=>Math.abs(value-(label==='Closed'?1:0))>.001)))throw new Error('El parpadeo de Eevee no cerró los ojos a los tres segundos.');
     for(const clip of c.clips){const sample=await js('window.petDiagnostics.sample('+JSON.stringify(clip.id)+')');if(!sample.finite||!sample.changes)throw new Error('Animación inválida '+c.id+'/'+clip.id);}
     const rotation=await js('window.petDiagnostics.rotation()');if(!rotation.hit||!rotation.emptyMiss||!rotation.alpha||!rotation.horizontalOnly)throw new Error('Falló el perfil/transparencia de '+c.id+': '+JSON.stringify({rotation,info:await js('window.petDiagnostics.info()')}));
     const profiles=await js('window.petDiagnostics.profiles()');if(profiles.clipped.length)throw new Error('Recorte '+c.id+': '+JSON.stringify(profiles.clipped.slice(0,8)));
     await execute('toggleMenu');await sleep(300);const anchor=await js('window.petUIDiagnostics.attachments()');
     if(!anchor.sameWindow||anchor.menuGap<0||anchor.menuGap>30)throw new Error('Menú separado en '+c.id+': '+JSON.stringify(anchor));
     await capture(c.id+'-menu');closeMenus();
-    smokeResults.roster.push({info,rotation,profiles,anchor,memory:await js('window.petDiagnostics.info()')});
+    smokeResults.roster.push({info,contract,rotation,profiles,anchor,memory:await js('window.petDiagnostics.info()')});
   }
   await showSection('characters',false);await sleep(400);
   const chooser=windows.get('dashboard');

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PetCharacterChooser: View {
     @Environment(\.petTheme) private var theme
+    var compact = false
     let selected: PetCharacter
     let onSelect: (PetCharacter) -> Void
     var body: some View {
@@ -12,11 +13,11 @@ struct PetCharacterChooser: View {
                 Button { onSelect(character) } label: {
                     VStack(spacing: 5) {
                         if let url = Bundle.main.url(forResource: character.thumbnailResource, withExtension: "png"), let art = NSImage(contentsOf: url) {
-                            Image(nsImage: art).resizable().scaledToFit().frame(height: 64)
-                        } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: 64) }
-                        Text(character.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.85)
-                        Text(chosen ? "Tu compañero" : "Elegir").font(.system(size: 10, weight: .semibold))
-                    }.frame(maxWidth: .infinity).padding(10)
+                            Image(nsImage: art).resizable().scaledToFit().frame(height: compact ? 52 : 64)
+                        } else { Image(systemName: character.symbol).font(.system(size: 32)).frame(height: compact ? 52 : 64) }
+                        Text(character.name).font(.system(size: compact ? 12 : 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.85)
+                        Text(chosen ? (compact ? "Elegido" : "Tu compañero") : "Elegir").font(.system(size: 10, weight: .semibold)).lineLimit(1)
+                    }.frame(maxWidth: .infinity).padding(compact ? 7 : 10)
                         .foregroundStyle(chosen ? theme.red : theme.ink)
                         .background(chosen ? theme.red.opacity(0.09) : theme.card)
                         .clipShape(RoundedRectangle(cornerRadius: 12))

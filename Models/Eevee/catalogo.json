@@ -1,0 +1,71 @@
+{
+  "source": {
+    "author": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/eevee-e93d3b389ea04c9ca8e532b7471a1cb0",
+    "title": "Eevee",
+    "modifications": "Exact nguyenlouis32 Eevee reference retained: original natural upright pose, geometry, colors, skin weights and inverse binds. Nine articulated PokéDesk gestures with baked paw-contact IK, head-attached original open/half/closed eye atlas, ear twitches, tail sways, paw greeting, alternate front-paw celebration and relaxed crouch.",
+    "pokedeskBlink": {
+      "time": 3,
+      "method": "eye-atlas-scale-swaps",
+      "nodes": {
+        "Open": "EeveeEyesOpen",
+        "Half": "EeveeEyesHalf",
+        "Closed": "EeveeEyesClosed"
+      }
+    }
+  },
+  "joints": 57,
+  "clips": [
+    {
+      "id": "reposo",
+      "duration": 8,
+      "channels": 28
+    },
+    {
+      "id": "curiosidad",
+      "duration": 4,
+      "channels": 28
+    },
+    {
+      "id": "saludo",
+      "duration": 4,
+      "channels": 28
+    },
+    {
+      "id": "cola-alegre",
+      "duration": 4.8,
+      "channels": 28
+    },
+    {
+      "id": "estiramiento",
+      "duration": 5,
+      "channels": 28
+    },
+    {
+      "id": "aviso-reunion",
+      "duration": 4,
+      "channels": 28
+    },
+    {
+      "id": "celebracion",
+      "duration": 3.6,
+      "channels": 28
+    },
+    {
+      "id": "caricias",
+      "duration": 5.6,
+      "channels": 28
+    },
+    {
+      "id": "sentarse",
+      "duration": 7.2,
+      "channels": 28
+    }
+  ],
+  "expressions": {
+    "Open": 0,
+    "Half": -0.25,
+    "Closed": -0.5
+  }
+}

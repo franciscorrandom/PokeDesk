@@ -45,7 +45,7 @@ enum PetQuickAction: String, CaseIterable {
         case .companions: return 3
         }
     }
-    var detailHeight: Double { self == .companions ? 372 : self == .notes ? 400 : self == .animations ? 360 : self == .agenda ? 310 : 252 }
+    var detailHeight: Double { self == .companions ? 450 : self == .notes ? 400 : self == .animations ? 360 : self == .agenda ? 310 : 252 }
 }
 
 @MainActor final class PetQuickMenuState: ObservableObject {
@@ -163,7 +163,7 @@ struct PetQuickDetailView: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    if action == .companions { PetCharacterChooser(selected: model.settings.character, onSelect: onCharacter) }
+                    if action == .companions { PetCharacterChooser(compact: true, selected: model.settings.character, onSelect: onCharacter) }
                     if action == .agenda { agenda }
                     if action == .focus { focus }
                     if action == .animations { animations }

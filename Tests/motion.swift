@@ -99,7 +99,7 @@ for index in 0..<8 {
 psychic.request(.alert, at: 30_000)
 psychic.click(at: 30_001)
 check(psychic.clip == .alert, "Los avisos de reunión conservan prioridad con Mewtwo")
-for character in [PetCharacter.lucario, .gengar] {
+for character in [PetCharacter.lucario, .gengar, .bulbasaur, .dragonite, .eevee] {
     var newcomer = Arcanine3DMotion(character: character)
     for clip in character.clips {
         newcomer.request(clip, at: 0, manual: true)

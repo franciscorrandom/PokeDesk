@@ -56,7 +56,8 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
       model.traverse(n=>{if(n.isMesh){n.frustumCulled=false;const materials=Array.isArray(n.material)?n.material:[n.material];const fixed=materials.map(m=>id==='charizard'&&m.name.startsWith('CharizardFlame')?makeFire(m):m);n.material=Array.isArray(n.material)?fixed:fixed[0];}});
       model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
       if(!(size.y>0))throw new Error('El modelo 3D no tiene una altura válida.');
-      const scale=id==='charizard'?Math.min(2.2/size.y,4.6/Math.hypot(size.x,size.z)):2.2/size.y;
+      const limitFootprint=['charizard','dragonite','eevee'].includes(id);
+      const scale=limitFootprint?Math.min(2.2/size.y,4.6/Math.max(.01,Math.hypot(size.x,size.z))):2.2/size.y;
       const placement=new THREE.Group();placement.scale.setScalar(scale);placement.position.set(-center.x*scale,-box.min.y*scale-1.1,-center.z*scale);placement.add(model);
       const mixer=new THREE.AnimationMixer(model),actions=new Map(gltf.animations.map(a=>[a.name,mixer.clipAction(a)])),bones=[],meshes=[];
       model.traverse(n=>{if(n.isBone)bones.push(n);if(n.isMesh)meshes.push(n);});
@@ -149,6 +150,22 @@ export async function createPet(container,onShape=()=>{},settings={},onReady=()=
   cameraFor(settings.character);setYaw(settings.yaw??0);lastTime=performance.now();
   await setCharacter(settings.character??'arcanine');
   const diagnostic={
+    animationContract(){
+      const closures=[...current.actions].map(([id,action])=>({id,seamless:action.getClip().tracks.every(track=>{
+        const width=track.getValueSize(),values=track.values;
+        const first=Array.from(values.subarray(0,width)),last=values.subarray(values.length-width);
+        const seamless=track.ValueTypeName==='quaternion'?Math.abs(first.reduce((dot,value,i)=>dot+value*last[i],0))>.9999:first.every((value,i)=>Math.abs(value-last[i])<.0001);
+        return values.every(Number.isFinite)&&seamless;
+      })}));
+      let eyes=null;
+      if(current.id==='eevee'){
+        // Exercise the imported Three.js scale tracks, not just the GLB JSON.
+        current.mixer.stopAllAction();current.active=null;play('reposo',true);current.mixer.update(3);scene.updateMatrixWorld(true);
+        eyes=Object.fromEntries(['Open','Half','Closed'].map(label=>[label,current.model.getObjectByName('EeveeEyes'+label)?.scale.toArray()??null]));
+        current.mixer.stopAllAction();current.active=null;play('reposo',true);current.mixer.update(0);draw(true);
+      }
+      return {joints:current.bones.length,closures,eyes};
+    },
     sample(id){play(id,true);const a=current.actions.get(id);current.mixer.update(.02);scene.updateMatrixWorld(true);const before=current.bones.flatMap(n=>n.matrixWorld.elements);current.mixer.update(a.getClip().duration*.4);scene.updateMatrixWorld(true);const after=current.bones.flatMap(n=>n.matrixWorld.elements);draw(true);return {finite:after.every(Number.isFinite),changes:after.filter((v,i)=>Math.abs(v-before[i])>1e-6).length,duration:a.getClip().duration};},
     rotation(){play('reposo',true);current.mixer.update(.1);setYaw(Math.PI/2);draw(true);const r=container.getBoundingClientRect();let found=false;for(let y=r.top+20;y<r.bottom-20;y+=15)for(let x=r.left+20;x<r.right-20;x+=15)if(hit(x,y))found=true;const gl=renderer.getContext(),px=new Uint8Array(4);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);const result={horizontalOnly:orientation.rotation.x===0&&orientation.rotation.z===0,hit:found,emptyMiss:!hit(2,2),alpha:px[3]===0};setYaw(0);draw(true);return result;},
     profiles(){const results=[];for(const [id,a]of current.actions)for(const fraction of [0,.25,.5,.75,.99])for(let turn=0;turn<12;turn++){play(id,true);current.mixer.update(a.getClip().duration*fraction);setYaw(turn*Math.PI/6);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);const b={left:Infinity,top:Infinity,right:-Infinity,bottom:-Infinity};for(const mesh of current.meshes)for(let i=0;i<mesh.geometry.attributes.position.count;i++){mesh.getVertexPosition(i,temp);temp.applyMatrix4(mesh.matrixWorld).project(camera);b.left=Math.min(b.left,(temp.x+1)*width/2);b.right=Math.max(b.right,(temp.x+1)*width/2);b.top=Math.min(b.top,(1-temp.y)*height/2);b.bottom=Math.max(b.bottom,(1-temp.y)*height/2);}results.push({id,fraction,turn,...b,fits:b.left>=6&&b.top>=6&&b.right<=width-6&&b.bottom<=height-6});}play('reposo',true);setYaw(0);draw(true);return {cases:results.length,clipped:results.filter(r=>!r.fits),minMargin:Math.min(...results.flatMap(b=>[b.left,b.top,width-b.right,height-b.bottom]))};},

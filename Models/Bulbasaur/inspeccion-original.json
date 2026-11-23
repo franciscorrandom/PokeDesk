@@ -1,0 +1,19 @@
+{
+  "nombre": "Bulbasaur",
+  "fecha_verificacion": "2026-10-29",
+  "archivo_original": "bulbasaur-original.glb",
+  "sha256": "dbc54d890f094f80ec9366e3a1b90d7ae95b5160a0ad999505122ba9ca5a2f56",
+  "bytes": 436796,
+  "triangulos": 5372,
+  "vertices_exportados": 3484,
+  "articulaciones": 72,
+  "mallas": 6,
+  "texturas_embebidas": 4,
+  "animaciones_originales": 0,
+  "author": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+  "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+  "source": "https://sketchfab.com/3d-models/bulbasaur-1d459f3ecc2b492fb3c82d02822e408b",
+  "title": "Bulbasaur",
+  "descarga": "Botón oficial de Sketchfab, GLB convertido",
+  "estado": "Original intacto; nueve clips preparados para PokéDesk 1.6.0"
+}

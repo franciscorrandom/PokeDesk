@@ -8,6 +8,9 @@ test('La Pokébola oculta al entrante desde el primer fotograma y termina en val
   for(const phase of ['release','recall'])for(let i=0;i<200;i++)for(const value of Object.values(summonFrame(phase,i*.02)))assert.ok(Number.isFinite(value));
 });
 test('Cada Pokémon conserva su repertorio; reposo y gestos automáticos nunca piden un clip ausente',()=>{
+  assert.equal(CHARACTERS.length,9);
+  assert.ok(CHARACTERS.some(c=>c.id==='dragonite'&&c.number==='149'));
+  assert.ok(CHARACTERS.some(c=>c.id==='eevee'&&c.number==='133'));
   const m=new Motion(()=>.5);
   for(const c of CHARACTERS){m.setCharacter(c.id,0);assert.equal(c.clips.length,c.id==='arcanine'?11:9);for(let i=0;i<150;i++){m.click(i*20000);assert.ok(c.clips.some(c=>c.id===m.clip));m.tick(i*20000+10000);}assert.equal(m.character,c.id);}
   const s=defaults();assert.equal(s.settings.character,'arcanine');assert.deepEqual(s.feeds,[]);

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 ARCANINE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ARCANINE_DIST="$ARCANINE_ROOT/dist"
+ARCANINE_DIST="${ARCANINE_DIST:-$ARCANINE_ROOT/dist}"
 ARCANINE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ARCANINE_ROOT/Info.plist")"
 ARCANINE_APP="$ARCANINE_DIST/PokeDesk.app"
 ARCANINE_ARCHS="${ARCANINE_ARCHS:-arm64 x86_64}"

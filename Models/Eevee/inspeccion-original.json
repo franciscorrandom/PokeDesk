@@ -1,0 +1,21 @@
+{
+  "sketchfab_uid": "e93d3b389ea04c9ca8e532b7471a1cb0",
+  "source_url": "https://sketchfab.com/3d-models/eevee-e93d3b389ea04c9ca8e532b7471a1cb0",
+  "redistribution": "Objaverse public corpus, exact uid from object-paths.json.gz",
+  "mapping_url": "https://huggingface.co/datasets/allenai/objaverse/resolve/main/object-paths.json.gz",
+  "object_path": "glbs/000-016/e93d3b389ea04c9ca8e532b7471a1cb0.glb",
+  "download_url": "https://huggingface.co/datasets/allenai/objaverse/resolve/main/glbs/000-016/e93d3b389ea04c9ca8e532b7471a1cb0.glb",
+  "bytes": 364476,
+  "sha256": "e556fd1be296ca85e3cef875c905e23695ea59eccbfa073574cfc08f9e9ecbeb",
+  "original_asset": {
+    "extras": {
+      "author": "nguyenlouis32 (https://sketchfab.com/nguyenlouis32)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/eevee-e93d3b389ea04c9ca8e532b7471a1cb0",
+      "title": "Eevee"
+    },
+    "generator": "Sketchfab-13.31.0",
+    "version": "2.0"
+  },
+  "joint_count": 57
+}

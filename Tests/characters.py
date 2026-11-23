@@ -1,5 +1,6 @@
 """Validate the distributed companion rigs and animation payload, without graphics."""
 import json
+import copy
 import math
 import struct
 from pathlib import Path
@@ -75,6 +76,48 @@ def validate(character, joint_count, author):
         assert all(doc['nodes'][names[n]].get('scale')==[0,0,0] for n in ['GengarTongue','GengarMouthMask'])
         assert all(n.get('mesh') not in [2,3,4] for n in doc['nodes']), 'Duplicate source tongue and mask meshes must not show at rest'
 
+    if character=='bulbasaur':
+        names={n.get('name'):i for i,n in enumerate(doc['nodes'])}
+        assert all(n.get('mesh') not in [1,3,4,5] for n in doc['nodes']), 'Extended vines and duplicate source eyes must not show'
+        for label in ['Open','Half','Closed']:
+            assert parents[names['BulbasaurEyes'+label]]==names['Head_046']
+        paws=[names[n] for n in ['LHand_057','RHand_031','LFoot_08','RFoot_015']]
+        chains=[(names[a],names[b],paw) for a,b,paw in [
+            ('LArm_055','LForeArm_056',paws[0]),('RArm_062','RForeArm_063',paws[1]),
+            ('LThigh_06','LLeg_07',paws[2]),('RThigh_013','RLeg_014',paws[3])]]
+        rest_nodes=copy.deepcopy(doc['nodes'])
+        def point(i): return [world(i)[r][3] for r in range(3)]
+        def dist(a,b): return math.sqrt(sum((x-y)**2 for x,y in zip(a,b)))
+        contacts=[point(i) for i in paws]
+        lengths={(a,b):dist(point(a),point(b)) for chain in chains for a,b in zip(chain,chain[1:])}
+        max_step=0;max_contact=0
+        for clip in doc['animations']:
+            tracks=[(c['target'],read(clip['samplers'][c['sampler']]['output'])) for c in clip['channels']]
+            frame_count=len(tracks[0][1]);lifted=[]
+            for target,values in tracks:
+                if target['path']=='rotation':
+                    max_step=max(max_step,max(2*math.acos(min(1,abs(sum(a*b for a,b in zip(q,r))))) for q,r in zip(values,values[1:])))
+                assert target['path']!='scale' or target['node'] not in doc['skins'][0]['joints'], 'Never shrink the legs'
+            for frame in range(0,frame_count,2):
+                doc['nodes']=copy.deepcopy(rest_nodes);world_cache.clear()
+                for target,values in tracks:doc['nodes'][target['node']][target['path']]=values[frame]
+                for (a,b),length in lengths.items():
+                    assert abs(dist(point(a),point(b))-length)<1e-5, 'Leg segment lengths must stay constant'
+                elevations=[point(paw)[1]-rest[1] for paw,rest in zip(paws,contacts)]
+                assert min(elevations)>-.002, (clip['name'],'Paws must not penetrate the floor')
+                if clip['name'] in ['reposo','curiosidad','cola-alegre','aviso-reunion','caricias']:
+                    max_contact=max(max_contact,max(dist(point(p),c) for p,c in zip(paws,contacts)))
+                if clip['name']=='saludo':
+                    assert max(dist(point(p),c) for p,c in zip(paws[2:],contacts[2:]))<.002
+                    lifted.append(elevations[0])
+                if clip['name']=='celebracion':
+                    assert sum(h>.008 for h in elevations[:2])<=1, 'Front steps must alternate'
+            if clip['name']=='saludo':assert max(lifted)>.18, 'The greeting must lift one front paw'
+        assert max_contact<.002, 'Planted paws should stay in place during head and bulb gestures'
+        assert max_step<.30, 'No abrupt elbow or hock flips between keys'
+        doc['nodes']=rest_nodes;world_cache.clear()
+        print(f'Bulbasaur: apoyos estables (error {max_contact:.6f} m), patas sin encogerse y paso articular máximo {math.degrees(max_step):.2f}°.')
+
 
     expected = {'reposo', 'curiosidad', 'saludo', 'cola-alegre', 'estiramiento', 'aviso-reunion', 'celebracion', 'caricias', 'sentarse'}
     assert len(doc['animations']) == 9
@@ -116,12 +159,12 @@ def validate(character, joint_count, author):
     assert len(read(doc['skins'][0]['inverseBindMatrices'])) == joint_count
     print(f'{character.title()} GLB válido: {joint_count} articulaciones, 9 clips, {animated_channels} canales; cierres, expresiones y pesos correctos.')
 
-for spec in [("mewtwo",77,"nguyenlouis32"),("pikachu",49,"jacobjksn42"),("charizard",87,"nguyenlouis32"),("lucario",86,"nguyenlouis32"),("gengar",65,"nguyenlouis32")]:
+for spec in [("mewtwo",77,"nguyenlouis32"),("pikachu",49,"jacobjksn42"),("charizard",87,"nguyenlouis32"),("lucario",86,"nguyenlouis32"),("gengar",65,"nguyenlouis32"),("bulbasaur",72,"nguyenlouis32")]:
     validate(*spec)
 
 # Every chooser image is a dedicated, consistently sized 3D render.
-for character in ['arcanine','mewtwo','pikachu','charizard','lucario','gengar']:
+for character in ['arcanine','mewtwo','pikachu','charizard','lucario','gengar','bulbasaur']:
     raw=(root/f'Assets/preview-{character}.png').read_bytes()
     assert raw[:8]==b'\x89PNG\r\n\x1a\n'
     assert struct.unpack_from('>II',raw,16)==(320,320)
-print('Seis miniaturas 3D de 320 × 320 incluidas.')
+print('Siete miniaturas 3D de 320 × 320 incluidas.')
